@@ -30,6 +30,27 @@ tags: [glibc2.27, tcache, UAF]
 
 标签建议统一用小写/驼峰，方便归档：`glibc2.23`、`glibc2.27`、`tcache`、`unlink`、`HouseOfSpirit`、`fastbin`、`fmtstr`、`one_gadget`、`FullRELRO`。
 
+## 最省事的写法：丢进 `notes/` 就自动发布
+
+平时的笔记不用管 Hexo 格式，**直接把 `.md` 放进仓库的 `notes/` 目录**：
+
+```bash
+npm run sync:dry              # 预览会生成哪些文章
+npm run publish -- --push     # 同步 + 提交 + 推送，Actions 自动上线
+npm run watch                 # 或者挂着，笔记一保存就全自动
+```
+
+同步器会补好 front matter（标题取正文第一个 `# 标题`、按关键词推断分类和标签）、
+把 Typora 的绝对路径截图搬进文章资源目录并改成相对路径、
+用 `sync-hash` 保证源没变就不重写。大笔记可以在 `notes-sources.json` 里配 `split-h1`，
+按一级标题拆成多篇，**代码块里的 `# 注释` 不会被误判成标题**。
+外部笔记（`D:\笔记\` 等）只读同步，原文件不会被改动。完整规则见 `notes/README.md`。
+
+> 生成的是 `source/_posts/sync-*.md`，请勿手改；要改就改 `notes/` 里的源笔记再同步一次。
+> 就算本地忘了同步，Actions 在构建前也会跑一次 `python3 tools/sync_notes.py --ci` 兜底。
+
+下面的 `new_post.py` / `import_from_wp.py` 是传统方式，想直接按模板写或批量导入旧题解时仍然可用。
+
 ## 新建一篇
 
 ```bash

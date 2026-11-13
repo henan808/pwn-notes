@@ -2,6 +2,8 @@ node_modules/
 public/
 .deploy_git/
 db.json
+__pycache__/
+*.pyc
 *.log
 npm-debug.log*
 .DS_Store

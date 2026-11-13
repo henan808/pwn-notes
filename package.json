@@ -12,7 +12,11 @@
     "server": "hexo server -i 127.0.0.1 -p 4000",
     "deploy": "hexo clean && hexo generate && hexo deploy",
     "new": "python tools/new_post.py",
-    "import": "python tools/import_from_wp.py"
+    "import": "python tools/import_from_wp.py",
+    "sync": "python tools/sync_notes.py",
+    "sync:dry": "python tools/sync_notes.py --dry",
+    "publish": "python tools/publish.py",
+    "watch": "python tools/watch_notes.py"
   },
   "dependencies": {
     "@adobe/css-tools": "^5.0.0",

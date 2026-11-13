@@ -1,0 +1,37 @@
+{
+  "_说明": "笔记源配置。改完直接跑 npm run sync 或 npm run publish。路径相对博客根目录；外部路径只在本地同步时读取（只读，绝不改动），CI 只处理已提交到 notes/ 的内容。",
+  "notes_dir": "notes",
+  "min_chars": 160,
+  "external": [
+    {
+      "name": "typora-pwn",
+      "path": "D:/笔记/pwn题目.md",
+      "enabled": false,
+      "mode": "split-h1",
+      "category": "知识点",
+      "sub": "堆",
+      "_说明": "90KB 大杂烩，按一级标题拆成多篇；开启后整份笔记会被复制进 notes/external/ 并提交，公开仓库请先检查内容"
+    },
+    {
+      "name": "typora-misc",
+      "path": "D:/笔记/MISC.md",
+      "enabled": false,
+      "mode": "per-file",
+      "category": "知识点",
+      "sub": "Misc"
+    },
+    {
+      "name": "wp-pwn",
+      "path": "../WP/实战记录/Pwn",
+      "enabled": false,
+      "mode": "per-file",
+      "category": "题目复现",
+      "sub": "其他赛事",
+      "_说明": "工作区里已整理好的题解目录；这些题解之前已用 import_from_wp.py 导入过，重复开启会产生重复文章"
+    }
+  ],
+  "default": {
+    "category": "知识点",
+    "sub": "未分类"
+  }
+}

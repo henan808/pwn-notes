@@ -10,16 +10,23 @@
 hexo-pwn-notes/
 ├── _config.yml                 # Hexo 主配置（站点信息 / 目录 / 高亮 / 搜索）
 ├── _config.fluid.yml           # Fluid 主题覆盖配置
+├── notes/                      # ★ 笔记投递区：往这里丢 .md 就行
+│   ├── README.md               # 投递区写法说明
+│   └── external/               # 外部笔记的只读副本（含 assets/ 图片）
+├── notes-sources.json          # ★ 笔记源配置：外部路径 / 大文件拆分 / 默认分类
 ├── package.json                # 依赖与快捷命令
 ├── scaffolds/                  # post / knowledge / writeup / tool 四种文章模板
 ├── tools/
-│   ├── new_post.py             # 新建文章（自动 front matter + 图片目录）
+│   ├── sync_notes.py           # ★ 笔记 -> 文章（front matter / 分类 / 图片 / 幂等）
+│   ├── publish.py              # ★ 一键：同步 + 提交 + 可选推送
+│   ├── watch_notes.py          # ★ 后台监听，笔记一保存就自动发布
+│   ├── new_post.py             # 传统方式：新建带模板的文章
 │   └── import_from_wp.py       # 把已有题解批量导进来
 ├── source/
-│   ├── _posts/*.md             # 所有笔记正文
+│   ├── _posts/*.md             # 生成的 sync-*.md + 手写文章
 │   ├── about/index.md          # 关于页
 │   └── .nojekyll               # 跳过 GitHub Pages 的 Jekyll 处理
-└── .github/workflows/deploy.yml  # push 自动构建部署
+└── .github/workflows/deploy.yml  # push 自动同步笔记 + 构建 + 部署
 ```
 
 ## 快速开始
@@ -31,25 +38,53 @@ npm run server           # 本地预览 http://127.0.0.1:4000/pwn-notes/
 npm run build            # 生成 public/
 ```
 
-## 写笔记
+## 写笔记（推荐：只管写，发布交给脚本）
+
+**把 `.md` 丢进 `notes/` 就够了**，不用写 front matter、不用管图片路径：
 
 ```bash
-# 知识点
+# 看看会生成什么（不写文件）
+npm run sync:dry
+
+# 同步 + 自动 git commit
+npm run publish
+
+# 同步 + 提交 + 推送；Actions 1–2 分钟后博客自动更新
+npm run publish -- --push
+
+# 后台挂着：笔记一保存（静默 8 秒）就自动同步、提交、推送
+npm run watch
+```
+
+`notes-sources.json` 里可以配外部笔记源。例如把 `D:\笔记\pwn题目.md` 的 `enabled` 改成 `true`，
+它会按 `# 一级标题` 自动拆成多篇（**代码块里的 `# 注释` 会跳过**），图片自动搬进
+`notes/external/<name>/assets/`，让仓库自包含、CI 也能复现。外部原文件**只读**，不会被改动。
+
+同步器会做这些事：
+
+| 能力 | 说明 |
+|---|---|
+| 自动 front matter | 标题取正文第一个 `# 标题`（并从正文移除，避免重复）；分类/标签按 Pwn 关键词推断 |
+| 图片搬运 | Typora 绝对路径 `C:\...\typora-user-images\x.png` → 复制到文章资源目录并改成相对路径 |
+| 幂等 | 文末写 `sync-hash`，源没变就跳过；重写时保留原 `date`，不会把旧文章顶到最前 |
+| 不误伤 | 只管理 `source/_posts/sync-*.md`，手写文章和 `imported-*.md` 一律不动 |
+| 清理 | 源章节删掉后跑 `npm run sync -- --prune` 才删对应文章，默认保留防误删 |
+
+> 生成文件请勿手改，改 `notes/` 里的源笔记再同步一次即可。详细说明见 `notes/README.md`。
+
+**传统方式**仍然可用（想直接用 Hexo 模板写时）：
+
+```bash
 python tools/new_post.py --title "tcache stash 机制" --type knowledge \
   --sub 堆 --tags tcache,glibc2.27 --slug tcache-stash
-
-# 题目复现
 python tools/new_post.py --title "[BUUCTF] xxx" --type writeup \
   --sub BUUCTF --tags unlink,libc2.23 --slug buuctf-xxx
-
-# 把工作区里已有的 WP/实战记录/Pwn/*.md 全部导进来
-python tools/import_from_wp.py --dry
+python tools/import_from_wp.py --dry     # 导入工作区已有题解
 python tools/import_from_wp.py
 ```
 
-`post_asset_folder: true`，每篇文章会带一个同名图片目录，gdb 截图直接放进去，用 `![](./slug/bins.png)` 引用。
-
-分类约定：`知识点 / 题目复现 / 工具与环境 / 指南`，二级分类为方向或赛事；标签用 `glibc2.27`、`tcache`、`unlink`、`HouseOfSpirit` 这类便于检索的词。
+`post_asset_folder: true`，每篇文章带同名图片目录，gdb 截图放进去用 `![](./slug/bins.png)` 引用。
+分类约定：`知识点 / 题目复现 / 工具与环境 / 指南`，二级为方向或赛事；标签用 `glibc2.27`、`tcache`、`unlink`、`HouseOfSpirit` 这类便于检索的词。
 
 ## 部署到 GitHub Pages
 
@@ -70,15 +105,14 @@ python tools/import_from_wp.py
 
 1. 在 GitHub 上新建名为 **`pwn-notes`** 的空仓库（不要勾选初始化 README / LICENSE，避免冲突）。
 
-2. 推送（首次提交已在本地准备好）：
+2. 推送（`git init`、首次提交 `4df4030`、分支 `main`、`origin` 远端都已在本地配好）：
 
    ```bash
-   git remote add origin https://github.com/henan808/pwn-notes.git
-   git branch -M main
    git push -u origin main
    ```
 
    命令行认证时，GitHub 要的是 **PAT（勾选 `repo`）当密码**，不是账号密码；也可以改用 SSH：`git@github.com:henan808/pwn-notes.git`。
+   以后日常更新直接用 `npm run publish -- --push`，或挂着 `npm run watch` 全自动。
 
 3. 仓库网页上设置：
    - **Settings → Actions → General → Workflow permissions** → 勾 `Read and write permissions`（让 Actions 能推 `gh-pages`）。
@@ -107,7 +141,13 @@ python tools/import_from_wp.py
 | 生成的 HTML 里出现 `<% ... %>` 源码 | 缺 `hexo-renderer-ejs` / `hexo-renderer-stylus`（Fluid 的 layout 是 `.ejs`、样式是 `.styl`）。执行 `npm install` 补齐，两者已在 `package.json` 显式声明 |
 | 代码块没有高亮 | `_config.yml` 的 `highlight.enable: true` 由 Hexo 服务端生成 `<figure class="highlight">`；若改成 `false` 才依赖主题的 highlightjs CDN |
 | mermaid 图不渲染 | 文章里用 ` ```mermaid ` 代码块；`post.mermaid.enable` 已开，依赖 `hexo-filter-mermaid-diagrams` |
-| 图片不显示 | 放进同名资源目录，用相对路径 `![](./<slug>/<file>.png)` |
+| 图片不显示 | 手写文章放进同名资源目录，用 `![](./<slug>/<file>.png)`；`notes/` 源笔记的绝对路径图片由 `sync_notes.py` 自动搬运 |
+| `push` 报认证失败 | GitHub 不接受账号密码，需 PAT（`repo` 权限）或 SSH key；脚本不保存任何凭据，认证交给系统 git |
+| 大笔记拆出一堆奇怪章节 | 确认 `mode: split-h1`；代码块里的 `# 注释` 会被跳过，太短章节由 `min_chars` 过滤 |
+| 改了 `sync-*.md` 又被覆盖 | 这些是自动生成文件，请改 `notes/` 里的源笔记后重新 `npm run sync` |
+| 忘了本地同步直接 push | 不会漏：Actions 在构建前有 `python3 tools/sync_notes.py --ci`，会用仓库里的 `notes/` 重新生成 |
+| 外部笔记没同步 | 检查 `notes-sources.json` 里该源的 `enabled` 是否为 `true`、路径是否存在；同步是只读的，不会改原文件 |
+| 源章节删了但文章还在 | 默认保留防误删，确认后跑 `npm run sync -- --prune` |
 
 ## 已有内容（6 篇）
 
