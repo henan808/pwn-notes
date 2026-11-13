@@ -31,7 +31,7 @@ jobs:
       # 即使本地忘了跑 sync，只要把 notes/ 里的原始笔记 push 上来，
       # CI 也会自动转换成 Hexo 文章。--ci 表示不读取仓库外的本地笔记路径。
       - name: Sync notes to posts
-        run: python3 tools/sync_notes.py --ci
+        run: python3 tools/sync_notes.py --ci --prune
 
       - name: Generate static site
         run: |

@@ -13,34 +13,38 @@
     {
       "name": "typora-misc",
       "path": "D:/笔记/MISC.md",
-      "enabled": true,
+      "enabled": false,
       "mode": "per-file",
       "category": "知识点",
-      "sub": "Misc"
+      "sub": "Misc",
+      "_说明": "按用户要求暂不展示；改成 true 即可重新上线"
     },
     {
       "name": "typora-rop",
       "path": "D:/笔记/1.rop（64位泄露libc和）.md",
-      "enabled": true,
+      "enabled": false,
       "mode": "per-file",
       "category": "知识点",
-      "sub": "ROP"
+      "sub": "ROP",
+      "_说明": "按用户要求暂不展示"
     },
     {
       "name": "typora-func",
       "path": "D:/笔记/函数.md",
-      "enabled": true,
+      "enabled": false,
       "mode": "per-file",
       "category": "知识点",
-      "sub": "基础"
+      "sub": "基础",
+      "_说明": "原文件为空（全 NUL），且按用户要求暂不展示"
     },
     {
       "name": "typora-lab",
       "path": "D:/笔记/实验1_模板.md",
-      "enabled": true,
+      "enabled": false,
       "mode": "split-h1",
       "category": "知识点",
-      "sub": "实验"
+      "sub": "实验",
+      "_说明": "按用户要求暂不展示"
     },
     {
       "name": "typora-asm",

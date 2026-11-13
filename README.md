@@ -124,9 +124,13 @@ npm run watch               # 或者挂着监听，笔记一保存就自动发�
 
 ## 只在 Typora 记笔记（零操作）
 
-`D://笔记//` 下的 6 份 Typora 笔记已在 `notes-sources.json` 里全部启用并自动同步：
-`pwn题目.md`（按 H1 拆篇）、`MISC.md`、`1.rop…md`、`函数.md`、`实验1_模板.md`、`汇编语言：.md`。
-共 17 篇文章、564 张图片，图片统一放 `source/images/notes/`。
+`D:\笔记\` 下目前只接入 **2 份** Typora 笔记（`notes-sources.json` 里 `enabled: true`）：
+`pwn题目.md`（按 H1 拆成 12 篇）和 `汇编语言：.md`（按 H1 拆成 2 篇），共 14 篇文章。
+图片统一放 `source/images/notes/`，只保留这 2 份笔记用到的截图。
+
+其余 4 份（`MISC.md`、`1.rop…md`、`函数.md`、`实验1_模板.md`）已设为 `enabled: false`：
+对应的暂存副本、文章和图片都不再展示，也不会被监听。想重新上线，把对应 `enabled`
+改回 `true` 再跑一次 `npm run sync -- --prune` 即可。
 
 **你什么都不用敲**：开机时 Windows「启动」文件夹里的 `PwnNotes-AutoSync.vbs` 会静默拉起
 `tools/watch_notes.py`，它监听这些 Typora 原稿；Ctrl+S 保存后静默 30 秒，
@@ -136,7 +140,7 @@ npm run watch               # 或者挂着监听，笔记一保存就自动发�
 - 想暂时停掉：在任务管理器里结束对应的 `pythonw.exe` 进程。
 - 想取消开机自启：删除 `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\PwnNotes-AutoSync.vbs`。
 - 想改监听范围：编辑 `notes-sources.json` 的 `enabled`，保存后监听会自动重载配置。
-- 手动兜底（需要时）：`npm run sync:dry` / `npm run publish -- --push` / `npm run watch`。
+- 手动兜底（需要时）：`npm run sync:dry` / `npm run sync -- --prune` / `npm run publish -- --prune --push` / `npm run watch`。
 
 > 注意：自动发布会把保存的笔记**直接公开**到博客。写草稿时可以先在 `notes-sources.json`
 > 里把对应源改成 `enabled: false`，或改用 `npm run watch -- --no-push` 只提交不推送。

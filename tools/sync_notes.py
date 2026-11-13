@@ -353,6 +353,13 @@ def split_h1(text, rel, source_name, src_dir, min_chars, cfg_cat, cfg_sub):
 def collect_units(cfg):
     notes_dir = os.path.join(ROOT, cfg.get('notes_dir', 'notes'))
     rules = external_rules(cfg, notes_dir)
+    # enabled: false 的外部源即使还留着暂存副本，也不再生成文章。
+    disabled = set()
+    for item in cfg.get('external', []):
+        if not item.get('enabled'):
+            name = re.sub(r'[^a-z0-9-]', '', item.get('name', '').lower())
+            if name:
+                disabled.add(name)
     min_chars = int(cfg.get('min_chars', 160))
     default = cfg.get('default', {})
     units = []
@@ -363,6 +370,9 @@ def collect_units(cfg):
         dirnames[:] = [d for d in dirnames if not d.startswith('.')]
         rel_dir = os.path.relpath(dirpath, notes_dir).replace('\\', '/')
         parts = rel_dir.split('/') if rel_dir != '.' else []
+        if len(parts) >= 2 and parts[0] == 'external' and parts[1].lower() in disabled:
+            dirnames[:] = []
+            continue
         ext_rule = rules.get(parts[1].lower()) if len(parts) >= 2 and parts[0] == 'external' else None
         source_name = parts[1] if (len(parts) >= 2 and parts[0] == 'external') else 'notes'
         mode = ext_rule.get('mode', 'per-file') if ext_rule else 'per-file'
@@ -505,7 +515,7 @@ def scan_existing():
 
 def run(stage=True, dry=False, force=False, prune=False, ci=False, quiet=False):
     report = {'units': 0, 'written': 0, 'skipped': 0, 'pruned': 0, 'staged': 0,
-              'copied_images': 0, 'missing_images': [], 'warnings': [],
+              'copied_images': 0, 'pruned_images': 0, 'missing_images': [], 'warnings': [],
               'posts': [], 'dry': dry, 'changed': False}
     cfg = load_config()
     if ci:
@@ -548,12 +558,14 @@ def run(stage=True, dry=False, force=False, prune=False, ci=False, quiet=False):
         report['posts'].append(('DRY' if dry else 'WRITE', unit.slug, unit.title))
 
     if prune:
+        removed = set()
         for path in all_paths:
             text = read_text(path)
             m = HASH_RE.search(text)
             if not m:
                 continue
             if m.group(1) not in expected:
+                removed.add(os.path.abspath(path))
                 if not dry:
                     os.remove(path)
                     asset = os.path.join(POSTS, os.path.splitext(os.path.basename(path))[0])
@@ -569,8 +581,30 @@ def run(stage=True, dry=False, force=False, prune=False, ci=False, quiet=False):
                 report['pruned'] += 1
                 report['posts'].append(('PRUNE', os.path.basename(path), ''))
 
+        # 笔记源下架后，把 source/images/notes/ 里没人再引用的图片也清掉，
+        # 避免旧笔记的截图继续留在公开仓库里。只碰这个自动生成的目录。
+        used = set()
+        for dp, dns, fns in os.walk(os.path.join(ROOT, 'source')):
+            for fn in fns:
+                if not fn.lower().endswith('.md'):
+                    continue
+                fp = os.path.join(dp, fn)
+                if os.path.abspath(fp) in removed:   # --dry 时这些文章还在磁盘上，不计入引用
+                    continue
+                txt = read_text(fp)
+                for name in re.findall(r'images/notes/([^\s)"\'<>]+)', txt):
+                    used.add(os.path.basename(urllib.parse.unquote(name)))
+        if os.path.isdir(NOTES_ASSETS):
+            for fn in os.listdir(NOTES_ASSETS):
+                fp = os.path.join(NOTES_ASSETS, fn)
+                if os.path.isfile(fp) and fn not in used:
+                    if not dry:
+                        os.remove(fp)
+                    report['pruned_images'] += 1
+
     report['changed'] = bool(report['written'] or report['pruned'] or
-                             report['staged'] or report['copied_images'])
+                             report['pruned_images'] or report['staged'] or
+                             report['copied_images'])
     if not quiet:
         print_report(report)
     return report
@@ -580,9 +614,10 @@ def print_report(r):
     for action, slug, title in r['posts']:
         print('%-6s %-58s %s' % (action, slug, title[:36]))
     print('')
-    print('源单元 %d 个 | %s%d 篇 | 跳过 %d | 清理 %d | 外部暂存 %d | 图片复制 %d'
+    print('源单元 %d 个 | %s%d 篇 | 跳过 %d | 清理文章 %d | 外部暂存 %d | 图片复制 %d | 清理图片 %d'
           % (r['units'], '计划生成 ' if r['dry'] else '生成 ',
-             r['written'], r['skipped'], r['pruned'], r['staged'], r['copied_images']))
+             r['written'], r['skipped'], r['pruned'], r['staged'],
+             r['copied_images'], r.get('pruned_images', 0)))
     if r['missing_images']:
         print('\n找不到的图片（已保留原链接）：')
         for x in r['missing_images'][:10]:

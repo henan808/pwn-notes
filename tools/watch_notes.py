@@ -82,7 +82,8 @@ def snapshot(cfg):
 
 
 def do_publish(push):
-    cmd = [sys.executable, PUBLISH]
+    # --prune：源被禁用/删除时，自动撤下对应文章和图片
+    cmd = [sys.executable, PUBLISH, '--prune']
     if push:
         cmd.append('--push')
     r = subprocess.run(cmd, cwd=ROOT)
