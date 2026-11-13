@@ -43,7 +43,7 @@ tags: [tcache, glibc2.27, stash]
 Typora 的绝对路径可以直接用：
 
 ```markdown
-![bins](C:\Users\86139\AppData\Roaming\Typora\typora-user-images\image-xxx.png)
+![bins](C:\Users\<用户名>\AppData\Roaming\Typora\typora-user-images\image-xxx.png)
 ```
 
 同步时会把图片复制到 `source/_posts/<slug>/`，并改写成 `![](image-xxx.png)` —— 只写文件名。
