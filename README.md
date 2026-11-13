@@ -2,6 +2,8 @@
 
 用来记 **Pwn 知识点**和 **CTF 题目复现** 的静态博客。Hexo 7 + Fluid 主题，Markdown 写文章，push 到 GitHub 后由 Actions 自动构建并发布到 GitHub Pages。
 
+> **线上站点：https://henan808.github.io/pwn-notes/** —— 已上线，push 到 `main` 后约 1 分钟自动更新。
+
 站点结构、分类约定、写作模板见博客里的第一篇文章《从这里开始：怎么写这个站的笔记》（`source/_posts/start-here.md`）。
 
 ## 目录结构
@@ -101,25 +103,24 @@ python tools/import_from_wp.py
 >
 > 若你改把仓库命名为 `henan808.github.io`（用户主页站点），把 `url` 改成 `https://henan808.github.io`、`root` 改成 `/`。
 
-**不需要在仓库里放任何密码或 token。** 剩下三步：
+**站点已上线，仓库里不需要放任何密码或 token。** 已完成的配置（2026-11-13）：
 
-1. 在 GitHub 上新建名为 **`pwn-notes`** 的空仓库（不要勾选初始化 README / LICENSE，避免冲突）。
+- GitHub 仓库 `henan808/pwn-notes`（public，默认分支 `main`），首次部署工作流 `Deploy Hexo to GitHub Pages` 已成功。
+- **Settings → Actions → General → Workflow permissions** = `Read and write permissions`，Actions 能推 `gh-pages`。
+- **Settings → Pages** = `Deploy from a branch` → `gh-pages` / `/root`；`gh-pages` 分支由 Actions 自动维护，不要手改。
+- 本机已用 `gh auth login` 完成授权，并用 `gh auth setup-git` 让系统 git 复用这份凭据，**以后 push 不用再输密码或 token**。
 
-2. 推送（`git init`、首次提交 `4df4030`、分支 `main`、`origin` 远端都已在本地配好）：
+日常更新（每次 push 到 `main`，工作流自动 `npm ci → sync_notes --ci → hexo generate → 部署`，约 1 分钟生效）：
 
-   ```bash
-   git push -u origin main
-   ```
+```bash
+npm run sync:dry            # 先预览这次会生成/更新哪些文章
+npm run publish -- --push   # 同步 + 构建 + 提交 + 推送，自动上线
+npm run watch               # 或者挂着监听，笔记一保存就自动发布
+```
 
-   命令行认证时，GitHub 要的是 **PAT（勾选 `repo`）当密码**，不是账号密码；也可以改用 SSH：`git@github.com:henan808/pwn-notes.git`。
-   以后日常更新直接用 `npm run publish -- --push`，或挂着 `npm run watch` 全自动。
-
-3. 仓库网页上设置：
-   - **Settings → Actions → General → Workflow permissions** → 勾 `Read and write permissions`（让 Actions 能推 `gh-pages`）。
-   - **Settings → Pages → Build and deployment** → Source 选 `Deploy from a branch`，分支 `gh-pages`、目录 `/root`。
-   - 之后每次 `git push`，`.github/workflows/deploy.yml` 会自动 `npm ci → hexo generate → 部署`，约 1–2 分钟后生效。
-
-部署用的是 GitHub 自动注入的 `secrets.GITHUB_TOKEN`，**不需要你配置 PAT**。若你想本地手动 `hexo deploy`，再在 `_config.yml` 里放开 `deploy` 段并填 SSH 地址。
+> 部署用的是 GitHub 自动注入的 `secrets.GITHUB_TOKEN`。
+> 想撤销本机授权：GitHub → **Settings → Applications → Authorized OAuth Apps → GitHub CLI → Revoke**。
+> 若你想本地手动 `hexo deploy`，再在 `_config.yml` 里放开 `deploy` 段并填 SSH 地址。
 
 ## 凭据安全（务必看）
 
