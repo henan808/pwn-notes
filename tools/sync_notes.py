@@ -417,7 +417,9 @@ def process_images(text, slug, src_dir, dry, report):
             os.makedirs(asset_dir, exist_ok=True)
             shutil.copy2(real, dst)
             report['copied_images'] += 1
-        return '![%s](./%s/%s)' % (alt, slug, name)
+        # hexo-renderer-marked 的 postAsset 会自己拼 postPath，
+        # 这里必须只写文件名；写成 ./<slug>/<name> 会拼出双层目录导致 404
+        return '![%s](%s)' % (alt, name)
 
     return IMG_RE.sub(repl, text)
 
@@ -467,8 +469,11 @@ def run(stage=True, dry=False, force=False, prune=False, ci=False, quiet=False):
     cfg = load_config()
     if ci:
         stage = False
-    if stage:
+    if stage and not dry:
         stage_external(cfg, report)
+    elif stage and dry and any(x.get('enabled') for x in cfg.get('external', [])):
+        report['warnings'].append(
+            '--dry 不会暂存外部笔记；去掉 --dry 后才复制到 notes/external/ 并同步')
 
     by_hash, all_paths = scan_existing()
     units = collect_units(cfg)

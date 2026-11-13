@@ -83,7 +83,7 @@ python tools/import_from_wp.py --dry     # 导入工作区已有题解
 python tools/import_from_wp.py
 ```
 
-`post_asset_folder: true`，每篇文章带同名图片目录，gdb 截图放进去用 `![](./slug/bins.png)` 引用。
+`post_asset_folder: true`，每篇文章带同名图片目录，gdb 截图放进去后**只写文件名**引用：`![](bins.png)`（`postAsset` 会自动补文章路径）。
 分类约定：`知识点 / 题目复现 / 工具与环境 / 指南`，二级为方向或赛事；标签用 `glibc2.27`、`tcache`、`unlink`、`HouseOfSpirit` 这类便于检索的词。
 
 ## 部署到 GitHub Pages
@@ -141,7 +141,7 @@ python tools/import_from_wp.py
 | 生成的 HTML 里出现 `<% ... %>` 源码 | 缺 `hexo-renderer-ejs` / `hexo-renderer-stylus`（Fluid 的 layout 是 `.ejs`、样式是 `.styl`）。执行 `npm install` 补齐，两者已在 `package.json` 显式声明 |
 | 代码块没有高亮 | `_config.yml` 的 `highlight.enable: true` 由 Hexo 服务端生成 `<figure class="highlight">`；若改成 `false` 才依赖主题的 highlightjs CDN |
 | mermaid 图不渲染 | 文章里用 ` ```mermaid ` 代码块；`post.mermaid.enable` 已开，依赖 `hexo-filter-mermaid-diagrams` |
-| 图片不显示 | 手写文章放进同名资源目录，用 `![](./<slug>/<file>.png)`；`notes/` 源笔记的绝对路径图片由 `sync_notes.py` 自动搬运 |
+| 图片不显示 | 手写文章把截图放进同名资源目录，引用只写文件名 `![](<file>.png)`；写成 `./<slug>/<file>.png` 会 404。`notes/` 源笔记的绝对路径图片由 `sync_notes.py` 自动搬运 |
 | `push` 报认证失败 | GitHub 不接受账号密码，需 PAT（`repo` 权限）或 SSH key；脚本不保存任何凭据，认证交给系统 git |
 | 大笔记拆出一堆奇怪章节 | 确认 `mode: split-h1`；代码块里的 `# 注释` 会被跳过，太短章节由 `min_chars` 过滤 |
 | 改了 `sync-*.md` 又被覆盖 | 这些是自动生成文件，请改 `notes/` 里的源笔记后重新 `npm run sync` |
