@@ -335,15 +335,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/pwn-notes/2026/11/13/ciscn-2019-final-3-leak-techniques/" target="_self">
-          ciscn_2019_final_3：四种流派怎么泄露 libc
+        <a href="/pwn-notes/2026/11/13/sync-typora-asm-65de1e22-741369/" target="_self">
+          汇编语言：
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/ciscn-2019-final-3-leak-techniques/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-asm-65de1e22-741369/" target="_self">
         <div>
-          平台：BUUCTF 收录 · CISCN 2019 决赛 环境：C++ 64 位，保护全开，glibc 2.27 早期版（无 tcache key &#x2F; double free 检查） 漏洞：delete 不清空指针（UAF） 约束：idx &lt;= 0x18（25 次 add）、size &lt;= 0x78、无 show  一、题面里最要紧的一句话唯一输出是每次 add 打印的 g
+          pwn 汇编语言：1.add    sub  mov  lea  jmp  call  ret  leave  push  pop  xor算术运算： add a,b; &#x3D;&#x3D;  a&#x3D;a+b; sub a,b;&#x3D;&#x3D; a&#x3D;a-b; 数据搬运：eax,ebx都是寄存器 mov a,b;&#x3D;&#x3D; 将右边的值赋给左边，如果右边的
         </div>
       </a>
 
@@ -351,83 +351,7 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-11-13 17:50" pubdate>
-              2026-11-13
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
-  
-  
-    <span>></span>
-    
-  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/CISCN/" class="category-chain-item">CISCN</a>
-  
-  
-
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/pwn-notes/tags/glibc2-27/">#glibc2.27</a>
-            
-              <a href="/pwn-notes/tags/tcache/">#tcache</a>
-            
-              <a href="/pwn-notes/tags/UAF/">#UAF</a>
-            
-              <a href="/pwn-notes/tags/unsortedbin/">#unsortedbin</a>
-            
-              <a href="/pwn-notes/tags/BUUCTF/">#BUUCTF</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/pwn-notes/2026/11/13/glibc-heap-chunk-and-bins/" target="_self">
-          glibc 堆基础：chunk 结构、request2size 与 bins
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/glibc-heap-chunk-and-bins/" target="_self">
-        <div>
-          一句话结论堆题里所有「为什么申请 0x18 &#x2F; 0x28 &#x2F; 0x38」的疑问，答案都在 request2size 和 bin 分档；所有「libc 地址从哪来」的疑问，答案都在 **unsorted bin 挂链时 glibc 自己写下的 fd/bk = main_arena+96**。 chunk 结构64 位下 chunk 头 16 字节，用户区从 chunk+0x10
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-11-13 17:45" pubdate>
+            <time datetime="2026-11-13 19:13" pubdate>
               2026-11-13
             </time>
           </div>
@@ -448,7 +372,7 @@
   
     <span>></span>
     
-  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/%E5%A0%86/" class="category-chain-item">堆</a>
+  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/%E6%B1%87%E7%BC%96/" class="category-chain-item">汇编</a>
   
   
 
@@ -464,159 +388,22 @@
         
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
-            
-              <a href="/pwn-notes/tags/glibc2-27/">#glibc2.27</a>
             
               <a href="/pwn-notes/tags/tcache/">#tcache</a>
             
-              <a href="/pwn-notes/tags/glibc2-23/">#glibc2.23</a>
-            
-              <a href="/pwn-notes/tags/request2size/">#request2size</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/pwn-notes/2026/11/13/start-here/" target="_self">
-          从这里开始：怎么写这个站的笔记
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/start-here/" target="_self">
-        <div>
-          这个站跑在 Hexo + Fluid 上，源文章就是 source/_posts/*.md 里的纯 Markdown。本地只写 Markdown，push 到 GitHub 后 Actions 自动构建并发布到 GitHub Pages，不需要在本地跑 hexo deploy。 三类内容与分类约定   类型 一级分类 二级分类示例 scaffold    知识点 知识点 堆 栈 格式化字符串 RO
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-11-13 17:40" pubdate>
-              2026-11-13
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/pwn-notes/categories/%E6%8C%87%E5%8D%97/" class="category-chain-item">指南</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/pwn-notes/tags/Hexo/">#Hexo</a>
-            
-              <a href="/pwn-notes/tags/%E5%86%99%E4%BD%9C%E8%A7%84%E8%8C%83/">#写作规范</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/pwn-notes/2026/11/12/imported-roarctf2019_easyheap/" target="_self">
-          RoarCTF 2019] easyheap
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/12/imported-roarctf2019_easyheap/" target="_self">
-        <div>
-          本文由 tools/import_from_wp.py 从 roarctf2019_easyheap.md 导入，正文未改动。  赛事：RoarCTF 2019（BUUCTF 收录） 来源：实战记录（附件静态分析 + 目录内已有 WP&#x2F;exp 对照整理） 方向：Pwn 难度：困难 flag：flag{flag_test}（附件 flag 文件内容 &#x2F; 目录内 wp.md 记录
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-11-13 00:00" pubdate>
-              2026-11-13
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
-  
-  
-    <span>></span>
-    
-  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/RoarCTF/" class="category-chain-item">RoarCTF</a>
-  
-  
-
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/pwn-notes/tags/glibc2-23/">#glibc2.23</a>
-            
-              <a href="/pwn-notes/tags/glibc-2-23/">#glibc 2.23</a>
-            
-              <a href="/pwn-notes/tags/House-of-Spirit/">#House of Spirit</a>
+              <a href="/pwn-notes/tags/UAF/">#UAF</a>
             
               <a href="/pwn-notes/tags/unlink/">#unlink</a>
             
-              <a href="/pwn-notes/tags/malloc-consolidate/">#malloc_consolidate</a>
+              <a href="/pwn-notes/tags/fastbin/">#fastbin</a>
             
-              <a href="/pwn-notes/tags/fastbin-attack/">#fastbin attack</a>
+              <a href="/pwn-notes/tags/unsorted-bin/">#unsorted-bin</a>
             
-              <a href="/pwn-notes/tags/malloc-hook/">#__malloc_hook</a>
+              <a href="/pwn-notes/tags/double-free/">#double-free</a>
             
-              <a href="/pwn-notes/tags/one-gadget/">#one_gadget</a>
+              <a href="/pwn-notes/tags/HouseOfForce/">#HouseOfForce</a>
+            
+              <a href="/pwn-notes/tags/one-gadget/">#one-gadget</a>
             
           </div>
         
@@ -630,15 +417,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/pwn-notes/2026/11/12/imported-fmt_cache/" target="_self">
-          fmt_cache（格式化字符串 + FILE IO 缓存残留）
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-ciscn2019final3-58c6fc/" target="_self">
+          ciscn2019final3
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/12/imported-fmt_cache/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-pwn-ciscn2019final3-58c6fc/" target="_self">
         <div>
-          本文由 tools/import_from_wp.py 从 fmt_cache.md 导入，正文未改动。  赛事：练习 &#x2F; 自出题（附件自带源码 Makefile &#x2F; fmt_cache.c） 来源：实战记录（附件静态分析 + 离线模拟验证） 方向：Pwn 难度：中等 flag：flag{lelellel}（附件目录内 flag 文件内容；本机无 Linux 执行环境，未取得
+          [ciscn2019_final_3 writeup | xia0ji233’s blog](https://xia0ji233.pro/2021/11/01/ciscn2019_final_3 writeup&#x2F;) ciscn_2019_final_3 需要避开当前free的chunk的下一个chunk不能超过arena的边界 - PYozo_free - 博客园  啥意思？  这道
         </div>
       </a>
 
@@ -646,86 +433,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-11-13 00:00" pubdate>
+            <time datetime="2026-11-13 19:08" pubdate>
               2026-11-13
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
-  
-  
-    <span>></span>
-    
-  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/%E5%85%B6%E4%BB%96%E8%B5%9B%E4%BA%8B/" class="category-chain-item">其他赛事</a>
-  
-  
-
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/pwn-notes/tags/x86-64/">#x86-64</a>
-            
-              <a href="/pwn-notes/tags/PIE/">#PIE</a>
-            
-              <a href="/pwn-notes/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%BB%BB%E6%84%8F%E8%AF%BB%E5%86%99/">#格式化字符串任意读写</a>
-            
-              <a href="/pwn-notes/tags/fmtstr-payload/">#fmtstr_payload</a>
-            
-              <a href="/pwn-notes/tags/glibc-FILE-%E7%BC%93%E5%86%B2/">#glibc FILE 缓冲</a>
-            
-              <a href="/pwn-notes/tags/%E6%A0%88%E4%B8%8A%E5%8F%98%E9%87%8F%E5%B8%83%E5%B1%80/">#栈上变量布局</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/pwn-notes/2026/11/10/imported-ciscn_2019_final_3/" target="_self">
-          ciscn_2019_final_3
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/10/imported-ciscn_2019_final_3/" target="_self">
-        <div>
-          本文由 tools/import_from_wp.py 从 ciscn_2019_final_3.md 导入，正文未改动。  赛事：CISCN 2019 总决赛（BUUCTF 收录） 来源：全网公开 writeup 汇总（见「七、来源清单」） 方向：Pwn &#x2F; glibc heap exploitation 难度：中等偏难 flag：未取得（本次仅做资料检索与 exp 讲解，未连接靶机
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-11-11 00:00" pubdate>
-              2026-11-11
             </time>
           </div>
         
@@ -762,17 +471,17 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
+              <a href="/pwn-notes/tags/glibc2-27/">#glibc2.27</a>
+            
               <a href="/pwn-notes/tags/UAF/">#UAF</a>
             
-              <a href="/pwn-notes/tags/tcache-dup/">#tcache dup</a>
+              <a href="/pwn-notes/tags/unsorted-bin/">#unsorted-bin</a>
             
-              <a href="/pwn-notes/tags/tcache-poisoning/">#tcache poisoning</a>
+              <a href="/pwn-notes/tags/double-free/">#double-free</a>
             
-              <a href="/pwn-notes/tags/fake-chunk-size/">#fake chunk size</a>
+              <a href="/pwn-notes/tags/free-hook/">#free-hook</a>
             
-              <a href="/pwn-notes/tags/unsorted-bin-%E5%88%87%E5%89%B2%E9%94%99%E4%BD%8D%E6%B3%84%E9%9C%B2/">#unsorted bin 切割错位泄露</a>
-            
-              <a href="/pwn-notes/tags/free-hook/">#__free_hook</a>
+              <a href="/pwn-notes/tags/%E5%A0%86%E9%A3%8E%E6%B0%B4/">#堆风水</a>
             
           </div>
         
@@ -780,7 +489,574 @@
     </article>
   </div>
 
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/pwn-notes/2026/11/13/sync-typora-rop-1-rop-64-libc-6c7ee7/" target="_self">
+          1.rop（64位泄露libc和）
+        </a>
+      </h2>
 
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-rop-1-rop-64-libc-6c7ee7/" target="_self">
+        <div>
+          0x00000000004006db : pop rdi ; ret 0x0000000000400511 : ret  1234567891011121314151617181920212223242526272829from pwn import*libc=ELF(&#x27;./libc.so.6&#x27;)elf=ELF(&#x27;./pwn2&#x27;)context(os=&
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-13 19:08" pubdate>
+              2026-11-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/" class="category-chain-item">知识点</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/ROP/" class="category-chain-item">ROP</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/pwn-notes/tags/unlink/">#unlink</a>
+            
+              <a href="/pwn-notes/tags/fastbin/">#fastbin</a>
+            
+              <a href="/pwn-notes/tags/unsorted-bin/">#unsorted-bin</a>
+            
+              <a href="/pwn-notes/tags/canary/">#canary</a>
+            
+              <a href="/pwn-notes/tags/free-hook/">#free-hook</a>
+            
+              <a href="/pwn-notes/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2/">#格式化字符串</a>
+            
+              <a href="/pwn-notes/tags/ROP/">#ROP</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-0ctf2017babyheap-9d78ba/" target="_self">
+          0ctf2017babyheap
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-pwn-0ctf2017babyheap-9d78ba/" target="_self">
+        <div>
+          看ai说只是修改两个小堆块，修改其中一个的size之后释放，使得两个小堆块进入unsortedbin 之后再次申请小的，其中一个被取出，另一个仍在unsortedbin中，之后查看内容，其fd和bk即是原始的数据区，当然是另一个小堆块，即可泄露出libc的相关地址  保护全开，或许堆题查看保护只是看它是多少位的 64位 ida查看关键函数  添加函数，限制size大小  编辑函数，这里可以自己
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-13 19:08" pubdate>
+              2026-11-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/0CTF/" class="category-chain-item">0CTF</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/pwn-notes/tags/unsorted-bin/">#unsorted-bin</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-8350d48a-e9e857/" target="_self">
+          单身杯
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-pwn-8350d48a-e9e857/" target="_self">
+        <div>
+          1.CheckIn保护全开   主流程 然后发现一个函数  这里似乎是触发，输入字符串 这个jmp跳转的地方好像是rax的值，那个read函数不是读取字符数量会存到rax中吗
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-13 19:08" pubdate>
+              2026-11-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/%E5%8D%95%E8%BA%AB%E6%9D%AF/" class="category-chain-item">单身杯</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/" target="_self">
+          hitcon2018childrentcache（off by null）
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/" target="_self">
+        <div>
+          12patchelf --set-interpreter /home/nan/桌面/pwn/2.27-3ubuntu1_amd64/ld-2.27.so ./pwnpatchelf --set-rpath /home/nan/桌面/pwn/2.27-3ubuntu1_amd64 ./pwn  因为是ubuntu18所以修改一下相关连接器 检查命令 1ldd ./pwn   这个是修改成绝对路径
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-13 19:08" pubdate>
+              2026-11-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/HITCON/" class="category-chain-item">HITCON</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/pwn-notes/tags/unsorted-bin/">#unsorted-bin</a>
+            
+              <a href="/pwn-notes/tags/double-free/">#double-free</a>
+            
+              <a href="/pwn-notes/tags/off-by-null/">#off-by-null</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-how2heap-c67585/" target="_self">
+          HOW2HEAP
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-pwn-how2heap-c67585/" target="_self">
+        <div>
+          2.23（部分）fastbin_dump123456789101112131415161718192021222324252627282930313233343536373839#include &lt;stdio.h&gt;#include &lt;stdlib.h&gt;#include &lt;assert.h&gt;int main()&#123;  fprintf(stderr, &
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-13 19:08" pubdate>
+              2026-11-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/how2heap/" class="category-chain-item">how2heap</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/pwn-notes/tags/UAF/">#UAF</a>
+            
+              <a href="/pwn-notes/tags/unlink/">#unlink</a>
+            
+              <a href="/pwn-notes/tags/fastbin/">#fastbin</a>
+            
+              <a href="/pwn-notes/tags/unsorted-bin/">#unsorted-bin</a>
+            
+              <a href="/pwn-notes/tags/double-free/">#double-free</a>
+            
+              <a href="/pwn-notes/tags/HouseOfSpirit/">#HouseOfSpirit</a>
+            
+              <a href="/pwn-notes/tags/malloc-consolidate/">#malloc-consolidate</a>
+            
+              <a href="/pwn-notes/tags/glibc2-35/">#glibc2.35</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-v-n2020-easytheap-8e50cf/" target="_self">
+          [V&amp;N2020 公开赛]easyTHeap（差一步美满）
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-pwn-v-n2020-easytheap-8e50cf/" target="_self">
+        <div>
+          edit函数  好像是没有限制大小，可以溢出 delete函数：  保护依旧全开，还是应该先泄露libc地址，之后写入 12patchelf --set-interpreter /home/nan/桌面/pwn/2.27-3ubuntu1_amd64/ld-2.27.so ./pwnpatchelf --set-rpath /home/nan/桌面/pwn/2.27-3ubuntu1_amd
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-13 19:08" pubdate>
+              2026-11-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/V-N/" class="category-chain-item">V&amp;N</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/pwn-notes/tags/tcache/">#tcache</a>
+            
+              <a href="/pwn-notes/tags/unsorted-bin/">#unsorted-bin</a>
+            
+              <a href="/pwn-notes/tags/double-free/">#double-free</a>
+            
+              <a href="/pwn-notes/tags/%E5%A0%86%E9%A3%8E%E6%B0%B4/">#堆风水</a>
+            
+              <a href="/pwn-notes/tags/malloc-hook/">#malloc-hook</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/pwn-notes/2026/11/13/sync-typora-lab-3e6b5dbe-796abc/" target="_self">
+          实验1模板
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-lab-3e6b5dbe-796abc/" target="_self">
+        <div>
+          实验1：CentOS 7安装、网络配置、远程访问实验目的  1、掌握Linux虚拟机的安装方法； 2、掌握Linux网络配置方法； 3、掌握远程访问Linux系统的方式。  1.实验要求 任务1：安装虚拟机；（实验过程可以省略） 任务2：安装CentOS 7（或8）（建议：最小化安装）； （安装成功后的截图即可） 任务3：配置网络为NAT模式，实现物理机与虚拟机的相互访问。（要求：IP地址段为
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-13 19:08" pubdate>
+              2026-11-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/" class="category-chain-item">知识点</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/%E5%AE%9E%E9%AA%8C/" class="category-chain-item">实验</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/pwn-notes/2026/11/13/sync-typora-misc-misc-ff2821/" target="_self">
+          misc
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-misc-misc-ff2821/" target="_self">
+        <div>
+          白洞改后缀成压缩包文件，真神了看半天就不知道改后缀。  Black holes hide matter, but whiteouts hide history.  这是啥，真没见过 docker镜像有关的，而且还是whiteouts机制   12345# 读取第一段 flagtar -xOf .\blobs\sha256\c5b5829007eb26e105b5477170c3b066918f
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-13 19:08" pubdate>
+              2026-11-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/" class="category-chain-item">知识点</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/Misc/" class="category-chain-item">Misc</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+      </div>
+    </article>
+  </div>
+
+
+
+  <nav aria-label="navigation">
+    <span class="pagination" id="pagination">
+      <span class="page-number current">1</span><a class="page-number" href="/pwn-notes/page/2/#board">2</a><a class="page-number" href="/pwn-notes/page/3/#board">3</a><a class="extend next" rel="next" href="/pwn-notes/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
+    </span>
+  </nav>
 
 
 

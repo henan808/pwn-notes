@@ -27,7 +27,7 @@
 <meta property="og:description" content="一句话结论堆题里所有「为什么申请 0x18 &#x2F; 0x28 &#x2F; 0x38」的疑问，答案都在 request2size 和 bin 分档；所有「libc 地址从哪来」的疑问，答案都在 **unsorted bin 挂链时 glibc 自己写下的 fd&#x2F;bk &#x3D; main_arena+96**。 chunk 结构64 位下 chunk 头 16 字节，用户区从 chunk+0x10">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-11-13T09:45:00.000Z">
-<meta property="article:modified_time" content="2026-11-13T11:00:27.522Z">
+<meta property="article:modified_time" content="2026-11-13T11:25:07.953Z">
 <meta property="article:author" content="henan808">
 <meta property="article:tag" content="glibc2.27">
 <meta property="article:tag" content="tcache">
@@ -397,7 +397,7 @@
         aria-expanded="true"
       >
         知识点
-        <span class="list-group-count">(1)</span>
+        <span class="list-group-count">(9)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -418,13 +418,87 @@
     
     
     <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="Misc"
+        id="heading-74248c725e00bf9fe04df4e35b249a19" role="tab" data-toggle="collapse" href="#collapse-74248c725e00bf9fe04df4e35b249a19"
+        aria-expanded="false"
+      >
+        Misc
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-74248c725e00bf9fe04df4e35b249a19"
+           role="tabpanel" aria-labelledby="heading-74248c725e00bf9fe04df4e35b249a19">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-misc-misc-ff2821/" title="misc"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">misc</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="ROP"
+        id="heading-e506eff6ed537e408a9d885bb307f5fc" role="tab" data-toggle="collapse" href="#collapse-e506eff6ed537e408a9d885bb307f5fc"
+        aria-expanded="false"
+      >
+        ROP
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-e506eff6ed537e408a9d885bb307f5fc"
+           role="tabpanel" aria-labelledby="heading-e506eff6ed537e408a9d885bb307f5fc">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-rop-1-rop-64-libc-6c7ee7/" title="1.rop（64位泄露libc和）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">1.rop（64位泄露libc和）</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
       <a class="category-subitem 
           list-group-item category-item-action col-10 col-md-11 col-xm-11" title="堆"
         id="heading-8b1fa850914185f78f36fd9a8b716ba4" role="tab" data-toggle="collapse" href="#collapse-8b1fa850914185f78f36fd9a8b716ba4"
         aria-expanded="true"
       >
         堆
-        <span class="list-group-count">(1)</span>
+        <span class="list-group-count">(3)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -438,10 +512,148 @@
     
       
       
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-easy-heap-7b39ae/" title="EASY HEAP"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">EASY HEAP</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-canary-70aabd/" title="canary"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">canary</span>
+        </a>
+      
+    
+      
+      
         <a href="/pwn-notes/2026/11/13/glibc-heap-chunk-and-bins/" title="glibc 堆基础：chunk 结构、request2size 与 bins"
            class="list-group-item list-group-item-action
            active">
           <span class="category-post">glibc 堆基础：chunk 结构、request2size 与 bins</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="实验"
+        id="heading-9f50ccd8efc555216580ff1a87051f5a" role="tab" data-toggle="collapse" href="#collapse-9f50ccd8efc555216580ff1a87051f5a"
+        aria-expanded="false"
+      >
+        实验
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-9f50ccd8efc555216580ff1a87051f5a"
+           role="tabpanel" aria-labelledby="heading-9f50ccd8efc555216580ff1a87051f5a">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-lab-3e6b5dbe-796abc/" title="实验1模板"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">实验1模板</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="未分类"
+        id="heading-ecf7ebb59328ebf2369ce693a2423566" role="tab" data-toggle="collapse" href="#collapse-ecf7ebb59328ebf2369ce693a2423566"
+        aria-expanded="false"
+      >
+        未分类
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-ecf7ebb59328ebf2369ce693a2423566"
+           role="tabpanel" aria-labelledby="heading-ecf7ebb59328ebf2369ce693a2423566">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-bcloudbctf2016-378ff1/" title="bcloudbctf2016"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">bcloudbctf2016</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="汇编"
+        id="heading-ef3380de76fd90069a3644053bc3379d" role="tab" data-toggle="collapse" href="#collapse-ef3380de76fd90069a3644053bc3379d"
+        aria-expanded="false"
+      >
+        汇编
+        <span class="list-group-count">(2)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-ef3380de76fd90069a3644053bc3379d"
+           role="tabpanel" aria-labelledby="heading-ef3380de76fd90069a3644053bc3379d">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-asm-off-by-null-6cd392/" title="off by null"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">off by null</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-asm-65de1e22-741369/" title="汇编语言："
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">汇编语言：</span>
         </a>
       
     

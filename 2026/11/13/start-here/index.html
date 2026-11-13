@@ -27,7 +27,7 @@
 <meta property="og:description" content="这个站跑在 Hexo + Fluid 上，源文章就是 source&#x2F;_posts&#x2F;*.md 里的纯 Markdown。本地只写 Markdown，push 到 GitHub 后 Actions 自动构建并发布到 GitHub Pages，不需要在本地跑 hexo deploy。 三类内容与分类约定   类型 一级分类 二级分类示例 scaffold    知识点 知识点 堆 栈 格式化字符串 RO">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-11-13T09:40:00.000Z">
-<meta property="article:modified_time" content="2026-11-13T11:00:27.522Z">
+<meta property="article:modified_time" content="2026-11-13T11:25:07.953Z">
 <meta property="article:author" content="henan808">
 <meta property="article:tag" content="Hexo">
 <meta property="article:tag" content="写作规范">
@@ -493,8 +493,9 @@
 <p>下面的 <code>new_post.py</code> &#x2F; <code>import_from_wp.py</code> 是传统方式，想直接按模板写或批量导入旧题解时仍然可用。</p>
 <h2 id="新建一篇"><a href="#新建一篇" class="headerlink" title="新建一篇"></a>新建一篇</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">python tools/new_post.py --title <span class="hljs-string">&quot;tcache stash 机制&quot;</span> --<span class="hljs-built_in">type</span> knowledge \<br>  --sub 堆 --tags tcache,glibc2.27 --slug tcache-stash<br><br>python tools/new_post.py --title <span class="hljs-string">&quot;[RoarCTF 2019] easyheap&quot;</span> --<span class="hljs-built_in">type</span> writeup \<br>  --sub RoarCTF --tags <span class="hljs-built_in">unlink</span>,libc2.23,HouseOfSpirit --slug roarctf2019-easyheap<br></code></pre></td></tr></table></figure>
 
-<p>脚本会生成带好 front matter 的 <code>.md</code>，并在同目录建一个同名资源文件夹（因为 <code>post_asset_folder: true</code>）—— <strong>gdb 截图、bins dump、堆布局图直接丢进去</strong>，文章里只写文件名引用（<code>postAsset</code> 会自动补文章路径，**不要写 <code>./&lt;slug&gt;/</code>**）：</p>
-<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs markdown">![<span class="hljs-string">add(8) 之后的 bins</span>](<span class="hljs-link">bins-after-add8.png</span>)<br></code></pre></td></tr></table></figure>
+<p>脚本会生成带好 front matter 的 <code>.md</code>。图片统一放进 <code>source/images/notes/</code>，
+用站内绝对路径引用（<code>postAsset</code> 已关闭，只写文件名会 404）：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs markdown">![<span class="hljs-string">add(8) 之后的 bins</span>](<span class="hljs-link">/pwn-notes/images/notes/bins-after-add8.png</span>)<br></code></pre></td></tr></table></figure>
 
 <h2 id="把已有题解批量导进来"><a href="#把已有题解批量导进来" class="headerlink" title="把已有题解批量导进来"></a>把已有题解批量导进来</h2><p>工作区里已有的 <code>WP/实战记录/Pwn/*.md</code> 可以一键转成 Hexo 文章：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">python tools/import_from_wp.py --dry      <span class="hljs-comment"># 先看会生成什么</span><br>python tools/import_from_wp.py            <span class="hljs-comment"># 实际写入 source/_posts/imported-*.md</span><br></code></pre></td></tr></table></figure>
@@ -631,8 +632,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/pwn-notes/2026/11/12/imported-roarctf2019_easyheap/" title="RoarCTF 2019] easyheap">
-                        <span class="hidden-mobile">RoarCTF 2019] easyheap</span>
+                      <a href="/pwn-notes/2026/11/12/imported-fmt_cache/" title="fmt_cache（格式化字符串 + FILE IO 缓存残留）">
+                        <span class="hidden-mobile">fmt_cache（格式化字符串 + FILE IO 缓存残留）</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
