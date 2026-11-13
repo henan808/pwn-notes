@@ -1,0 +1,1658 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/pwn-notes/img/fluid.png">
+  <link rel="icon" href="/pwn-notes/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="henan808">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本文由 tools&#x2F;import_from_wp.py 从 ciscn_2019_final_3.md 导入，正文未改动。  赛事：CISCN 2019 总决赛（BUUCTF 收录） 来源：全网公开 writeup 汇总（见「七、来源清单」） 方向：Pwn &#x2F; glibc heap exploitation 难度：中等偏难 flag：未取得（本次仅做资料检索与 exp 讲解，未连接靶机">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ciscn_2019_final_3">
+<meta property="og:url" content="https://henan808.github.io/pwn-notes/2026/11/10/imported-ciscn_2019_final_3/index.html">
+<meta property="og:site_name" content="Pwn Notes">
+<meta property="og:description" content="本文由 tools&#x2F;import_from_wp.py 从 ciscn_2019_final_3.md 导入，正文未改动。  赛事：CISCN 2019 总决赛（BUUCTF 收录） 来源：全网公开 writeup 汇总（见「七、来源清单」） 方向：Pwn &#x2F; glibc heap exploitation 难度：中等偏难 flag：未取得（本次仅做资料检索与 exp 讲解，未连接靶机">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-10T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-11-13T10:58:01.682Z">
+<meta property="article:author" content="henan808">
+<meta property="article:tag" content="UAF">
+<meta property="article:tag" content="tcache dup">
+<meta property="article:tag" content="tcache poisoning">
+<meta property="article:tag" content="fake chunk size">
+<meta property="article:tag" content="unsorted bin 切割错位泄露">
+<meta property="article:tag" content="__free_hook">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>ciscn_2019_final_3 - Pwn Notes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/pwn-notes/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/pwn-notes/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/pwn-notes/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"henan808.github.io","root":"/pwn-notes/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/pwn-notes/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/pwn-notes/js/utils.js" ></script>
+  <script  src="/pwn-notes/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/pwn-notes/">
+      <strong>Pwn Notes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/pwn-notes/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="ciscn_2019_final_3"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        henan808
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-11 00:00" pubdate>
+          2026-11-11 00:00
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          19k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          156 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="题目复现"
+        id="heading-c24904fafdedd94cae3329cab43afa2f" role="tab" data-toggle="collapse" href="#collapse-c24904fafdedd94cae3329cab43afa2f"
+        aria-expanded="true"
+      >
+        题目复现
+        <span class="list-group-count">(4)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-c24904fafdedd94cae3329cab43afa2f"
+           role="tabpanel" aria-labelledby="heading-c24904fafdedd94cae3329cab43afa2f">
+        
+        
+          
+          
+  <div class="category-post-list">
+    
+    
+  </div>
+
+          
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="CISCN"
+        id="heading-85d4b39991e6d793b4caecd8f57b316e" role="tab" data-toggle="collapse" href="#collapse-85d4b39991e6d793b4caecd8f57b316e"
+        aria-expanded="true"
+      >
+        CISCN
+        <span class="list-group-count">(2)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-85d4b39991e6d793b4caecd8f57b316e"
+           role="tabpanel" aria-labelledby="heading-85d4b39991e6d793b4caecd8f57b316e">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/10/imported-ciscn_2019_final_3/" title="ciscn_2019_final_3"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">ciscn_2019_final_3</span>
+        </a>
+      
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/ciscn-2019-final-3-leak-techniques/" title="ciscn_2019_final_3：四种流派怎么泄露 libc"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">ciscn_2019_final_3：四种流派怎么泄露 libc</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="RoarCTF"
+        id="heading-d25d9658953f4c8222b2c810b44b34c6" role="tab" data-toggle="collapse" href="#collapse-d25d9658953f4c8222b2c810b44b34c6"
+        aria-expanded="false"
+      >
+        RoarCTF
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-d25d9658953f4c8222b2c810b44b34c6"
+           role="tabpanel" aria-labelledby="heading-d25d9658953f4c8222b2c810b44b34c6">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/12/imported-roarctf2019_easyheap/" title="RoarCTF 2019] easyheap"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">RoarCTF 2019] easyheap</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+    
+    
+    
+    <div class="category-sub row nomargin-x">
+      <a class="category-subitem collapsed
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="其他赛事"
+        id="heading-cc195e58b34754a13fcd0d59c782bfee" role="tab" data-toggle="collapse" href="#collapse-cc195e58b34754a13fcd0d59c782bfee"
+        aria-expanded="false"
+      >
+        其他赛事
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse " id="collapse-cc195e58b34754a13fcd0d59c782bfee"
+           role="tabpanel" aria-labelledby="heading-cc195e58b34754a13fcd0d59c782bfee">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/12/imported-fmt_cache/" title="fmt_cache（格式化字符串 + FILE IO 缓存残留）"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">fmt_cache（格式化字符串 + FILE IO 缓存残留）</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">ciscn_2019_final_3</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <blockquote>
+<p>本文由 <code>tools/import_from_wp.py</code> 从 <code>ciscn_2019_final_3.md</code> 导入，正文未改动。</p>
+<ul>
+<li>赛事：CISCN 2019 总决赛（BUUCTF 收录）</li>
+<li>来源：全网公开 writeup 汇总（见「七、来源清单」）</li>
+<li>方向：Pwn &#x2F; glibc heap exploitation</li>
+<li>难度：中等偏难</li>
+<li>flag：未取得（本次仅做资料检索与 exp 讲解，未连接靶机、未做本地复现）</li>
+<li>日期：2026-11-11</li>
+<li>技术栈：UAF &#x2F; tcache dup &#x2F; tcache poisoning &#x2F; fake chunk size &#x2F; unsorted bin 切割错位泄露 &#x2F; __free_hook &#x2F; __malloc_hook + one_gadget</li>
+</ul>
+</blockquote>
+<!-- 原始题解元信息保留如上；Hexo 分类/标签见 front matter -->
+<h1 id="ciscn-2019-final-3-题解汇总与-exp-逐段拆解"><a href="#ciscn-2019-final-3-题解汇总与-exp-逐段拆解" class="headerlink" title="ciscn_2019_final_3 题解汇总与 exp 逐段拆解"></a>ciscn_2019_final_3 题解汇总与 exp 逐段拆解</h1><blockquote>
+<p>声明：本文是对公开 writeup 的整理与机制复盘。本次会话没有题目附件、没有连接靶机，
+所有 exp 均来自公开来源，未按本地环境验证；文中所有「成功」表述都是原作者回显的结论，
+不构成本次复现证据。偏移、one_gadget 必须用题目给的 libc.so.6 重新核对。</p>
+</blockquote>
+<h2 id="一、题面"><a href="#一、题面" class="headerlink" title="一、题面"></a>一、题面</h2><p>C++ 编写的 64 位堆菜单题，Ubuntu 18.04 + 题目自带 <code>libc.so.6</code>（glibc 2.27 早期版本，
+<strong>没有 tcache double free 检测</strong>）。<code>checksec</code> 保护全开：Full RELRO &#x2F; Canary &#x2F; NX &#x2F; PIE。</p>
+<p>两个功能：</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>行为</th>
+<th>约束</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>add(idx, size, content)</code></td>
+<td><code>malloc(size)</code> → 读 size 字节写入 → 指针存入全局数组 <code>0x2022a0 + idx</code> → <strong>打印 malloc 返回的用户指针（<code>gift :</code>）</strong></td>
+<td><code>0 &lt;= idx &lt;= 0x18</code>（共 25 次、不可重复）、<code>size &lt;= 0x78</code></td>
+</tr>
+<tr>
+<td><code>delete(idx)</code></td>
+<td><code>free(ptr[idx])</code></td>
+<td><strong>free 后不清空指针</strong> → UAF &#x2F; 可 double free</td>
+</tr>
+</tbody></table>
+<p>没有 <code>show</code>、没有 <code>edit</code>。</p>
+<p>三条硬约束决定了整道题的形状：</p>
+<ol>
+<li><strong>唯一输出是 add 打印的 chunk 地址</strong>。要泄露 libc，只能想办法让某次 <code>malloc</code> 返回 libc 里的地址，让程序自己把地址打印出来。</li>
+<li><strong>size 上限 0x78</strong> → 最大 chunk size 0x80，永远落在 tcache &#x2F; fastbin 范围内，正常途径拿不到 unsorted bin chunk。要泄露 libc 就必须<strong>伪造 chunk size</strong>。</li>
+<li><strong>Full RELRO</strong> → GOT 不可写，收尾只能打 <code>__free_hook</code> &#x2F; <code>__malloc_hook</code>。</li>
+</ol>
+<h2 id="二、思路（主流解，四阶段）"><a href="#二、思路（主流解，四阶段）" class="headerlink" title="二、思路（主流解，四阶段）"></a>二、思路（主流解，四阶段）</h2><figure class="highlight hsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs hsp">UAF/<span class="hljs-keyword">double</span> free → 任意地址分配 → 改写 chunk0 的 size 域<br>        ↓<br>free 大 chunk → 进 unsorted bin（fd/bk = main_arena+<span class="hljs-number">96</span>）<br>        ↓<br>切割 unsorted bin，让剩余块的开头与一个已在 tcache 链里的小 chunk 对齐<br>→ main_arena 地址被当成该 tcache chunk 的 <span class="hljs-keyword">next</span> 指针<br>→ 再 malloc 两次，第二次返回 libc 地址，被 gift 打印 → 泄露 libc<br>        ↓<br>再来一次 tcache <span class="hljs-keyword">dup</span> → 写 __free_hook = <span class="hljs-keyword">system</span>（或 __malloc_hook = one_gadget）→ getshell<br></code></pre></td></tr></table></figure>
+
+<p>核心矛盾：题目不给 show，却给「每次 malloc 的地址」。于是一切手段都服务于
+<strong>把 libc 地址塞进 tcache 的 next 链</strong>，让 malloc 把 libc 地址当堆块返回。</p>
+<h2 id="三、关键步骤"><a href="#三、关键步骤" class="headerlink" title="三、关键步骤"></a>三、关键步骤</h2><p>以 PYozo_free（博客园）&#x2F; mcmuyanga（CSDN）这一版最清晰的 exp 为基准。</p>
+<h3 id="阶段-0：堆布局，heap-add-0-0x78-a-拿到堆地址"><a href="#阶段-0：堆布局，heap-add-0-0x78-a-拿到堆地址" class="headerlink" title="阶段 0：堆布局，heap = add(0, 0x78, &#39;a&#39;) 拿到堆地址"></a>阶段 0：堆布局，<code>heap = add(0, 0x78, &#39;a&#39;)</code> 拿到堆地址</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python">heap = add(<span class="hljs-number">0</span>, <span class="hljs-number">0x78</span>, <span class="hljs-string">b&#x27;a&#x27;</span>)     <span class="hljs-comment"># chunk0, size 0x80 —— 后面要被伪造成大 chunk</span><br>add(<span class="hljs-number">1</span>, <span class="hljs-number">0x18</span>, <span class="hljs-string">b&#x27;b&#x27;</span>)            <span class="hljs-comment"># chunk1, size 0x20 —— 泄露用的「错位」小 chunk</span><br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">2</span>, <span class="hljs-number">12</span>):<br>    add(i, <span class="hljs-number">0x78</span>, <span class="hljs-string">b&#x27;c&#x27;</span>)       <span class="hljs-comment"># 10 个 0x80 chunk，给伪造大 chunk 当「身体」和边界</span><br>add(<span class="hljs-number">12</span>, <span class="hljs-number">0x28</span>, <span class="hljs-string">b&#x27;d&#x27;</span>)          <span class="hljs-comment"># 0x30 chunk，double free 的牺牲品</span><br></code></pre></td></tr></table></figure>
+
+<p><code>gift</code> 返回的是 <strong>用户指针</strong>，chunk 头在 <code>heap - 0x10</code>。</p>
+<h3 id="阶段-1：tcache-dup-→-任意地址分配-→-伪造-size"><a href="#阶段-1：tcache-dup-→-任意地址分配-→-伪造-size" class="headerlink" title="阶段 1：tcache dup → 任意地址分配 → 伪造 size"></a>阶段 1：tcache dup → 任意地址分配 → 伪造 size</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">delete(<span class="hljs-number">12</span>); delete(<span class="hljs-number">12</span>)                    <span class="hljs-comment"># 2.27 早期无 tcache key 检查，可直接 free 两次</span><br>add(<span class="hljs-number">13</span>, <span class="hljs-number">0x28</span>, p64(heap - <span class="hljs-number">0x10</span>))          <span class="hljs-comment"># 取回 chunk12，把它的 next 改成 chunk0 的 chunk 头</span><br>add(<span class="hljs-number">14</span>, <span class="hljs-number">0x28</span>, p64(heap - <span class="hljs-number">0x10</span>))          <span class="hljs-comment"># 第二次取回同一个 chunk12（自环）</span><br>add(<span class="hljs-number">15</span>, <span class="hljs-number">0x28</span>, p64(<span class="hljs-number">0</span>) + p64(<span class="hljs-number">0x421</span>))       <span class="hljs-comment"># 第三次 malloc 返回 heap-0x10 → 写 prev_size=0, size=0x421</span><br></code></pre></td></tr></table></figure>
+
+<p><code>tcache_put/get</code> 是 FILO 单链表，2.27 的 <code>tcache_get</code> 不校验目标地址：
+free 两次后 <code>entries[0x30] → chunk12 → chunk12</code>；第一次取出并改写 <code>next</code>，
+第二次取出后 <code>entries</code> 就指向我们写的 <code>heap-0x10</code>，第三次分配即落到 chunk0 头部。</p>
+<p><code>0x421</code> &#x3D; <code>0x420 | PREV_INUSE</code>。它必须<strong>精确等于从 chunk0 开始连续若干 chunk 的总长度</strong>：
+<code>0x80(chunk0) + 0x20(chunk1) + 7*0x80 = 0x420</code>。
+因为 &gt; <code>0x410</code>（tcache 最大 bin），free 时绕过 tcache 直接进 unsorted bin。
+后面多申请的 3 个 0x80 chunk 是为了让 <code>nextchunk</code> 落在合法已分配堆块上，
+避开 <code>free(): invalid next size</code> &#x2F; <code>next chunk exceeds arena</code> 检查 —— 这正是博客园那篇标题的坑。</p>
+<p>各 WP 的伪造 size 不同只是布局不同：<code>0x461</code>（zylxixixi，覆盖 chunk0~8）、
+<code>0x4a1</code>（FreeBuf treebacker）、<code>0x451</code>（isolator-1）、<code>0xa1</code>（xia0ji233，
+配合连续 free 8 次填满 tcache 让 0xa0 尺寸的块进 unsorted bin）。</p>
+<h3 id="阶段-2：unsorted-bin-与-tcache-错位-→-泄露-libc（本题最精妙的一步）"><a href="#阶段-2：unsorted-bin-与-tcache-错位-→-泄露-libc（本题最精妙的一步）" class="headerlink" title="阶段 2：unsorted bin 与 tcache 错位 → 泄露 libc（本题最精妙的一步）"></a>阶段 2：unsorted bin 与 tcache 错位 → 泄露 libc（本题最精妙的一步）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python">delete(<span class="hljs-number">0</span>)                      <span class="hljs-comment"># 大 chunk 进 unsorted bin，fd/bk = main_arena+96</span><br>delete(<span class="hljs-number">1</span>)                      <span class="hljs-comment"># chunk1 (0x20) 进 tcache；物理上它在 unsorted chunk 内部</span><br>add(<span class="hljs-number">16</span>, <span class="hljs-number">0x78</span>, <span class="hljs-string">b&#x27;e&#x27;</span>)            <span class="hljs-comment"># 从 unsorted bin 切割 0x80</span><br>leak = add(<span class="hljs-number">18</span>, <span class="hljs-number">0x18</span>, ...)      <span class="hljs-comment"># 中间 add(17) 取回 chunk1；add(18) 返回 libc 地址</span><br>libc_base = leak - <span class="hljs-number">0x3ebca0</span><br></code></pre></td></tr></table></figure>
+
+<p>机制：从 unsorted bin 切走 0x80 后，<strong>剩余块被重新挂回 unsorted bin</strong>，
+其 <code>fd/bk</code> 写入 <code>main_arena+96</code>。剩余块的起点正好是 chunk1 的 chunk 头，
+于是 <code>main_arena+96</code> 落在 <strong>chunk1 用户区的前 8 字节</strong>，也就是 chunk1 的 tcache <code>next</code> 上。
+此时 tcache[0x20] 链变成 <code>chunk1 → main_arena+96</code>：
+第一次同尺寸 malloc 返回 chunk1，第二次就返回 <code>main_arena+96</code>（libc 内地址），
+而 add 会把这个地址通过 <code>gift</code> 打印出来 —— 泄露完成。</p>
+<p>偏移的等价写法（更抗 libc 小版本差异）：</p>
+<ul>
+<li><code>main_arena = __malloc_hook + 0x10</code></li>
+<li><code>leak = main_arena + 96 = libc_base + __malloc_hook + 0x70</code></li>
+<li>glibc 2.27 ubuntu 里 <code>__malloc_hook = 0x3ebc30</code>，故 <code>leak - libc_base = 0x3ebca0</code></li>
+<li>稳妥写法：<code>malloc_hook = (leak &amp; ~0xfff) + (libc.sym[&#39;__malloc_hook&#39;] &amp; 0xfff)</code>，
+再 <code>libc_base = malloc_hook - libc.sym[&#39;__malloc_hook&#39;]</code>（yongbaoii 版），
+或直接用 LibcSearcher。</li>
+</ul>
+<h3 id="阶段-3：再打一次-tcache-dup，写-hook"><a href="#阶段-3：再打一次-tcache-dup，写-hook" class="headerlink" title="阶段 3：再打一次 tcache dup，写 hook"></a>阶段 3：再打一次 tcache dup，写 hook</h3><p>路线 A（<code>__free_hook = system</code>，多数 WP）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python">delete(<span class="hljs-number">3</span>); delete(<span class="hljs-number">3</span>)<br>add(<span class="hljs-number">19</span>, <span class="hljs-number">0x78</span>, p64(free_hook))<br>add(<span class="hljs-number">20</span>, <span class="hljs-number">0x78</span>, p64(free_hook))<br>add(<span class="hljs-number">21</span>, <span class="hljs-number">0x78</span>, p64(system_addr))<br>add(<span class="hljs-number">22</span>, <span class="hljs-number">0x78</span>, <span class="hljs-string">b&#x27;/bin/sh\x00&#x27;</span>)<br>delete(<span class="hljs-number">22</span>)                     <span class="hljs-comment"># __free_hook(ptr) == system(&quot;/bin/sh&quot;)</span><br></code></pre></td></tr></table></figure>
+
+<p>路线 B（<code>__malloc_hook = one_gadget</code>，mcmuyanga &#x2F; yongbaoii）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">free(<span class="hljs-number">5</span>); free(<span class="hljs-number">5</span>)<br>add(<span class="hljs-number">19</span>, <span class="hljs-number">0x78</span>, p64(malloc_hook)); add(<span class="hljs-number">20</span>, <span class="hljs-number">0x78</span>, p64(malloc_hook))<br>add(<span class="hljs-number">21</span>, <span class="hljs-number">0x78</span>, p64(libc_base + <span class="hljs-number">0x10a38c</span>))   <span class="hljs-comment"># one_gadget，按实际 libc 重算</span><br><span class="hljs-comment"># 再触发一次 malloc 即 getshell</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="四、核心脚本"><a href="#四、核心脚本" class="headerlink" title="四、核心脚本"></a>四、核心脚本</h2><p>见同目录 <code>exp_ciscn_2019_final_3.py</code>：整合主流解法、带 local&#x2F;remote 切换与逐段注释。</p>
+<p>parameter 说明：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs vim"><span class="hljs-keyword">python3</span> exp_ciscn_2019_final_3.<span class="hljs-keyword">py</span> local  ./ciscn_final_3 ./libc.<span class="hljs-keyword">so</span>.<span class="hljs-number">6</span><br><span class="hljs-keyword">python3</span> exp_ciscn_2019_final_3.<span class="hljs-keyword">py</span> remote node5.buuoj.<span class="hljs-keyword">cn</span> <span class="hljs-number">29058</span> ./libc.<span class="hljs-keyword">so</span>.<span class="hljs-number">6</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="五、坑点-失败路径"><a href="#五、坑点-失败路径" class="headerlink" title="五、坑点 &#x2F; 失败路径"></a>五、坑点 &#x2F; 失败路径</h2><ol>
+<li><strong>libc 版本是生死线</strong>。glibc 2.29+ 引入 <code>tcache key</code>（bk 指向 tcache struct）与
+double free 遍历检查，<code>free(12); free(12)</code> 直接 abort；2.27-3ubuntu1.x 后期补丁版也修了。
+有 WP 明确写「连 ubuntu18.04 的 libc 都不行，必须用题目给的」。</li>
+<li><strong>C++ 二进制换 libc 更麻烦</strong>：除了 libc 还要换匹配的 <code>libstdc++</code>、ld，
+否则本地复现不起来（xia0ji233、2301_79326813 都专门写了更换方法）。</li>
+<li><strong>伪造 size 必须精确覆盖整数个 chunk</strong>，且后面要有合法 chunk 头，否则
+<code>free(): invalid next size (fast)</code> &#x2F; <code>next chunk exceeds arena</code>。
+博客园那篇的标题就是这条。xia0ji233 的建议：让小堆块<strong>完全</strong>被大堆块包含。</li>
+<li><strong>add 次数只有 25 次</strong>（idx ≤ 0x18）。arttnba3 数过：stash 版要 19 次才拿到
+第一次任意地址写，只剩 4 次机会，必须精算。</li>
+<li><strong><code>gift</code> 是用户指针不是 chunk 头</strong>，所以任意地址分配要写 <code>heap - 0x10</code>。</li>
+<li>**<code>send</code> vs <code>sendline</code>**：题目用 <code>read(0, ptr, size)</code> 精确读，多送的 <code>\n</code> 会污染下一次输入；
+覆盖 fd 时也应只写必要字节，别写满破坏相邻数据。有 WP 特意只写 <code>b&#39;\x00&#39;</code>
+去修 <code>main_arena+88</code> 的低字节。</li>
+<li><strong><code>0x3ebca0</code> 不是通用常量</strong>，换 libc 就变；LibcSearcher &#x2F; 页对齐技巧更稳。</li>
+<li><strong>Full RELRO</strong> ⇒ 只能打 hook，不能改 GOT。</li>
+<li><strong>失败路径记录</strong>：2301_79326813 试过收尾用 <code>__malloc_hook</code> 没成功
+（「我尝试过用修改malloc来解题，但没试出来」），改 <code>__free_hook</code> 才通；
+isolator-1 提到 tcache struct 路线里「0x40 改 0x50 也行、改 0x70 就不对」尚未想明白；
+yichen 最初想用 IO 泄露，后来才意识到 <code>gift</code> 才是唯一出口。</li>
+<li><strong>别误读 <code>0;cat flag</code><strong>：mcmuyanga 版最后 <code>sendline(&#39;0;cat flag&#39;)</code> 是</strong>size 输入</strong>，
+不是命令注入；<code>atoi</code> 得到 0，<code>malloc(0)</code> 触发 <code>__malloc_hook</code> 上的 one_gadget 而已。
+getshell 后要自己 <code>cat /flag</code> 或 <code>cat flag.txt</code>。</li>
+</ol>
+<h2 id="六、复盘：四种流派"><a href="#六、复盘：四种流派" class="headerlink" title="六、复盘：四种流派"></a>六、复盘：四种流派</h2><table>
+<thead>
+<tr>
+<th>流派</th>
+<th>关键手法</th>
+<th>代表来源</th>
+<th>适用&#x2F;特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A 主流</td>
+<td>tcache dup 伪造 <code>0x421</code> 等大 size → unsorted&#x2F;tcache 错位泄露 → hook</td>
+<td>PYozo_free、mcmuyanga、yongbaoii、zylxixixi、FreeBuf、CSDN 2301 等 8+ 篇</td>
+<td>最短、最易读，依赖无 double free 检测的 2.27</td>
+</tr>
+<tr>
+<td>B 填满 tcache</td>
+<td>伪造较小 size <code>0xa1</code>，靠连续 free 8 次填满 tcache 让块落进 unsorted bin</td>
+<td>xia0ji233、CSDN 2301_79326813</td>
+<td>不需要 &gt;0x410 的大 size，堆布局更紧凑</td>
+</tr>
+<tr>
+<td>C stash 绕过</td>
+<td>不用 tcache dup，fastbin <code>A→B→A</code> double free + tcache stash 把块倒回 tcache → 劫持 <code>tcache_perthread_struct</code>(0x250) → free 它进 unsorted bin 泄露</td>
+<td>arttnba3、isolator-1 转述</td>
+<td>可对抗有 double free 检测的新 libc；次数极紧</td>
+</tr>
+<tr>
+<td>D 劫持 tcache 结构</td>
+<td>把 fd 改到 <code>heap_base+0x10</code>，篡改 <code>counts</code> &#x2F; <code>entries</code>，或直接 house of spirit 改 size</td>
+<td>yichen（腾讯云&#x2F;看雪）、FreeBuf treebacker</td>
+<td>路径最绕，但对理解 tcache 布局帮助最大</td>
+</tr>
+</tbody></table>
+<p>一句话总结这道题的考点：<strong>当程序只肯告诉你「malloc 返回了哪里」时，就把 libc 地址伪装成一个
+即将被 malloc 返回的堆块</strong>。</p>
+<h2 id="七、来源清单"><a href="#七、来源清单" class="headerlink" title="七、来源清单"></a>七、来源清单</h2><table>
+<thead>
+<tr>
+<th>#</th>
+<th>来源</th>
+<th>链接</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>PYozo_free（博客园，2020-11）</td>
+<td><a target="_blank" rel="noopener" href="https://www.cnblogs.com/pppyyyzzz/p/14040210.html">https://www.cnblogs.com/pppyyyzzz/p/14040210.html</a></td>
+<td>最清晰的 <code>0x421</code> + <code>__free_hook</code> 版；标题即 nextchunk 坑</td>
+</tr>
+<tr>
+<td>2</td>
+<td>mcmuyanga（CSDN，2021-03）</td>
+<td><a target="_blank" rel="noopener" href="https://blog.csdn.net/mcmuyanga/article/details/113995633">https://blog.csdn.net/mcmuyanga/article/details/113995633</a></td>
+<td>tcache 结构讲解 + <code>0x421</code> + <code>__malloc_hook</code>+one_gadget 版</td>
+</tr>
+<tr>
+<td>3</td>
+<td>yichen（腾讯云开发者社区 &#x2F; 看雪，2020-10）</td>
+<td><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1732424">https://cloud.tencent.com/developer/article/1732424</a> 、 <a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-262480.htm">https://bbs.kanxue.com/thread-262480.htm</a></td>
+<td>劫持 tcache struct 路线，含大量调试心路</td>
+</tr>
+<tr>
+<td>4</td>
+<td>yongbaoii（CSDN，2021-02）</td>
+<td><a target="_blank" rel="noopener" href="https://blog.csdn.net/yongbaoii/article/details/113812564">https://blog.csdn.net/yongbaoii/article/details/113812564</a></td>
+<td>页对齐算 <code>__malloc_hook</code> 的技巧、overlap 配图</td>
+</tr>
+<tr>
+<td>5</td>
+<td>xia0ji233（2021-11）</td>
+<td><a target="_blank" rel="noopener" href="https://xia0ji233.pro/2021/11/01/ciscn2019_final_3%20writeup">https://xia0ji233.pro/2021/11/01/ciscn2019_final_3%20writeup</a></td>
+<td><code>0xa1</code> + 填满 tcache 版；C++ 换 libc 提示</td>
+</tr>
+<tr>
+<td>6</td>
+<td>CSDN 2301_79326813（2024-02）</td>
+<td><a target="_blank" rel="noopener" href="https://blog.csdn.net/2301_79326813/article/details/136122825">https://blog.csdn.net/2301_79326813/article/details/136122825</a></td>
+<td>明确 libc 为 GLIBC 2.27-3ubuntu1、 LibcSearcher 版</td>
+</tr>
+<tr>
+<td>7</td>
+<td>zylxixixi（CSDN，2021-10）</td>
+<td><a target="_blank" rel="noopener" href="https://blog.csdn.net/zylxixixi/article/details/120659051">https://blog.csdn.net/zylxixixi/article/details/120659051</a></td>
+<td><code>0x461</code> 版；讲清 unsorted bin 切割写 fd&#x2F;bk</td>
+</tr>
+<tr>
+<td>8</td>
+<td>FreeBuf &#x2F; treebacker《Tcache Attack 总结》（2019-10）</td>
+<td><a target="_blank" rel="noopener" href="https://www.freebuf.com/vuls/217458.html">https://www.freebuf.com/vuls/217458.html</a></td>
+<td>最早一批公开分析，<code>0x4a1</code> + house of spirit</td>
+</tr>
+<tr>
+<td>9</td>
+<td>arttnba3《PWN.0x01 Glibc heap exploit》（2021-05）</td>
+<td><a target="_blank" rel="noopener" href="https://arttnba3.cn/2021/05/10/PWN-0X01-GLIBC_HEAP-EXPLOIT">https://arttnba3.cn/2021/05/10/PWN-0X01-GLIBC_HEAP-EXPLOIT</a></td>
+<td>stash + fastbin double free + 劫持 tcache struct，例题 2</td>
+</tr>
+<tr>
+<td>10</td>
+<td>isolator-1《tcache poisoning》（2023-12）</td>
+<td><a target="_blank" rel="noopener" href="https://isolator-1.github.io/2023/12/01/ctf-pwn/tcache%20attack/">https://isolator-1.github.io/2023/12/01/ctf-pwn/tcache%20attack/</a></td>
+<td>「没有 show 如何泄露」的思路推演，含 stash 版</td>
+</tr>
+<tr>
+<td>11</td>
+<td>CSDN m0_73756460（2023-03）</td>
+<td><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_73756460/article/details/129640158">https://blog.csdn.net/m0_73756460/article/details/129640158</a></td>
+<td><code>tcache_get</code> 源码级解释；正文后半被付费墙截断</td>
+</tr>
+<tr>
+<td>12</td>
+<td>CSDN zylxixixi &#x2F; mcmuyanga 的转载镜像</td>
+<td><a target="_blank" rel="noopener" href="http://www.chinadongda.com/j?mcmuyanga/article/details/113995633">http://www.chinadongda.com/j?mcmuyanga/article/details/113995633</a></td>
+<td>镜像站，内容同上</td>
+</tr>
+<tr>
+<td>13</td>
+<td>BUUCTF 题目页</td>
+<td><a target="_blank" rel="noopener" href="https://buuoj.cn/challenges#ciscn_2019_final_3">https://buuoj.cn/challenges#ciscn_2019_final_3</a></td>
+<td>靶机与附件入口，动态 flag</td>
+</tr>
+</tbody></table>
+<p>检索结论：中文社区这道题的 writeup 高度同源（多数可追溯到 2019 年 FreeBuf 那篇与
+2020 年博客园&#x2F;看雪那几篇），差异集中在伪造 size 的取值、泄露偏移的写法、
+以及收尾用 <code>__free_hook</code> 还是 <code>__malloc_hook</code>。<strong>没有检索到独立的英文 writeup</strong>。</p>
+<h2 id="八、专题：libc-泄露机制的统一模型与四流派对照"><a href="#八、专题：libc-泄露机制的统一模型与四流派对照" class="headerlink" title="八、专题：libc 泄露机制的统一模型与四流派对照"></a>八、专题：libc 泄露机制的统一模型与四流派对照</h2><h3 id="8-1-题眼：gift-打印的是-malloc-的返回值，不是堆块内容"><a href="#8-1-题眼：gift-打印的是-malloc-的返回值，不是堆块内容" class="headerlink" title="8.1 题眼：gift 打印的是 malloc 的返回值，不是堆块内容"></a>8.1 题眼：gift 打印的是 malloc 的返回值，不是堆块内容</h3><p>程序没有 <code>show</code>，不打印任何堆块内容；<code>add</code> 里的 <code>printf(&quot;gift : %p&quot;, ptr)</code> 打印的是
+<code>malloc</code> 返回的<strong>用户指针</strong>。因此「泄露 libc」不是「读出 unsorted bin 的 fd 字段」，
+而是「<strong>让 malloc 的返回值本身变成 libc 地址</strong>」。</p>
+<p>tcache 的 <code>entries[tc_idx]</code> 链表里存的就是「下一个待返回的用户指针」，<code>tcache_get</code>
+直接把它返回，2.27 早期不校验该地址是否合法。所以只要链上出现一个 libc 地址，
+那次 <code>add</code> 就会把这个地址通过 <code>gift</code> 打印出来。这是全部流派的共同出口。</p>
+<h3 id="8-2-三条件模型"><a href="#8-2-三条件模型" class="headerlink" title="8.2 三条件模型"></a>8.2 三条件模型</h3><table>
+<thead>
+<tr>
+<th>条件</th>
+<th>内容</th>
+<th>为什么难</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>① libc 地址来源</td>
+<td>需要一个 <code>fd/bk = main_arena+96</code> 的 <strong>unsorted bin chunk</strong></td>
+<td><code>size &lt;= 0x78</code> → 最大 0x80，永远进 tcache&#x2F;fastbin；free 进 tcache 只写 <code>next</code>（堆地址或 NULL），不写 libc 指针</td>
+</tr>
+<tr>
+<td>② 传送通道</td>
+<td>让这个 libc 地址出现在某条 tcache <code>entries</code> 链上，充当 <code>next</code></td>
+<td>需要 unsorted bin 的 <code>fd</code> 与某个已 free tcache chunk 的 <code>next</code> <strong>落在同一格内存</strong></td>
+</tr>
+<tr>
+<td>③ 输出通道</td>
+<td>连续两次同尺寸 malloc，第二次由 <code>gift</code> 打印</td>
+<td>只有 25 次 add，且中途不能把链弄断</td>
+</tr>
+</tbody></table>
+<p><code>_int_free</code> 把块插入 unsorted bin 时写 <code>fd = bk = unsorted_chunks(av) = main_arena + 96</code>；
+<code>main_arena</code> 是 libc 的全局变量，所以这个指针天然就是 libc 地址。
+<code>_int_malloc</code> 从 unsorted bin <strong>切割</strong>时，剩余块要重新挂回 unsorted bin，
+于是 <code>fd/bk</code> 被写到<strong>新的剩余块开头</strong> —— 这就是条件 ② 可利用的「地址搬家」。</p>
+<p>另有一个隐含前提：能触发 unsorted bin 切割，必须<strong>该尺寸的 tcache 链为空</strong>，
+否则 malloc 优先从 tcache 取块。主流 exp 里 <code>add(16, 0x78, ...)</code> 之前从不 free 0x78 的块，
+正是为此。CSDN 2301_79326813 也明写「因为 tcachebin 里没有类似大小的堆块，所以可以切割」。</p>
+<h3 id="8-3-四流派分别怎么满足条件-①-②"><a href="#8-3-四流派分别怎么满足条件-①-②" class="headerlink" title="8.3 四流派分别怎么满足条件 ① ②"></a>8.3 四流派分别怎么满足条件 ① ②</h3><p><strong>A · 伪造大 size（0x421 &#x2F; 0x461 &#x2F; 0x4a1，8+ 篇）</strong></p>
+<ul>
+<li>① <code>tcache dup</code> → 分配到 <code>heap-0x10</code> → 把 chunk0 的 size 改成 <code>0x421</code>（&gt; 0x410，
+tcache 最大 bin 之外），<code>delete(0)</code> 直接绕过 tcache 进 unsorted bin。</li>
+<li>② 布局时让 chunk1(0x20) 紧跟 chunk0(0x80)，<code>delete(1)</code> 让它进 tcache[0x20]；
+再 <code>add(0x78)</code> 从 unsorted bin 切走 0x80，剩余块开头恰好 &#x3D; chunk1 的 chunk 头，
+挂回时写的 <code>main_arena+96</code> 正好落在 chunk1 用户区前 8 字节 &#x3D; 它的 tcache <code>next</code>。</li>
+<li>③ <code>tcache[0x20]</code> 变成 <code>chunk1 → main_arena+96</code>；第一次 0x18 malloc 取回 chunk1，
+第二次返回 <code>main_arena+96</code> 并被打印。</li>
+</ul>
+<p><strong>B · 小 size + 填满 tcache（0xa1，xia0ji233 &#x2F; CSDN 2301_79326813）</strong></p>
+<ul>
+<li>① 不追求 &gt;0x410：伪造 <code>0xa1</code>（0xa0 &gt; fastbin 上限 0x80，但仍在 tcache 范围内），
+然后 <strong>连续 <code>free(0)</code> 8 次</strong>把 0xa0 的 tcache 链填满 7 个，第 8 次 free 时
+<code>tcache_put</code> 的 <code>count &lt; 7</code> 不成立，块走 <code>_int_free</code> → 因尺寸属 smallbin 范围而进
+<strong>unsorted bin</strong>。能连 free 同一块 8 次，靠的仍是 2.27 早期无 tcache key 检查。</li>
+<li>② 同样靠切割错位，但这一派多了两步调试技巧：<code>alloc(6, 0x10, ...)</code> 切割后
+用 <code>alloc(7/8, 0x70, b&#39;\x00&#39;)</code> <strong>只写一个字节</strong>去修残留指针的低位
+（作者注释「main_arena+88 的最后一个字节相对固定」，属部分写修指针）。</li>
+<li>③ 连续两次同尺寸 malloc，第二次 <code>gift</code> 打印；这一派用 <code>LibcSearcher</code>
+按 <code>__malloc_hook</code> 反查 libc，而不是硬编码 <code>0x3ebca0</code>。</li>
+</ul>
+<p><strong>C · stash + 劫持 tcache struct（arttnba3 &#x2F; isolator-1）</strong></p>
+<ul>
+<li>① <strong>完全不伪造 size</strong>：<code>tcache_perthread_struct</code> 本身大小 <code>0x250</code>（2.27），
+大于 fastbin 上限，直接 <code>free(20)</code> 就进 unsorted bin，其 <code>fd/bk = main_arena+96</code>。
+拿到它的方式是填满 tcache → <code>free(7);free(8);free(7)</code> 做 fastbin <code>A→B→A</code>
+double free → 消耗 tcache 触发 <strong>stash</strong> 把 fastbin 剩余块倒回 tcache →
+污染 <code>next</code> 指向 <code>heap_base+0x10</code> → 分配到 tcache struct 并控制 <code>counts/entries</code>。</li>
+<li>② 巧妙之处：tcache struct 被 free 后，<strong>它自己的内存开头被改写成 fd&#x2F;bk</strong>，
+而它同时正是 <code>entries[]</code> 指向的位置 —— 所以 <code>next</code> 天然变成了 libc 地址，
+不需要再手工做「切割对齐」。这仍然是条件 ② 的另一种实现，内核没变。</li>
+<li>③ <code>new(21,0x20)</code>、<code>new(22,0x20)</code> 沿被污染的链取两次，第二次 <code>gift</code> 打印
+<code>libc_leak</code>，<code>libc_base = libc_leak - 0x3ebca0</code>。</li>
+</ul>
+<p><strong>D · 篡改 counts 假装满 &#x2F; house of spirit（yichen 腾讯云+看雪、FreeBuf treebacker）</strong></p>
+<ul>
+<li>① yichen 走的是另一条：把 tcache struct 的 <code>counts</code> 全写成 <code>0x61</code>（’a’ ≥ 7），
+让 glibc <strong>误以为每条链都满了</strong>，于是连 <code>0x100</code> 的小 chunk 被 free 时也不进 tcache、
+直接进 unsorted bin。等价于「用软件状态绕过 tcache」而非「用尺寸绕过」。</li>
+<li>② 他手工把 double free 块的 <code>fd</code> 改回「刚才释放的那个」，强行把 unsorted bin
+的地址排队进 tcache 链（文中原话「强行排队」）。</li>
+<li>③ 第三次 malloc 落到 unsorted bin 处，<code>gift</code> 得到 <code>main_arena+96</code>，
+<code>libc_base = main_arena_addr - 0x10 - libc.sym[&#39;__malloc_hook&#39;]</code>。
+FreeBuf treebacker 版则是 <code>0x4a1</code> 大 size + <code>add(15/16, size=0, ...)</code> 用空块错位，
+本质与 A 相同，只是错位载体换成 size&#x3D;0 的 0x20 块。</li>
+</ul>
+<h3 id="8-4-泄露值的换算与各-WP-的分歧"><a href="#8-4-泄露值的换算与各-WP-的分歧" class="headerlink" title="8.4 泄露值的换算与各 WP 的分歧"></a>8.4 泄露值的换算与各 WP 的分歧</h3><p>统一关系：<code>main_arena = __malloc_hook + 0x10</code>，<code>leak = main_arena + 96</code>，
+2.27 ubuntu 的 <code>__malloc_hook = 0x3ebc30</code> ⇒ <code>leak - libc_base = 0x3ebca0</code>。</p>
+<p>但各 WP 拿到的并不总是同一个值：</p>
+<ul>
+<li>多数 WP：<code>leak = main_arena+96</code>，<code>libc_base = leak - 0x3ebca0</code>。</li>
+<li>腾讯云 &#x2F; isolator-1：<code>main_arena_addr = gift - 96</code>，再减 <code>__malloc_hook + 0x10</code>。</li>
+<li>CSDN 2301_79326813：拿到的是 <code>mainarena+88</code>（切割尺寸不同，落在 <code>bk</code> 或另一格），
+且用 <code>mallochook = mainarena - 0x18</code>，作者自己承认「这些地方是根据习惯去写的，
+实际可能不准，但最后的 mallochook 肯定是对的」。</li>
+<li>yongbaoii 的稳妥写法（页内偏移固定，抗 libc 小版本差异）：
+<code>malloc_hook = (leak &amp; ~0xfff) + (libc.sym[&#39;__malloc_hook&#39;] &amp; 0xfff)</code>，
+<code>libc_base = malloc_hook - libc.sym[&#39;__malloc_hook&#39;]</code>。</li>
+</ul>
+<p>结论：<code>+96/+88</code>、<code>-0x10/-0x18</code> 的分歧来自<strong>切割尺寸不同导致落在 fd 还是 bk</strong>
+以及不同 2.27 小版本的符号偏移。可靠做法是页对齐技巧或 LibcSearcher，
+并对着题目给的 <code>libc.so.6</code> 用 <code>readelf -s | grep __malloc_hook</code> 核对。</p>
+<h3 id="8-5-一句话复盘"><a href="#8-5-一句话复盘" class="headerlink" title="8.5 一句话复盘"></a>8.5 一句话复盘</h3><blockquote>
+<p>所有流派都在做同一件事：<strong>造一个带 libc 指针的 unsorted bin chunk，
+把这个指针「搬」到 tcache 的 <code>next</code> 上，再让题目亲手把 malloc 的返回值打印出来</strong>。
+差异只在「怎么造 unsorted bin」和「怎么搬指针」，
+而「搬」的四种实现分别是：切割对齐（A&#x2F;B）、free tcache struct 自身（C）、
+篡改 counts + 手工改 fd（D）。</p>
+</blockquote>
+<h2 id="九、专题：azraelxuemo-版（2022-03-10）与两处归类更正"><a href="#九、专题：azraelxuemo-版（2022-03-10）与两处归类更正" class="headerlink" title="九、专题：azraelxuemo 版（2022-03-10）与两处归类更正"></a>九、专题：azraelxuemo 版（2022-03-10）与两处归类更正</h2><p>来源：<a target="_blank" rel="noopener" href="https://blog.csdn.net/azraelxuemo/article/details/123405694">https://blog.csdn.net/azraelxuemo/article/details/123405694</a>
+《linux_pwn(6)–tcache&amp;&amp;double free&amp;&amp;ciscn_2019_final_3》，作者自述「网上普遍用的是
+修改大小超过 0x400 进 unsorted bin，我第一次也是用这个打的，现在讲的是另一种解法」。</p>
+<h3 id="9-1-定位：B-派造-bin-A-派搬运-混合派"><a href="#9-1-定位：B-派造-bin-A-派搬运-混合派" class="headerlink" title="9.1 定位：B 派造 bin + A 派搬运 &#x3D; 混合派"></a>9.1 定位：B 派造 bin + A 派搬运 &#x3D; 混合派</h3><table>
+<thead>
+<tr>
+<th>环节</th>
+<th>主流 0x421（博客园）</th>
+<th>xia0ji233（用户复现版）</th>
+<th>本文 azraelxuemo</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>造 unsorted bin</td>
+<td>伪 <code>0x421</code>，一次 free</td>
+<td>伪 <code>0xa1</code> + free ×8</td>
+<td>伪 <code>0xa1</code> + free ×8</td>
+</tr>
+<tr>
+<td>伪造对象</td>
+<td>chunk0 (0x80)</td>
+<td>chunk0 (0x20)</td>
+<td><strong>chunk1 (0x20)</strong></td>
+</tr>
+<tr>
+<td>指针怎么到 <code>next</code></td>
+<td>切割，剩余块 fd 落在 chunk1</td>
+<td><strong>不切割</strong>，第 8 次 free 直接写同一格</td>
+<td>切割，剩余块 fd 落在 chunk2</td>
+</tr>
+<tr>
+<td>泄露档位</td>
+<td><code>0x20</code>（add 0x18 ×2）</td>
+<td><code>0x30</code>（add 0x28 ×2）</td>
+<td><code>0x80</code>（add 0x78 ×2）</td>
+</tr>
+<tr>
+<td>add 次数</td>
+<td>约 23 次（逼近 25 上限）</td>
+<td>16 次</td>
+<td><strong>13 次</strong></td>
+</tr>
+</tbody></table>
+<p><strong>更正 8.3 节 B 派的描述</strong>：xia0ji233 那版并不靠「切割错位」，而是同一块 chunk0 既挂在
+tcache[0x30]、又是 unsorted bin 块，<code>C0+0x10</code> 这一格同时是 <code>next</code> 和 <code>fd</code>，第 8 次 free
+一步写成 <code>main_arena+96</code>。真正用「切割对齐」的 B 派是本文 azraelxuemo 版。</p>
+<h3 id="9-2-堆地址表（C0-chunk0-头-heap-0-addr-0x10）"><a href="#9-2-堆地址表（C0-chunk0-头-heap-0-addr-0x10）" class="headerlink" title="9.2 堆地址表（C0 &#x3D; chunk0 头 &#x3D; heap_0_addr - 0x10）"></a>9.2 堆地址表（C0 &#x3D; chunk0 头 &#x3D; heap_0_addr - 0x10）</h3><table>
+<thead>
+<tr>
+<th>地址</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>C0+0x00</code></td>
+<td>chunk0，size 0x20（第一次 dup 的牺牲品）</td>
+</tr>
+<tr>
+<td><code>C0+0x20</code></td>
+<td>chunk1 头，size 被 <code>add(5)</code> 改成 <strong>0xa1</strong>；伪造大块起点</td>
+</tr>
+<tr>
+<td><code>C0+0x30</code></td>
+<td>chunk1 用户区 &#x3D; unsorted bin 的 <code>fd</code>（8 次 free 后为 <code>main_arena+96</code>）</td>
+</tr>
+<tr>
+<td><code>C0+0x40</code></td>
+<td>chunk2 头，size 0x80；切割后剩余块的起点</td>
+</tr>
+<tr>
+<td><code>C0+0x50</code></td>
+<td>chunk2 用户区 &#x3D; tcache[0x80] 节点的 <code>next</code> ← <strong>泄露的关键共格</strong></td>
+</tr>
+<tr>
+<td><code>C0+0xc0</code></td>
+<td><code>add(6,0x18)</code> 隔离块（0x20），正好是伪造 0xa0 的 <code>nextchunk</code></td>
+</tr>
+<tr>
+<td><code>C0+0xe0</code></td>
+<td>top chunk</td>
+</tr>
+</tbody></table>
+<p><code>chunk1(0x20) + chunk2(0x80) = 0xa0</code> 就是 <code>0xa1</code> 的跨度；作者原文
+「0x18+0x78 的大小是 0x20+0x80&#x3D;0xa0」算的是这两块，不含 chunk0。</p>
+<h3 id="9-3-泄露链（与-8-2-三条件模型对照）"><a href="#9-3-泄露链（与-8-2-三条件模型对照）" class="headerlink" title="9.3 泄露链（与 8.2 三条件模型对照）"></a>9.3 泄露链（与 8.2 三条件模型对照）</h3><ol>
+<li><code>free(2); free(2)</code> → chunk2 提前挂进 tcache[0x80]，自环 <code>count=2</code>（条件 ② 的载体）。</li>
+<li><code>for i in range(8): free(1)</code> → 前 7 次填满 tcache[0xa0]，第 8 次进 unsorted bin，
+<code>fd/bk = main_arena+96</code> 写到 <code>C0+0x30/38</code>（条件 ①）。</li>
+<li><code>add(7, 0x18, ...)</code> → tcache[0x20] 已空（第一次 dup 消耗完、<code>add(6)</code> 从 top 分配），
+<strong>必然</strong>从 unsorted bin 切走 0x20；剩余 0x80 块 @ <code>C0+0x40</code> 挂回 unsorted bin 时
+<code>fd/bk</code> 写到 <code>C0+0x50/58</code> —— 正好是 chunk2 的 <code>next</code>（条件 ② 的「地址搬家」）。
+无论 glibc 走 <code>last_remainder</code> 分支还是 binmap 扫描分支，剩余块挂回 unsorted bin 都写
+<code>unsorted_chunks(av)</code>，机制成立。</li>
+<li><code>add(8, 0x78)</code> 取走 chunk2；<code>add(9, 0x78)</code> 的 <code>tcache_get</code> 直接返回 <code>main_arena+96</code>，
+<code>gift</code> 打印（条件 ③）。<code>libc_base = leak - 0x3ebca0</code>。</li>
+</ol>
+<p><strong>为什么 0x18 不能改成 0x28</strong>：切 0x30 会让剩余块落在 <code>C0+0x50</code>、fd 写到 <code>C0+0x60</code>，
+错开 chunk2 的 <code>next</code>，泄露断掉。这是「尺寸精算」而非随便挑档位。
+<strong>为什么 free(2) 要提前</strong>：切割写入的 libc 地址只有落在已挂链的块的用户区才有意义。
+free 两次只是让 <code>count</code> 非负、链更干净，理论上一次也够（2.27 只看 <code>entries != NULL</code>）。</p>
+<h3 id="9-4-原文的可疑写法-照抄会踩的坑"><a href="#9-4-原文的可疑写法-照抄会踩的坑" class="headerlink" title="9.4 原文的可疑写法 &#x2F; 照抄会踩的坑"></a>9.4 原文的可疑写法 &#x2F; 照抄会踩的坑</h3><ol>
+<li><code>libc_base = int(rld(),16) + 0x7F2DEB7F2000 - 0x7F2DEBBDDCA0</code>：看似写死 gdb 的
+ASLR 绝对地址，实为调试残留的<strong>常量差</strong>——<code>0x7F2DEBBDDCA0 - 0x7F2DEB7F2000 = 0x3EBCA0</code>，与 ASLR 无关，等价于 <code>leak - 0x3ebca0</code>，功能正常；但换 libc 必须重算。
+建议 <code>leak - (libc.sym[&#39;__malloc_hook&#39;] + 0x70)</code>。</li>
+<li><code>from LibcSearcher import LibcSearcheronline</code>（拼写异常）、<code>libc_23_gadget</code>
+（glibc 2.23 的 one_gadget）全文未使用，属模板残留；收尾用 <code>__free_hook + system</code>，
+与 one_gadget 无关。</li>
+<li><code>libc_path = elf.linker.decode().replace(&quot;ld&quot;, &quot;./libc&quot;)</code> 依赖作者本地 patchelf 的
+目录约定，不通用；直接 <code>ELF(&#39;./libc.so.6&#39;)</code> 更稳。</li>
+<li><code>sla(..., b&quot;&quot;)</code> 实际发 <code>\n</code>。这版 payload 都极短，<code>read(0,ptr,size)</code> 会把换行一起
+读进 buf、不残留 stdin；代价是 <code>add(9)</code> 往 <code>main_arena+96</code> 写一个 <code>0x0a</code>。已拿到
+leak 且后续全走 tcache &#x2F; <code>__free_hook</code>，无碍。<strong>但若把 payload 改成填满 size，
+sendline 就会污染下一次输入</strong>——这正是 xia0ji233 版必须用 <code>sendafter</code> 的原因。
+整理版脚本把空内容改为 <code>b&#39;\x00&#39;</code>（read 至少收到 1 字节才返回，发 <code>b&#39;&#39;</code> 会卡死）。</li>
+<li>文中「marene+88」是泛泛说法，本版实际为 <code>main_arena+96</code>；见 8.4 的偏移分歧。</li>
+<li><code>free(0)×3</code> 而非 ×2：让三次 <code>tcache_get</code> 后 count 归 0 更干净；×2 会得到 -1，
+pwndbg 显示怪但 2.27 不检查 count，照样能跑（用户复现版即如此）。</li>
+<li>作者截图提到「作为 unsorted bin free 时会把后面块 prev_inuse 清空」，是
+<code>clear_inuse_bit_at_offset</code> 的副作用；后续分配全走 tcache，不影响利用。</li>
+</ol>
+<h3 id="9-5-交付与边界"><a href="#9-5-交付与边界" class="headerlink" title="9.5 交付与边界"></a>9.5 交付与边界</h3><p>见同目录 <code>exp_ciscn_2019_final_3_azraelxuemo.py</code>：按原文逻辑重写，修正上述 1&#x2F;2&#x2F;3&#x2F;4，
+带 local&#x2F;remote 参数、逐段堆状态注释与 <code>libc.sym</code> 校验。<strong>该脚本为静态整理，
+未在附件&#x2F;靶机上复现，未取得 flag</strong>；<code>LEAK_OFF</code>、<code>__free_hook</code>、<code>system</code> 偏移必须按
+题目给的 <code>libc.so.6</code> 核对。</p>
+<hr>
+<h2 id="十、第五种解法：直接劫持-tcache-perthread-struct（用户提供版-exp）"><a href="#十、第五种解法：直接劫持-tcache-perthread-struct（用户提供版-exp）" class="headerlink" title="十、第五种解法：直接劫持 tcache_perthread_struct（用户提供版 exp）"></a>十、第五种解法：直接劫持 tcache_perthread_struct（用户提供版 exp）</h2><h3 id="10-1-定位"><a href="#10-1-定位" class="headerlink" title="10.1 定位"></a>10.1 定位</h3><p>不伪造任何 chunk size；用 tcache dup 把 malloc 返回到 <code>tcache_perthread_struct</code>
+用户区，篡改 <code>counts</code>，再 <code>free</code> struct 自身进 unsorted bin，最后用一次精确切割
+把 <code>main_arena+96</code> 写到 <code>entries[0]</code>。等价于 <strong>C 派（free struct 自身）+ D 派（改 counts
+假装满）的混合简化版</strong>，但不需要 fastbin stash，只依赖 2.27 无 tcache <code>key</code> 检查。
+全链 13 次 add，远低于 25 次上限。</p>
+<h3 id="10-2-前置：本地启动模板（中文标识符）"><a href="#10-2-前置：本地启动模板（中文标识符）" class="headerlink" title="10.2 前置：本地启动模板（中文标识符）"></a>10.2 前置：本地启动模板（中文标识符）</h3><ul>
+<li>三种启动方式：<code>修补</code>（patchelf 产物）&#x2F; <code>加载器</code>（题附 ld + <code>--library-path</code>）&#x2F; <code>自动</code>。
+<strong>C++ + 旧 libc 必须用「加载器」</strong>：patchelf 只换 interpreter，<code>libstdc++.so.6</code>、
+<code>libgcc_s.so.1</code> 仍会从系统加载，其 <code>GLIBC_2.3x</code> 符号要求与题附 2.27 冲突。</li>
+<li><code>--library-path</code> 顺序为 <code>题目目录:库目录</code>：题附 <code>libc.so.6</code> 优先，库目录补 C++ 运行库。</li>
+<li><code>args.REMOTE</code> &#x2F; <code>args.GDB</code> 为 pwntools 命令行开关；<code>libc = ELF(库文件)</code> 必须用题附 libc
+取 <code>__free_hook</code> &#x2F; <code>system</code> 偏移。</li>
+<li><code>add()</code> 用 <code>sendafter(b&#39;now you can write something\\n&#39;, ...)</code> 而非 <code>sendline</code>：
+程序 <code>read()</code> 精确读 size 字节，多送换行会污染下一次 <code>&gt; </code>。
+等待串写 <code>b&#39;&gt; &#39;</code> 是 <code>choice &gt;</code> 的子串，可匹配。</li>
+</ul>
+<h3 id="10-3-利用链（heap-struct-chunk-头）"><a href="#10-3-利用链（heap-struct-chunk-头）" class="headerlink" title="10.3 利用链（heap &#x3D; struct chunk 头）"></a>10.3 利用链（heap &#x3D; struct chunk 头）</h3><table>
+<thead>
+<tr>
+<th>幕</th>
+<th>代码</th>
+<th>堆状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><code>add(0..3,0x60)</code> → <code>delete(0..3)</code></td>
+<td>tcache[0x70]：U3→U2→U1→U0，count&#x3D;4</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>add(4,0x60)</code></td>
+<td>取回 U3，<code>gift</code> 打印；<code>heap = gift - 0x11fc0</code>（调试量出的 heap base 差值）</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>delete(0)×2</code></td>
+<td>U0 自环：entries&#x3D;U0，<code>U0-&gt;next=U0</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>add(5,0x60,p64(heap+0x10))</code></td>
+<td>第 1 次 get 返回 U0，写 next&#x3D;heap+0x10；entries 仍为 U0</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>add(6,0x60,b&#39;a&#39;)</code></td>
+<td>第 2 次 get 返回 U0，读出 next → entries[0x70]&#x3D;heap+0x10</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>add(7,0x60,payload)</code></td>
+<td><strong>第 3 次 get 返回 heap+0x10 &#x3D; struct 用户区</strong>，写 payload</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>delete(7)</code></td>
+<td><code>free(heap+0x10)</code>，size&#x3D;0x251；counts[35]&#x3D;7 → 跳过 tcache；0x250&gt;0x80 → 进 unsorted bin，<code>fd/bk=main_arena+96</code> 写到 heap+0x10&#x2F;18</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>add(8,0x30,b&#39;\x00&#39;*0x10)</code></td>
+<td>nb&#x3D;0x40、tc_idx&#x3D;2 且 entries[2]&#x3D;NULL → 切割 0x250 struct；remainder 用户区 &#x3D; heap+0x50 &#x3D; **entries[0]**，挂回时写 fd 覆盖链头；同时 16 个 0 清掉被 libc 地址污染的 counts[0..15]</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>add(9,0x10,b&#39;\x00&#39;)</code></td>
+<td>nb&#x3D;0x20、tc_idx&#x3D;0 → tcache_get 返回 <code>main_arena+96</code>，<code>gift</code> 打印；<code>libc_addr = leak - 0x3ebca0</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>delete(1)×2</code> → <code>add(10/11/12,0x60)</code></td>
+<td>重置被 add(7) 弄脏的 0x70 链；写 <code>__free_hook = system</code>，<code>add(11)</code> 内容 <code>/bin/sh\0</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>delete(11)</code></td>
+<td><code>__libc_free</code> 在 <code>_int_free</code> 前检查 hook → <code>system(&quot;/bin/sh&quot;)</code></td>
+</tr>
+</tbody></table>
+<h3 id="10-4-payload-的精确含义"><a href="#10-4-payload-的精确含义" class="headerlink" title="10.4 payload 的精确含义"></a>10.4 payload 的精确含义</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">payload = <span class="hljs-string">b&#x27;\x00&#x27;</span>*<span class="hljs-number">0x20</span> + <span class="hljs-string">b&#x27;\x07&#x27;</span>*(<span class="hljs-number">64</span>-<span class="hljs-number">0x20</span>) + p64(heap+<span class="hljs-number">0x40</span>)<br></code></pre></td></tr></table></figure>
+
+<p><code>64 - 0x20</code> &#x3D; 64 − 32 &#x3D; <strong>32</strong>（十进制 64 减十六进制 0x20），故前 32 + 后 32 &#x3D; **64 字节，
+正好铺满 <code>counts[64]</code>**（<code>char</code> 数组，每档 1 字节，不是 qword）；末 8 字节落在 <code>entries[0]</code>。</p>
+<ul>
+<li><code>counts[0..31]</code>（size 0x20..0x220 的小档）&#x3D; 0 → 后续小块 free 仍正常进 tcache；</li>
+<li><code>counts[32..63]</code>（size 0x230..0x410 的大档）&#x3D; 7 → 大块 free 时 <code>count &lt; 7</code> 不成立，
+被迫走 <code>_int_free</code>。关键档：<code>tc_idx(0x250) = (0x250-0x20)/0x10 = 35</code> 落在此区间；</li>
+<li><code>p64(heap+0x40)</code> 只是占位，随后会被 <code>add(8)</code> 切割写入的 fd 覆盖。详析：<ul>
+<li>这一格是 <code>entries[0]</code>（<code>heap+0x50</code>）；值 <code>heap+0x40</code> 既是 <code>counts[48..55]</code>
+的地址，也正好是 <code>add(8)</code> 切割后 <code>remainder</code> 的 <strong>chunk 头</strong>
+（<code>chunk_at_offset(victim, 0x40)</code>），而 remainder 的<strong>用户区</strong>才是 <code>heap+0x50</code>。</li>
+<li>切割时 glibc 写 <code>remainder-&gt;fd = main_arena+96</code> 到 <code>heap+0x50</code>，把这一格整个覆盖；
+<code>add(9)</code> 的 <code>tcache_get</code> 读到的是覆盖后的值，与 payload 里写了什么无关。</li>
+<li>佐证「它不打算被消费」：tcache <code>entries[]</code> 存的应是 <strong>用户指针</strong>（<code>chunk2mem</code>），
+而 <code>heap+0x40</code> 是 chunk 头地址；若真被 <code>tcache_get</code> 返回，程序 <code>read</code> 会写坏
+刚切好的 <code>prev_size</code>&#x2F;<code>size</code>。所以它只是把 <code>entries[0]</code> 初始化为非 NULL
+（2.27 只判断 <code>entries != NULL</code>），保证切割意外未发生时 <code>add(9)</code> 仍走 tcache、
+失败表现稳定，同时把 payload 补齐到 0x48 不留半截数据。</li>
+<li>验证：改成 <code>p64(0)</code> &#x2F; <code>p64(0xdeadbeef)</code> &#x2F; 直接删掉，泄露结果不变；或 gdb 里
+<code>add(7)</code> 后 <code>x/2gx heap+0x50</code> 见 <code>0x...40</code>，<code>add(8)</code> 后见 <code>0x7f...ca0</code>。</li>
+<li>常见误读：以为它是「把链头指向剩余块好让 add(9) 返回」。真正把 libc 地址
+搬进 <code>entries[0]</code> 的是**切割时 glibc 自己写的 <code>fd</code>**，不是这一句。</li>
+</ul>
+</li>
+</ul>
+<h3 id="10-5-泄露机制与精算点"><a href="#10-5-泄露机制与精算点" class="headerlink" title="10.5 泄露机制与精算点"></a>10.5 泄露机制与精算点</h3><p>与 A 派内核一致（<code>fd</code> 搬到 tcache <code>next</code>），但「搬」的目标是 **struct 自己的 <code>entries[0]</code>**：</p>
+<ol>
+<li><code>delete(7)</code> 让 struct 自身成为 unsorted bin chunk，<code>fd/bk</code> 写在 struct 用户区开头；</li>
+<li><code>add(8,0x30)</code> 切走 <code>0x40</code>，<code>remainder</code> chunk 头 @ <code>heap+0x40</code>、用户区 @ <code>heap+0x50</code>
+&#x3D; <code>entries[0]</code>；剩余块挂回 unsorted bin 时写 <code>remainder-&gt;fd = unsorted_chunks(av)</code>；</li>
+<li>于是 <code>tcache[0x20]</code> 的链头直接变成 <code>main_arena+96</code>，<code>add(9,0x10)</code> 由 <code>gift</code> 打印。</li>
+</ol>
+<p><strong>0x30 是精算值</strong>：换 <code>0x28</code>（nb&#x3D;0x30）会让 remainder 用户区落在 <code>heap+0x40</code>，
+fd 写进 counts 尾部而非 <code>entries[0]</code>，泄露断掉。与第九节 azraelxuemo 版的
+「<code>0x18</code> 不能换 <code>0x28</code>」同理。</p>
+<h3 id="10-6-坑点与失败路径"><a href="#10-6-坑点与失败路径" class="headerlink" title="10.6 坑点与失败路径"></a>10.6 坑点与失败路径</h3><ol>
+<li><strong>两处硬编码常量差性质不同</strong>：<code>0x771f7bdebca0 - 0x771f7ba00000 = 0x3ebca0</code>
+是 libc 内部固定偏移，与 ASLR 无关、可靠；<code>0x55558f14cfc0 - 0x55558f13b000 = 0x11fc0</code> 是 gdb 会话里量出的 heap base 差值，<strong>依赖启动方式、环境变量、C++ 初始化
+把堆撑到多大</strong>，换 <code>process</code>&#x2F;<code>gdb.debug</code>&#x2F;机器就得重新 <code>vmmap</code> 量。这是全版最脆弱处。</li>
+<li><code>counts[35]</code> 必须 ≥7，否则 struct 进 <code>tcache[0x250]</code>，只有堆地址、没有 libc 指针。</li>
+<li>前 32 档不能一起设 7：否则 <code>delete(1)×2</code> 的 0x70 档（idx&#x3D;5）也绕过 tcache，
+收尾第二次 dup 做不成。</li>
+<li><code>add(7)</code> 的 <code>tcache_get</code> 会把 <code>*(heap+0x10)</code>（旧 counts 前 8 字节）当 <code>next</code>
+存进 <code>entries[0x70]</code>，把 0x70 链弄脏；<strong>靠 <code>delete(1)×2</code> 重置链头躲过</strong>，
+少 delete 一次或改顺序就会踩非法地址。<ul>
+<li><strong>容易漏的副作用</strong>：<code>delete(7)</code> 的 <code>fd/bk = main_arena+96</code> 写在
+<code>heap+0x10/0x18</code>，也就是 <code>counts[0..15]</code>；小端字节 <code>a0 bc 41 ac d5 7f 00 00</code>
+让 <code>counts[0..11]</code> 全部 ≥7，小档 <code>tcache_put</code> 同样会被跳过。
+<strong><code>add(8,0x30,b&#39;\x00&#39;*0x10)</code> 的 16 个 0 正是为了把这段清零</strong>，恢复小档 tcache，
+后面 <code>delete(1)×2</code> 才能正常进 tcache 做第二次 dup；否则 0x70 走 fastbin，
+连续两次 free 会触发 <code>double free or corruption (fasttop)</code>。</li>
+<li>调试截图佐证：<code>delete(7)</code> 之后 <code>heap+0x050</code> 仍是 <code>heap+0x40</code>、<code>heap+0x010/018</code>
+变成 <code>0x7fd5ac41bca0</code>，说明 fd&#x2F;bk 落在 counts 而非 entries[0]；
+<code>add(8)</code> 之后应看到 <code>heap+0x010</code> 归零、<code>heap+0x050</code> 变成 <code>main_arena+96</code>。</li>
+</ul>
+</li>
+<li><code>add(9)</code> 往 <code>main_arena+96</code> 写 1 字节 <code>0</code>，破坏 bins 一个字节；已拿到 leak 且
+后续只走 tcache &#x2F; <code>__free_hook</code> 故无碍，但之后不能再走 unsorted bin。</li>
+<li><code>add(8)</code> &#x2F; <code>add(9)</code> 的 payload 只发 16 &#x2F; 1 字节，而 size 是 0x30 &#x2F; 0x10：依赖程序
+单次 <code>read()</code> 不读满就返回；若程序循环读满 size 会卡死。</li>
+<li><code>bug()</code> 放在 <code>io.interactive()</code> 之前：已经 getshell 再 attach 会挂住等待；
+<code>REMOTE</code> 下 <code>gdb.attach</code> 会失败；<code>args.GDB</code> 已用 <code>gdb.debug</code> 起进程，重复 attach。</li>
+<li>明确无关项：全链用 <code>__free_hook + system</code>，<strong>与 one_gadget 无关</strong>；
+<code>elf</code> 只用来启动&#x2F;取符号，未参与偏移计算。</li>
+</ol>
+<h3 id="10-7-边界"><a href="#10-7-边界" class="headerlink" title="10.7 边界"></a>10.7 边界</h3><p>本节为对用户提供 exp 的<strong>静态机制复盘</strong>：没有题目附件、没有连接靶机、没有运行该脚本，
+未取得 flag，也没有 getshell 回显证据。<code>__free_hook</code>、<code>system</code>、<code>0x3ebca0</code>
+须按题目 <code>libc.so.6</code> 核对；<code>heap</code> 差值须在当前启动方式下用 <code>vmmap</code> 实测。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/CISCN/" class="category-chain-item">CISCN</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/pwn-notes/tags/UAF/" class="print-no-link">#UAF</a>
+      
+        <a href="/pwn-notes/tags/tcache-dup/" class="print-no-link">#tcache dup</a>
+      
+        <a href="/pwn-notes/tags/tcache-poisoning/" class="print-no-link">#tcache poisoning</a>
+      
+        <a href="/pwn-notes/tags/fake-chunk-size/" class="print-no-link">#fake chunk size</a>
+      
+        <a href="/pwn-notes/tags/unsorted-bin-%E5%88%87%E5%89%B2%E9%94%99%E4%BD%8D%E6%B3%84%E9%9C%B2/" class="print-no-link">#unsorted bin 切割错位泄露</a>
+      
+        <a href="/pwn-notes/tags/free-hook/" class="print-no-link">#__free_hook</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>ciscn_2019_final_3</div>
+      <div>https://henan808.github.io/pwn-notes/2026/11/10/imported-ciscn_2019_final_3/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>henan808</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年11月11日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                    <i class="iconfont icon-cc-nc"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - 相同方式共享">
+                    <i class="iconfont icon-cc-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/pwn-notes/2026/11/12/imported-roarctf2019_easyheap/" title="RoarCTF 2019] easyheap">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">RoarCTF 2019] easyheap</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  <script>
+  Fluid.utils.createScript('https://lib.baomitu.com/mermaid/8.14.0/mermaid.min.js', function() {
+    mermaid.initialize({"theme":"default"});
+
+    Fluid.utils.listenDOMLoaded(function() {
+      Fluid.events.registerRefreshCallback(function() {
+        if ('mermaid' in window) {
+          mermaid.init();
+        }
+      });
+    });
+  });
+</script>
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/pwn-notes/js/events.js" ></script>
+<script  src="/pwn-notes/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/pwn-notes/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/pwn-notes/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/pwn-notes/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

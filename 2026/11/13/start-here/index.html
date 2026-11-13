@@ -1,0 +1,981 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/pwn-notes/img/fluid.png">
+  <link rel="icon" href="/pwn-notes/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="henan808">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="这个站跑在 Hexo + Fluid 上，源文章就是 source&#x2F;_posts&#x2F;*.md 里的纯 Markdown。本地只写 Markdown，push 到 GitHub 后 Actions 自动构建并发布到 GitHub Pages，不需要在本地跑 hexo deploy。 三类内容与分类约定   类型 一级分类 二级分类示例 scaffold    知识点 知识点 堆 栈 格式化字符串 RO">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从这里开始：怎么写这个站的笔记">
+<meta property="og:url" content="https://henan808.github.io/pwn-notes/2026/11/13/start-here/index.html">
+<meta property="og:site_name" content="Pwn Notes">
+<meta property="og:description" content="这个站跑在 Hexo + Fluid 上，源文章就是 source&#x2F;_posts&#x2F;*.md 里的纯 Markdown。本地只写 Markdown，push 到 GitHub 后 Actions 自动构建并发布到 GitHub Pages，不需要在本地跑 hexo deploy。 三类内容与分类约定   类型 一级分类 二级分类示例 scaffold    知识点 知识点 堆 栈 格式化字符串 RO">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-13T09:40:00.000Z">
+<meta property="article:modified_time" content="2026-11-13T10:58:01.682Z">
+<meta property="article:author" content="henan808">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="写作规范">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>从这里开始：怎么写这个站的笔记 - Pwn Notes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/pwn-notes/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/pwn-notes/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/pwn-notes/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"henan808.github.io","root":"/pwn-notes/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/pwn-notes/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/pwn-notes/js/utils.js" ></script>
+  <script  src="/pwn-notes/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/pwn-notes/">
+      <strong>Pwn Notes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/pwn-notes/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/pwn-notes/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/pwn-notes/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="从这里开始：怎么写这个站的笔记"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-author" aria-hidden="true"></i>
+        henan808
+      </span>
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-11-13 17:40" pubdate>
+          2026-11-13 17:40
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          22 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar category-bar" style="margin-right: -1rem">
+    
+
+
+
+
+
+<div class="category-list">
+  
+  
+    
+    
+    
+    <div class="category row nomargin-x">
+      <a class="category-item 
+          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="指南"
+        id="heading-0941aa706f56dc8aa92a0b70b66ce8c2" role="tab" data-toggle="collapse" href="#collapse-0941aa706f56dc8aa92a0b70b66ce8c2"
+        aria-expanded="true"
+      >
+        指南
+        <span class="list-group-count">(1)</span>
+        <i class="iconfont icon-arrowright"></i>
+      </a>
+      
+      <div class="category-collapse collapse show" id="collapse-0941aa706f56dc8aa92a0b70b66ce8c2"
+           role="tabpanel" aria-labelledby="heading-0941aa706f56dc8aa92a0b70b66ce8c2">
+        
+        
+          
+  <div class="category-post-list">
+    
+    
+      
+      
+        <a href="/pwn-notes/2026/11/13/start-here/" title="从这里开始：怎么写这个站的笔记"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">从这里开始：怎么写这个站的笔记</span>
+        </a>
+      
+    
+  </div>
+
+        
+      </div>
+    </div>
+  
+</div>
+
+
+  </aside>
+
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">从这里开始：怎么写这个站的笔记</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p>这个站跑在 Hexo + Fluid 上，源文章就是 <code>source/_posts/*.md</code> 里的纯 Markdown。<strong>本地只写 Markdown，push 到 GitHub 后 Actions 自动构建并发布到 GitHub Pages</strong>，不需要在本地跑 <code>hexo deploy</code>。</p>
+<h2 id="三类内容与分类约定"><a href="#三类内容与分类约定" class="headerlink" title="三类内容与分类约定"></a>三类内容与分类约定</h2><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>一级分类</th>
+<th>二级分类示例</th>
+<th>scaffold</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>知识点</td>
+<td><code>知识点</code></td>
+<td><code>堆</code> <code>栈</code> <code>格式化字符串</code> <code>ROP</code> <code>内核</code> <code>保护机制</code></td>
+<td><code>knowledge</code></td>
+</tr>
+<tr>
+<td>题目复现</td>
+<td><code>题目复现</code></td>
+<td><code>BUUCTF</code> <code>CISCN</code> <code>RoarCTF</code> <code>其他赛事</code></td>
+<td><code>writeup</code></td>
+</tr>
+<tr>
+<td>工具环境</td>
+<td><code>工具与环境</code></td>
+<td><code>libc切换</code> <code>pwndbg</code> <code>Docker</code></td>
+<td><code>post</code></td>
+</tr>
+<tr>
+<td>站点说明</td>
+<td><code>指南</code></td>
+<td>—</td>
+<td><code>post</code></td>
+</tr>
+</tbody></table>
+<p>分类用 Hexo 的层级写法，第二个元素会成为子分类：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">categories:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">知识点</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">堆</span><br><span class="hljs-attr">tags:</span> [<span class="hljs-string">glibc2.27</span>, <span class="hljs-string">tcache</span>, <span class="hljs-string">UAF</span>]<br></code></pre></td></tr></table></figure>
+
+<p>标签建议统一用小写&#x2F;驼峰，方便归档：<code>glibc2.23</code>、<code>glibc2.27</code>、<code>tcache</code>、<code>unlink</code>、<code>HouseOfSpirit</code>、<code>fastbin</code>、<code>fmtstr</code>、<code>one_gadget</code>、<code>FullRELRO</code>。</p>
+<h2 id="最省事的写法：丢进-notes-就自动发布"><a href="#最省事的写法：丢进-notes-就自动发布" class="headerlink" title="最省事的写法：丢进 notes/ 就自动发布"></a>最省事的写法：丢进 <code>notes/</code> 就自动发布</h2><p>平时的笔记不用管 Hexo 格式，<strong>直接把 <code>.md</code> 放进仓库的 <code>notes/</code> 目录</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm run <span class="hljs-built_in">sync</span>:dry              <span class="hljs-comment"># 预览会生成哪些文章</span><br>npm run publish -- --push     <span class="hljs-comment"># 同步 + 提交 + 推送，Actions 自动上线</span><br>npm run watch                 <span class="hljs-comment"># 或者挂着，笔记一保存就全自动</span><br></code></pre></td></tr></table></figure>
+
+<p>同步器会补好 front matter（标题取正文第一个 <code># 标题</code>、按关键词推断分类和标签）、
+把 Typora 的绝对路径截图搬进文章资源目录并改成相对路径、
+用 <code>sync-hash</code> 保证源没变就不重写。大笔记可以在 <code>notes-sources.json</code> 里配 <code>split-h1</code>，
+按一级标题拆成多篇，<strong>代码块里的 <code># 注释</code> 不会被误判成标题</strong>。
+外部笔记（<code>D:\笔记\</code> 等）只读同步，原文件不会被改动。完整规则见 <code>notes/README.md</code>。</p>
+<blockquote>
+<p>生成的是 <code>source/_posts/sync-*.md</code>，请勿手改；要改就改 <code>notes/</code> 里的源笔记再同步一次。
+就算本地忘了同步，Actions 在构建前也会跑一次 <code>python3 tools/sync_notes.py --ci</code> 兜底。</p>
+</blockquote>
+<p>下面的 <code>new_post.py</code> &#x2F; <code>import_from_wp.py</code> 是传统方式，想直接按模板写或批量导入旧题解时仍然可用。</p>
+<h2 id="新建一篇"><a href="#新建一篇" class="headerlink" title="新建一篇"></a>新建一篇</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">python tools/new_post.py --title <span class="hljs-string">&quot;tcache stash 机制&quot;</span> --<span class="hljs-built_in">type</span> knowledge \<br>  --sub 堆 --tags tcache,glibc2.27 --slug tcache-stash<br><br>python tools/new_post.py --title <span class="hljs-string">&quot;[RoarCTF 2019] easyheap&quot;</span> --<span class="hljs-built_in">type</span> writeup \<br>  --sub RoarCTF --tags <span class="hljs-built_in">unlink</span>,libc2.23,HouseOfSpirit --slug roarctf2019-easyheap<br></code></pre></td></tr></table></figure>
+
+<p>脚本会生成带好 front matter 的 <code>.md</code>，并在同目录建一个同名资源文件夹（因为 <code>post_asset_folder: true</code>）—— <strong>gdb 截图、bins dump、堆布局图直接丢进去</strong>，文章里只写文件名引用（<code>postAsset</code> 会自动补文章路径，**不要写 <code>./&lt;slug&gt;/</code>**）：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs markdown">![<span class="hljs-string">add(8) 之后的 bins</span>](<span class="hljs-link">bins-after-add8.png</span>)<br></code></pre></td></tr></table></figure>
+
+<h2 id="把已有题解批量导进来"><a href="#把已有题解批量导进来" class="headerlink" title="把已有题解批量导进来"></a>把已有题解批量导进来</h2><p>工作区里已有的 <code>WP/实战记录/Pwn/*.md</code> 可以一键转成 Hexo 文章：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">python tools/import_from_wp.py --dry      <span class="hljs-comment"># 先看会生成什么</span><br>python tools/import_from_wp.py            <span class="hljs-comment"># 实际写入 source/_posts/imported-*.md</span><br></code></pre></td></tr></table></figure>
+
+<p>脚本会读原文件的 YAML front matter（题名 &#x2F; 赛事 &#x2F; 技术栈 &#x2F; 日期），转成 <code>title</code>、<code>date</code>、<code>categories: [题目复现, &lt;赛事&gt;]</code>、<code>tags</code>，并把原来的元信息保留成正文顶部的引用块，正文一字不改。</p>
+<h2 id="本地预览与构建"><a href="#本地预览与构建" class="headerlink" title="本地预览与构建"></a>本地预览与构建</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm install<br>npm run server          <span class="hljs-comment"># http://127.0.0.1:4000/pwn-notes/</span><br>npm run build           <span class="hljs-comment"># 生成到 public/</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><p>默认走 <code>.github/workflows/deploy.yml</code>：<code>push</code> 到 <code>main</code> → <code>npm ci</code> → <code>hexo generate</code> → 推到 <code>gh-pages</code> 分支。<strong>只需要 GitHub 自带的 <code>GITHUB_TOKEN</code>，不需要你配置任何密码或 token。</strong></p>
+<p>本站已按 GitHub 用户名 <code>henan808</code> 配好 <code>_config.yml</code>（<code>url: https://henan808.github.io/pwn-notes</code>、<code>root: /pwn-notes/</code>、<code>author: henan808</code>）和 <code>_config.fluid.yml</code> 的主页链接，首次使用只需三步：</p>
+<ol>
+<li>在 GitHub 建一个名为 <strong><code>pwn-notes</code></strong> 的空仓库，把本目录 <code>git push -u origin main</code> 推上去（认证用 PAT 或 SSH key，不用账号密码）。</li>
+<li>仓库 Settings → Pages → Build and deployment → Source 选 <code>Deploy from a branch</code>，分支选 <code>gh-pages</code> &#x2F; <code>root</code>。</li>
+<li>仓库 Settings → Actions → General → Workflow permissions 勾 <code>Read and write permissions</code>。</li>
+</ol>
+<blockquote>
+<p>如果想用 <code>henan808.github.io</code> 作为用户主页站点，把仓库改成同名，并把 <code>_config.yml</code> 的 <code>url</code> 改成 <code>https://henan808.github.io</code>、<code>root</code> 改成 <code>/</code>。<code>url</code> 必须带项目子路径，是因为 Hexo 的 <code>full_url_for</code> 只用 <code>url + 页面路径</code>，不会拼 <code>root</code>。</p>
+</blockquote>
+<h2 id="安全提醒"><a href="#安全提醒" class="headerlink" title="安全提醒"></a>安全提醒</h2><ul>
+<li><strong>绝对不要把 GitHub 密码、PAT、SSH 私钥写进这个仓库的任何文件、commit message 或 workflow。</strong> <code>.gitignore</code> 已经排除了 <code>.env</code>、<code>*token*</code>、<code>_config.local.yml</code> 等。</li>
+<li>GitHub 自 2021 年 8 月起<strong>不再接受账号密码推送代码</strong>，需要 PAT（勾选 <code>repo</code>）或 SSH key；用 Actions 方案则完全不用碰这些。</li>
+<li>本站公开，题解里的靶机地址、内网 IP、个人邮箱按需脱敏。</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E6%8C%87%E5%8D%97/" class="category-chain-item">指南</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/pwn-notes/tags/Hexo/" class="print-no-link">#Hexo</a>
+      
+        <a href="/pwn-notes/tags/%E5%86%99%E4%BD%9C%E8%A7%84%E8%8C%83/" class="print-no-link">#写作规范</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>从这里开始：怎么写这个站的笔记</div>
+      <div>https://henan808.github.io/pwn-notes/2026/11/13/start-here/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>henan808</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年11月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="NC - 非商业性使用">
+                    <i class="iconfont icon-cc-nc"></i>
+                  </span>
+                </a>
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="SA - 相同方式共享">
+                    <i class="iconfont icon-cc-sa"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/pwn-notes/2026/11/13/glibc-heap-chunk-and-bins/" title="glibc 堆基础：chunk 结构、request2size 与 bins">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">glibc 堆基础：chunk 结构、request2size 与 bins</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/pwn-notes/2026/11/12/imported-fmt_cache/" title="fmt_cache（格式化字符串 + FILE IO 缓存残留）">
+                        <span class="hidden-mobile">fmt_cache（格式化字符串 + FILE IO 缓存残留）</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  <script>
+  Fluid.utils.createScript('https://lib.baomitu.com/mermaid/8.14.0/mermaid.min.js', function() {
+    mermaid.initialize({"theme":"default"});
+
+    Fluid.utils.listenDOMLoaded(function() {
+      Fluid.events.registerRefreshCallback(function() {
+        if ('mermaid' in window) {
+          mermaid.init();
+        }
+      });
+    });
+  });
+</script>
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/pwn-notes/js/events.js" ></script>
+<script  src="/pwn-notes/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/pwn-notes/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/pwn-notes/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/pwn-notes/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
