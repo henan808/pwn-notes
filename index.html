@@ -495,86 +495,6 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/pwn-notes/2026/11/13/sync-typora-rop-1-rop-64-libc-6c7ee7/" target="_self">
-          1.rop（64位泄露libc和）
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-rop-1-rop-64-libc-6c7ee7/" target="_self">
-        <div>
-          0x00000000004006db : pop rdi ; ret 0x0000000000400511 : ret  1234567891011121314151617181920212223242526272829from pwn import*libc=ELF(&#x27;./libc.so.6&#x27;)elf=ELF(&#x27;./pwn2&#x27;)context(os=&
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-11-13 19:08" pubdate>
-              2026-11-13
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/" class="category-chain-item">知识点</a>
-  
-  
-    <span>></span>
-    
-  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/ROP/" class="category-chain-item">ROP</a>
-  
-  
-
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/pwn-notes/tags/unlink/">#unlink</a>
-            
-              <a href="/pwn-notes/tags/fastbin/">#fastbin</a>
-            
-              <a href="/pwn-notes/tags/unsorted-bin/">#unsorted-bin</a>
-            
-              <a href="/pwn-notes/tags/canary/">#canary</a>
-            
-              <a href="/pwn-notes/tags/free-hook/">#free-hook</a>
-            
-              <a href="/pwn-notes/tags/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2/">#格式化字符串</a>
-            
-              <a href="/pwn-notes/tags/ROP/">#ROP</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
         <a href="/pwn-notes/2026/11/13/sync-typora-pwn-0ctf2017babyheap-9d78ba/" target="_self">
           0ctf2017babyheap
         </a>
@@ -776,6 +696,82 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-v-n2020-easytheap-8e50cf/" target="_self">
+          [V&amp;N2020 公开赛]easyTHeap（差一步美满）
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-pwn-v-n2020-easytheap-8e50cf/" target="_self">
+        <div>
+          edit函数  好像是没有限制大小，可以溢出 delete函数：  保护依旧全开，还是应该先泄露libc地址，之后写入 12patchelf --set-interpreter /home/nan/桌面/pwn/2.27-3ubuntu1_amd64/ld-2.27.so ./pwnpatchelf --set-rpath /home/nan/桌面/pwn/2.27-3ubuntu1_amd
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-11-13 19:08" pubdate>
+              2026-11-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/" class="category-chain-item">题目复现</a>
+  
+  
+    <span>></span>
+    
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/V-N/" class="category-chain-item">V&amp;N</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/pwn-notes/tags/tcache/">#tcache</a>
+            
+              <a href="/pwn-notes/tags/unsorted-bin/">#unsorted-bin</a>
+            
+              <a href="/pwn-notes/tags/double-free/">#double-free</a>
+            
+              <a href="/pwn-notes/tags/%E5%A0%86%E9%A3%8E%E6%B0%B4/">#堆风水</a>
+            
+              <a href="/pwn-notes/tags/malloc-hook/">#malloc-hook</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
         <a href="/pwn-notes/2026/11/13/sync-typora-pwn-how2heap-c67585/" target="_self">
           HOW2HEAP
         </a>
@@ -858,15 +854,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-v-n2020-easytheap-8e50cf/" target="_self">
-          [V&amp;N2020 公开赛]easyTHeap（差一步美满）
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-1-uaf-a9fd52/" target="_self">
+          1.UAF
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-pwn-v-n2020-easytheap-8e50cf/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-pwn-1-uaf-a9fd52/" target="_self">
         <div>
-          edit函数  好像是没有限制大小，可以溢出 delete函数：  保护依旧全开，还是应该先泄露libc地址，之后写入 12patchelf --set-interpreter /home/nan/桌面/pwn/2.27-3ubuntu1_amd64/ld-2.27.so ./pwnpatchelf --set-rpath /home/nan/桌面/pwn/2.27-3ubuntu1_amd
+          1.HackNote 菜单然后就是，查看各自的功能，于是在delete中发现  free后并没有进行指针清零，后面还有一个函数是print函数，于是这个时候在新建完两条笔记再次删除之后， 比如新建A B 之后删除 在bin里就会组成链表 B-&gt;A 这时如果再次新建笔记，就会从bin里面找出B之后，我们编辑的时候就可以修改里面的内容，就是相当于修改原来A里内容，改成后门函数之后，再次打印A
         </div>
       </a>
 
@@ -895,7 +891,7 @@
   
     <span>></span>
     
-  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/V-N/" class="category-chain-item">V&amp;N</a>
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/ZJCTF/" class="category-chain-item">ZJCTF</a>
   
   
 
@@ -912,16 +908,14 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/pwn-notes/tags/tcache/">#tcache</a>
+              <a href="/pwn-notes/tags/glibc2-23/">#glibc2.23</a>
+            
+              <a href="/pwn-notes/tags/UAF/">#UAF</a>
+            
+              <a href="/pwn-notes/tags/fastbin/">#fastbin</a>
             
               <a href="/pwn-notes/tags/unsorted-bin/">#unsorted-bin</a>
             
-              <a href="/pwn-notes/tags/double-free/">#double-free</a>
-            
-              <a href="/pwn-notes/tags/%E5%A0%86%E9%A3%8E%E6%B0%B4/">#堆风水</a>
-            
-              <a href="/pwn-notes/tags/malloc-hook/">#malloc-hook</a>
-            
           </div>
         
       </div>
@@ -934,15 +928,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/pwn-notes/2026/11/13/sync-typora-lab-3e6b5dbe-796abc/" target="_self">
-          实验1模板
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-bcloudbctf2016-378ff1/" target="_self">
+          bcloudbctf2016
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-lab-3e6b5dbe-796abc/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-pwn-bcloudbctf2016-378ff1/" target="_self">
         <div>
-          实验1：CentOS 7安装、网络配置、远程访问实验目的  1、掌握Linux虚拟机的安装方法； 2、掌握Linux网络配置方法； 3、掌握远程访问Linux系统的方式。  1.实验要求 任务1：安装虚拟机；（实验过程可以省略） 任务2：安装CentOS 7（或8）（建议：最小化安装）； （安装成功后的截图即可） 任务3：配置网络为NAT模式，实现物理机与虚拟机的相互访问。（要求：IP地址段为
+          检查  md,不会 bcloud_bctf_2016 - LynneHuan - 博客园
         </div>
       </a>
 
@@ -971,7 +965,7 @@
   
     <span>></span>
     
-  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/%E5%AE%9E%E9%AA%8C/" class="category-chain-item">实验</a>
+  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/%E6%9C%AA%E5%88%86%E7%B1%BB/" class="category-chain-item">未分类</a>
   
   
 
@@ -995,15 +989,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/pwn-notes/2026/11/13/sync-typora-misc-misc-ff2821/" target="_self">
-          misc
+        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-canary-70aabd/" target="_self">
+          canary
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-misc-misc-ff2821/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/pwn-notes/2026/11/13/sync-typora-pwn-canary-70aabd/" target="_self">
         <div>
-          白洞改后缀成压缩包文件，真神了看半天就不知道改后缀。  Black holes hide matter, but whiteouts hide history.  这是啥，真没见过 docker镜像有关的，而且还是whiteouts机制   12345# 读取第一段 flagtar -xOf .\blobs\sha256\c5b5829007eb26e105b5477170c3b066918f
+          add函数:  Puts函数：   堆溢出，主要就是在这里修改topchunk
         </div>
       </a>
 
@@ -1032,7 +1026,7 @@
   
     <span>></span>
     
-  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/Misc/" class="category-chain-item">Misc</a>
+  <a href="/pwn-notes/categories/%E7%9F%A5%E8%AF%86%E7%82%B9/%E5%A0%86/" class="category-chain-item">堆</a>
   
   
 
@@ -1045,6 +1039,13 @@
 
           </div>
         
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/pwn-notes/tags/canary/">#canary</a>
+            
+          </div>
         
       </div>
     </article>
@@ -1054,7 +1055,7 @@
 
   <nav aria-label="navigation">
     <span class="pagination" id="pagination">
-      <span class="page-number current">1</span><a class="page-number" href="/pwn-notes/page/2/#board">2</a><a class="page-number" href="/pwn-notes/page/3/#board">3</a><a class="extend next" rel="next" href="/pwn-notes/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
+      <span class="page-number current">1</span><a class="page-number" href="/pwn-notes/page/2/#board">2</a><a class="extend next" rel="next" href="/pwn-notes/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
     </span>
   </nav>
 
