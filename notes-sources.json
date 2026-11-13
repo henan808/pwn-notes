@@ -6,19 +6,49 @@
     {
       "name": "typora-pwn",
       "path": "D:/笔记/pwn题目.md",
-      "enabled": false,
+      "enabled": true,
       "mode": "split-h1",
-      "category": "知识点",
-      "sub": "堆",
-      "_说明": "90KB 大杂烩，按一级标题拆成多篇；开启后整份笔记会被复制进 notes/external/ 并提交，公开仓库请先检查内容"
+      "_说明": "90KB Pwn 主笔记，按一级标题拆成多篇；Typora 绝对路径图片自动搬进仓库"
     },
     {
       "name": "typora-misc",
       "path": "D:/笔记/MISC.md",
-      "enabled": false,
+      "enabled": true,
       "mode": "per-file",
       "category": "知识点",
       "sub": "Misc"
+    },
+    {
+      "name": "typora-rop",
+      "path": "D:/笔记/1.rop（64位泄露libc和）.md",
+      "enabled": true,
+      "mode": "per-file",
+      "category": "知识点",
+      "sub": "ROP"
+    },
+    {
+      "name": "typora-func",
+      "path": "D:/笔记/函数.md",
+      "enabled": true,
+      "mode": "per-file",
+      "category": "知识点",
+      "sub": "基础"
+    },
+    {
+      "name": "typora-lab",
+      "path": "D:/笔记/实验1_模板.md",
+      "enabled": true,
+      "mode": "split-h1",
+      "category": "知识点",
+      "sub": "实验"
+    },
+    {
+      "name": "typora-asm",
+      "path": "D:/笔记/汇编语言：.md",
+      "enabled": true,
+      "mode": "split-h1",
+      "category": "知识点",
+      "sub": "汇编"
     },
     {
       "name": "wp-pwn",

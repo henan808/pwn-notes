@@ -61,10 +61,11 @@ python tools/new_post.py --title "[RoarCTF 2019] easyheap" --type writeup \
   --sub RoarCTF --tags unlink,libc2.23,HouseOfSpirit --slug roarctf2019-easyheap
 ```
 
-脚本会生成带好 front matter 的 `.md`，并在同目录建一个同名资源文件夹（因为 `post_asset_folder: true`）—— **gdb 截图、bins dump、堆布局图直接丢进去**，文章里只写文件名引用（`postAsset` 会自动补文章路径，**不要写 `./<slug>/`**）：
+脚本会生成带好 front matter 的 `.md`。图片统一放进 `source/images/notes/`，
+用站内绝对路径引用（`postAsset` 已关闭，只写文件名会 404）：
 
 ```markdown
-![add(8) 之后的 bins](bins-after-add8.png)
+![add(8) 之后的 bins](/pwn-notes/images/notes/bins-after-add8.png)
 ```
 
 ## 把已有题解批量导进来

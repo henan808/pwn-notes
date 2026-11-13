@@ -67,7 +67,7 @@ npm run watch
 | 能力 | 说明 |
 |---|---|
 | 自动 front matter | 标题取正文第一个 `# 标题`（并从正文移除，避免重复）；分类/标签按 Pwn 关键词推断 |
-| 图片搬运 | Typora 绝对路径 `C:\...\typora-user-images\x.png` → 复制到文章资源目录并改成相对路径 |
+| 图片搬运 | Typora 绝对路径 `C:\...\typora-user-images\x.png` → 复制到 `source/images/notes/` 并改成站内绝对 URL（同名只存一份） |
 | 幂等 | 文末写 `sync-hash`，源没变就跳过；重写时保留原 `date`，不会把旧文章顶到最前 |
 | 不误伤 | 只管理 `source/_posts/sync-*.md`，手写文章和 `imported-*.md` 一律不动 |
 | 清理 | 源章节删掉后跑 `npm run sync -- --prune` 才删对应文章，默认保留防误删 |
@@ -85,7 +85,7 @@ python tools/import_from_wp.py --dry     # 导入工作区已有题解
 python tools/import_from_wp.py
 ```
 
-`post_asset_folder: true`，每篇文章带同名图片目录，gdb 截图放进去后**只写文件名**引用：`![](bins.png)`（`postAsset` 会自动补文章路径）。
+`post_asset_folder: true` 仍会为手写文章建同名目录，但 `postAsset` 已关闭：图片统一放 `source/images/notes/`，用 `![](/pwn-notes/images/notes/<file>.png)` 引用（多篇文章共用同名截图时 postAsset 会算错路径）。
 分类约定：`知识点 / 题目复现 / 工具与环境 / 指南`，二级为方向或赛事；标签用 `glibc2.27`、`tcache`、`unlink`、`HouseOfSpirit` 这类便于检索的词。
 
 ## 部署到 GitHub Pages
@@ -122,6 +122,25 @@ npm run watch               # 或者挂着监听，笔记一保存就自动发�
 > 想撤销本机授权：GitHub → **Settings → Applications → Authorized OAuth Apps → GitHub CLI → Revoke**。
 > 若你想本地手动 `hexo deploy`，再在 `_config.yml` 里放开 `deploy` 段并填 SSH 地址。
 
+## 只在 Typora 记笔记（零操作）
+
+`D://笔记//` 下的 6 份 Typora 笔记已在 `notes-sources.json` 里全部启用并自动同步：
+`pwn题目.md`（按 H1 拆篇）、`MISC.md`、`1.rop…md`、`函数.md`、`实验1_模板.md`、`汇编语言：.md`。
+共 17 篇文章、564 张图片，图片统一放 `source/images/notes/`。
+
+**你什么都不用敲**：开机时 Windows「启动」文件夹里的 `PwnNotes-AutoSync.vbs` 会静默拉起
+`tools/watch_notes.py`，它监听这些 Typora 原稿；Ctrl+S 保存后静默 30 秒，
+自动 `同步 → 提交 → push`，Actions 约 1 分钟后把新内容发到博客。
+
+- 想立刻启动/重启监听：双击项目里的 `tools/autosync.vbs`（重复运行会自动退出，不会起两个进程）。
+- 想暂时停掉：在任务管理器里结束对应的 `pythonw.exe` 进程。
+- 想取消开机自启：删除 `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\PwnNotes-AutoSync.vbs`。
+- 想改监听范围：编辑 `notes-sources.json` 的 `enabled`，保存后监听会自动重载配置。
+- 手动兜底（需要时）：`npm run sync:dry` / `npm run publish -- --push` / `npm run watch`。
+
+> 注意：自动发布会把保存的笔记**直接公开**到博客。写草稿时可以先在 `notes-sources.json`
+> 里把对应源改成 `enabled: false`，或改用 `npm run watch -- --no-push` 只提交不推送。
+
 ## 凭据安全（务必看）
 
 - **不要把 GitHub 账号密码、Personal Access Token、SSH 私钥写进这个仓库的任何文件**，也不要写进 commit message、workflow 或 `_config.yml`。`.gitignore` 已排除 `.env`、`*token*`、`_config.local.yml`、`credentials*` 等。
@@ -142,7 +161,7 @@ npm run watch               # 或者挂着监听，笔记一保存就自动发�
 | 生成的 HTML 里出现 `<% ... %>` 源码 | 缺 `hexo-renderer-ejs` / `hexo-renderer-stylus`（Fluid 的 layout 是 `.ejs`、样式是 `.styl`）。执行 `npm install` 补齐，两者已在 `package.json` 显式声明 |
 | 代码块没有高亮 | `_config.yml` 的 `highlight.enable: true` 由 Hexo 服务端生成 `<figure class="highlight">`；若改成 `false` 才依赖主题的 highlightjs CDN |
 | mermaid 图不渲染 | 文章里用 ` ```mermaid ` 代码块；`post.mermaid.enable` 已开，依赖 `hexo-filter-mermaid-diagrams` |
-| 图片不显示 | 手写文章把截图放进同名资源目录，引用只写文件名 `![](<file>.png)`；写成 `./<slug>/<file>.png` 会 404。`notes/` 源笔记的绝对路径图片由 `sync_notes.py` 自动搬运 |
+| 图片不显示 | 手写文章把截图放进 `source/images/notes/`，引用写 `![](/pwn-notes/images/notes/<file>.png)`；只写文件名会 404。`notes/` 源笔记的绝对路径图片由 `sync_notes.py` 自动搬运 |
 | `push` 报认证失败 | GitHub 不接受账号密码，需 PAT（`repo` 权限）或 SSH key；脚本不保存任何凭据，认证交给系统 git |
 | 大笔记拆出一堆奇怪章节 | 确认 `mode: split-h1`；代码块里的 `# 注释` 会被跳过，太短章节由 `min_chars` 过滤 |
 | 改了 `sync-*.md` 又被覆盖 | 这些是自动生成文件，请改 `notes/` 里的源笔记后重新 `npm run sync` |

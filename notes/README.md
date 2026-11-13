@@ -46,8 +46,9 @@ Typora 的绝对路径可以直接用：
 ![bins](C:\Users\<用户名>\AppData\Roaming\Typora\typora-user-images\image-xxx.png)
 ```
 
-同步时会把图片复制到 `source/_posts/<slug>/`，并改写成 `![](image-xxx.png)` —— 只写文件名。
-（`hexo-renderer-marked` 的 `postAsset` 会自己拼文章资源目录，写成 `./<slug>/image.png` 反而会 404。）
+同步时会把图片复制到全站唯一的 `source/images/notes/`，并改写成站内绝对路径
+`/pwn-notes/images/notes/image-xxx.png`。同名图片只存一份，多篇文章共用；
+Typora 的 `<img src="..." style="zoom:50%">` 标签也会被一起处理。
 相对路径的图片按笔记所在目录解析；找不到的图片会保留原链接并在报告里列出来，不会静默丢掉。
 
 ## 幂等与安全

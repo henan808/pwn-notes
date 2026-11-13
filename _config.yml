@@ -74,8 +74,11 @@ tag_generator:
 
 # ---------- Markdown 渲染 ----------
 marked:
-  prependRoot: true
-  postAsset: true
+  # 图片链接由同步器写成带 root 的站内绝对 URL，不要再自动补一次 root
+  prependRoot: false
+  # 关掉 postAsset：多篇文章共用同名图片时它会算错 postPath，
+  # 同步器改用 source/images/notes/ + 站内绝对 URL，稳定且图片只存一份
+  postAsset: false
   mangle: false
   headerIds: true
   breaks: false

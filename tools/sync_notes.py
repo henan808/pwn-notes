@@ -7,7 +7,8 @@
 * notes/ 下一个 .md = 一篇文章；配置了 split-h1 的源按一级标题拆分，
   并且**跳过 ``` 代码块里的 # 注释**（pwn 笔记里大量 Python 注释以 # 开头）。
 * 自动补 front matter：标题 / 日期 / 分类 / 标签，按 Pwn 关键词推断。
-* Typora 绝对路径图片自动复制到文章资源目录，链接改写成相对路径；
+* Typora 图片（含 <img> 标签）统一复制到 source/images/notes/，链接写成带 root
+  的站内绝对 URL，绕开 postAsset 的多文章路径错乱问题；
   外部笔记在 stage 阶段先把图片搬进 notes/external/<name>/assets/，
   让提交到仓库的原稿自包含，CI 才能重新生成。
 * 幂等：正文里写 <!-- sync-hash: ... -->，源文本没变就 SKIP；
@@ -41,7 +42,28 @@ PREFIX = 'sync'
 HASH_RE = re.compile(r'<!--\s*sync-hash:\s*([0-9a-f]{64})\s*-->')
 DATE_RE = re.compile(r'^date:\s*(.+?)\s*$', re.M)
 IMG_RE = re.compile(r'!\[([^\]]*)\]\(([^)]+)\)')
+# Typora 也会写 <img src="C:\..." style="zoom:50%">，一并处理
+HTML_SRC_RE = re.compile(r'(<img\b[^>]*?\bsrc=")([^"]+)(")', re.I)
 H1_RE = re.compile(r'^#\s+(.+?)\s*$')
+
+
+def site_root():
+    """从 _config.yml 读 root；图片用站内绝对 URL，不依赖文章 permalink。"""
+    try:
+        with open(os.path.join(ROOT, '_config.yml'), encoding='utf-8') as f:
+            m = re.search(r'^root:\s*(\S+)', f.read(), re.M)
+        if m:
+            v = m.group(1).strip().strip('"\'')
+            if not v.startswith('/'):
+                v = '/' + v
+            return v if v.endswith('/') else v + '/'
+    except OSError:
+        pass
+    return '/'
+
+
+SITE_ROOT = site_root()
+NOTES_ASSETS = os.path.join(ROOT, 'source', 'images', 'notes')
 
 # 赛事 -> 二级分类
 EVENTS = [
@@ -87,7 +109,7 @@ def read_text(path):
     for enc in ('utf-8-sig', 'utf-8', 'gb18030'):
         try:
             with open(path, 'r', encoding=enc) as f:
-                return f.read()
+                return f.read().replace('\x00', '')
         except UnicodeDecodeError:
             continue
     with open(path, 'r', encoding='utf-8', errors='replace') as f:
@@ -167,20 +189,21 @@ def load_config():
 # 阶段 1：把外部只读笔记连同图片搬进 notes/external/（CI 不做）
 # --------------------------------------------------------------------------
 def stage_one_file(src, dest_dir, report):
-    """复制单个 md 到投递区，并把绝对路径图片改成 assets/ 相对路径。"""
+    """复制单个 md 到投递区，把图片收进 assets/ 并改写两种图片语法。"""
     os.makedirs(dest_dir, exist_ok=True)
     assets_dir = os.path.join(dest_dir, 'assets')
     text = read_text(src)
     src_dir = os.path.dirname(os.path.abspath(src))
     changed = False
 
-    def repl(m):
+    def to_assets(raw):
         nonlocal changed
-        alt, raw = m.group(1), m.group(2)
+        if raw.strip().startswith(('http://', 'https://', 'data:', '//')):
+            return raw
         real = resolve_image(raw, src_dir)
         if not os.path.isfile(real):
             report['missing_images'].append('%s -> %s' % (os.path.basename(src), raw))
-            return m.group(0)
+            return raw
         name = safe_name(real)
         os.makedirs(assets_dir, exist_ok=True)
         dst = os.path.join(assets_dir, name)
@@ -188,9 +211,15 @@ def stage_one_file(src, dest_dir, report):
             shutil.copy2(real, dst)
             report['copied_images'] += 1
         changed = True
-        return '![%s](assets/%s)' % (alt, name)
+        return 'assets/%s' % name
 
-    new_text = IMG_RE.sub(repl, text)
+    def repl_md(m):
+        return '![%s](%s)' % (m.group(1), to_assets(m.group(2)))
+
+    def repl_html(m):
+        return m.group(1) + to_assets(m.group(2)) + m.group(3)
+
+    new_text = HTML_SRC_RE.sub(repl_html, IMG_RE.sub(repl_md, text))
     dest = os.path.join(dest_dir, os.path.basename(src))
     if not os.path.isfile(dest) or read_text(dest) != new_text:
         write_text(dest, new_text)
@@ -350,6 +379,8 @@ def collect_units(cfg):
             rel = os.path.relpath(full, ROOT).replace('\\', '/')
             text = read_text(full)
             meta, body = parse_front_matter(text)
+            if not body.strip():
+                continue
             if mode == 'split-h1':
                 units.extend(split_h1(body, rel, source_name, os.path.dirname(full),
                                       min_chars, cat, sub))
@@ -400,28 +431,38 @@ def infer(unit, cfg):
 
 
 def process_images(text, slug, src_dir, dry, report):
-    """复制图片到 source/_posts/<slug>/，并改写链接。返回新文本。"""
-    asset_dir = os.path.join(POSTS, slug)
+    """图片收进 source/images/notes/（全站一份），链接写成站内绝对 URL。
 
-    def repl(m):
-        alt, raw = m.group(1), m.group(2)
-        if raw.strip().startswith(('http://', 'https://', 'data:')):
-            return m.group(0)
+    不走 hexo-renderer-marked 的 postAsset：多篇 sync 文章共用图片时，
+    它会把 postPath 算错，生成 /2026/.../ciscn-.../ge-xxx.png 这种坏路径。
+    """
+    prefix = SITE_ROOT + 'images/notes/'
+
+    def to_url(raw):
+        p = raw.strip()
+        if p.startswith(('http://', 'https://', 'data:', '//')):
+            return raw
+        if p.startswith(prefix):
+            return raw                       # 已经处理过，保持幂等
         real = resolve_image(raw, src_dir)
         if not os.path.isfile(real):
             report['missing_images'].append('%s -> %s' % (slug, raw))
-            return m.group(0)
+            return raw
         name = safe_name(real)
-        dst = os.path.join(asset_dir, name)
+        dst = os.path.join(NOTES_ASSETS, name)
         if not dry and (not os.path.isfile(dst) or os.path.getsize(dst) != os.path.getsize(real)):
-            os.makedirs(asset_dir, exist_ok=True)
+            os.makedirs(NOTES_ASSETS, exist_ok=True)
             shutil.copy2(real, dst)
             report['copied_images'] += 1
-        # hexo-renderer-marked 的 postAsset 会自己拼 postPath，
-        # 这里必须只写文件名；写成 ./<slug>/<name> 会拼出双层目录导致 404
-        return '![%s](%s)' % (alt, name)
+        return prefix + urllib.parse.quote(name)
 
-    return IMG_RE.sub(repl, text)
+    def repl_md(m):
+        return '![%s](%s)' % (m.group(1), to_url(m.group(2)))
+
+    def repl_html(m):
+        return m.group(1) + to_url(m.group(2)) + m.group(3)
+
+    return HTML_SRC_RE.sub(repl_html, IMG_RE.sub(repl_md, text))
 
 
 def render(unit, cfg, old_date, dry, report):
