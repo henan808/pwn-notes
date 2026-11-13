@@ -1,0 +1,33 @@
+{
+  "name": "pwn-notes-hexo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pwn 知识点与题目复现笔记（Hexo + Fluid + GitHub Pages）",
+  "hexo": {
+    "version": "7.3.0"
+  },
+  "scripts": {
+    "build": "hexo generate",
+    "clean": "hexo clean",
+    "server": "hexo server -i 127.0.0.1 -p 4000",
+    "deploy": "hexo clean && hexo generate && hexo deploy",
+    "new": "python tools/new_post.py",
+    "import": "python tools/import_from_wp.py"
+  },
+  "dependencies": {
+    "@adobe/css-tools": "^5.0.0",
+    "hexo": "^7.3.0",
+    "hexo-deployer-git": "^4.0.0",
+    "hexo-filter-mermaid-diagrams": "^1.0.5",
+    "hexo-generator-archive": "^2.0.0",
+    "hexo-generator-category": "^2.0.0",
+    "hexo-generator-index": "^4.0.0",
+    "hexo-generator-searchdb": "^1.5.0",
+    "hexo-generator-tag": "^2.0.0",
+    "hexo-renderer-ejs": "^2.0.0",
+    "hexo-renderer-marked": "^6.3.0",
+    "hexo-renderer-stylus": "^3.0.1",
+    "hexo-server": "^3.0.0",
+    "hexo-theme-fluid": "^1.9.9"
+  }
+}

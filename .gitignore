@@ -1,0 +1,16 @@
+node_modules/
+public/
+.deploy_git/
+db.json
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# 本地覆盖配置（可能含私人信息，不要提交）
+_config.local.yml
+.env
+.env.*
+*.token
+*secret*
+credentials*

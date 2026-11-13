@@ -1,0 +1,100 @@
+# ------------------------------------------------------------------
+# Hexo 主配置 · Pwn Notes
+# 部署到 GitHub Pages 项目页：https://henan808.github.io/pwn-notes/
+# 仓库名必须是 pwn-notes；若改叫 henan808.github.io（用户页），
+# 把 url 改成 https://henan808.github.io 并把 root 改成 /
+# ------------------------------------------------------------------
+title: Pwn Notes
+subtitle: 堆、栈、格式化字符串与题目复现
+description: 个人 Pwn 学习笔记：glibc 堆机制、利用手法、CTF 题目复现与踩坑记录
+author: henan808
+language: zh-CN
+timezone: Asia/Shanghai
+
+# 项目页必须把子目录也写进 url：Hexo 的 full_url_for 是 url + path（不带 root），
+# 只有相对链接（菜单/CSS）才走 root。写完整子路径才能让 og:url、版权链接正确。
+url: https://henan808.github.io/pwn-notes
+root: /pwn-notes/
+permalink: :year/:month/:day/:title/
+permalink_defaults:
+pretty_urls:
+  trailing_index: true
+  trailing_html: true
+
+# ---------- 目录 ----------
+source_dir: source
+public_dir: public
+tag_dir: tags
+archive_dir: archives
+category_dir: categories
+code_dir: downloads/code
+i18n_dir: :lang
+skip_render:
+
+# ---------- 写作 ----------
+new_post_name: :title.md
+default_layout: post
+titlecase: false
+external_link:
+  enable: true
+  field: site
+  exclude: ''
+filename_case: 0
+render_drafts: false
+post_asset_folder: true   # 每篇文章自动带同名资源目录，放 gdb 截图很方便
+relative_link: false
+future: true
+
+# ---------- 代码高亮（服务端渲染，不依赖 CDN）----------
+highlight:
+  enable: true
+  line_number: true
+  auto_detect: false
+  tab_replace: '  '
+  wrap: true
+  hljs: false
+prismjs:
+  enable: false
+
+# ---------- 生成器 ----------
+index_generator:
+  path: ''
+  per_page: 10
+  order_by: -date
+pagination_dir: page
+archive_generator:
+  per_page: 20
+  yearly: true
+  monthly: true
+  daily: false
+category_generator:
+  per_page: 20
+tag_generator:
+  per_page: 20
+
+# ---------- Markdown 渲染 ----------
+marked:
+  prependRoot: true
+  postAsset: true
+  mangle: false
+  headerIds: true
+  breaks: false
+
+# ---------- 本地搜索 ----------
+search:
+  path: local-search.xml
+  field: post
+  content: true
+  format: html
+
+# ---------- 主题 ----------
+theme: fluid
+
+# ---------- 可选：本地手动部署（推荐改用 GitHub Actions，无需填任何凭据）----------
+# 若要用 hexo d，把 repo 换成 git@github.com:henan808/pwn-notes.git
+# 绝对不要把密码或 token 写进这个文件
+# deploy:
+#   type: git
+#   repo: ''
+#   branch: gh-pages
+#   message: "site updated: {{ now('YYYY-MM-DD HH:mm:ss') }}"
