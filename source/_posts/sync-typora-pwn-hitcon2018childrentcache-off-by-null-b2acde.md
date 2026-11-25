@@ -1,6 +1,6 @@
 ---
 title: "hitcon2018childrentcache（off by null）"
-date: 2026-11-13 19:08:05
+date: 2026-11-25 10:02:11
 categories:
   - "题目复现"
   - "HITCON"
@@ -10,8 +10,10 @@ tags: ["unsorted-bin", "double-free", "off-by-null"]
 <!-- 本文件由 tools/sync_notes.py 生成，请勿手动编辑；改 notes/ 里的源笔记后重新同步 -->
 <!-- sync-source: notes/external/typora-pwn/pwn题目.md#9 -->
 ```bash
-patchelf --set-interpreter /home/nan/桌面/pwn/2.27-3ubuntu1_amd64/ld-2.27.so ./pwn
-patchelf --set-rpath /home/nan/桌面/pwn/2.27-3ubuntu1_amd64 ./pwn
+patchelf --set-interpreter /home/nan/桌面/tiaozhan/ld-2.35.so ./pwn
+patchelf --set-rpath /home/nan/桌面/tiaozhan/libc.so.6 ./pwn
+patchelf --set-rpath /home/nan/桌面/tiaozhan/2.23-0ubuntu3_amd64 ./pwn
+patchelf --set-interpreter /home/nan/桌面/pwn/2.23-0ubuntu3_amd64/ld-2.23.so ./note
 ```
 
 因为是ubuntu18所以修改一下相关连接器
@@ -122,4 +124,4 @@ delete 0之后有申请了一个，有释放掉了2，所以再次申请的话�
 
 接着就是将free_hook的地址写入，之后就修改吧
 
-<!-- sync-hash: f7c774114ec26bae7a828b24c352f1c45f14aed55b8de24fdef064cf2625097b -->
+<!-- sync-hash: 4c623b0010d319e6b4cc3be780b7e9a36786d8b5f49a4f8ec2df7a5c665b395d -->

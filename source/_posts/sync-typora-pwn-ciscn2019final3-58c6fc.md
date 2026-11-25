@@ -1,6 +1,6 @@
 ---
 title: "ciscn2019final3"
-date: 2026-11-13 19:08:06
+date: 2026-11-25 10:02:11
 categories:
   - "题目复现"
   - "CISCN"
@@ -407,4 +407,80 @@ free的时候没有报错
 
 再连续申请两次就可以
 
-<!-- sync-hash: ceba53bebe237c7e1db541a5048e822b652d2c748b6809a34883f4589b2e0b3d -->
+
+
+
+
+
+
+## 第四次
+
+首先创建4个0x60堆块，然后释放
+
+![image-20261112184055300](/pwn-notes/images/notes/image-20261112184055300.png)
+
+然后呢，就只是释放到了tcachebin中
+
+接着又重新创建一个0x60大小堆块，接受堆地址
+
+![image-20261112184445686](/pwn-notes/images/notes/image-20261112184445686.png)
+
+![image-20261112184646033](/pwn-notes/images/notes/image-20261112184646033.png)
+
+新获得的堆块地址距离堆块开头距离
+
+它的开头又一个大小是0x250大小的堆块
+
+然后又是删除chunk0两次
+
+![image-20261112185339214](/pwn-notes/images/notes/image-20261112185339214.png)
+
+这个只是删除一次之后
+
+可是接下来删除第二次之后
+
+![image-20261112185555454](/pwn-notes/images/notes/image-20261112185555454.png)
+
+居然tcache链表中就只是剩下了70的链，其他的呢？
+
+接下来申请一个0x60大小的，大小的利用其double free漏洞，修改其fd指针，指向堆的开头
+
+![image-20261112190309214](/pwn-notes/images/notes/image-20261112190309214.png)
+
+接下来就是修改其counts数组
+
+```python
+add(6,0x60,b'a')
+payload=b'\x00'*0x20+b'\x07'*(64-0x20)+p64(heap+0x40)
+add(7,0x60,payload)
+```
+
+连续申请，之后的话就直接
+
+![image-20261112193209266](/pwn-notes/images/notes/image-20261112193209266.png)
+
+可是那个payload到底干了什么？
+
+这是payload没有写入之前，然后写入查看
+
+![image-20261112193637327](/pwn-notes/images/notes/image-20261112193637327.png)
+
+counts数组后面紧跟的就是entry数组
+
+而且是tcache[0x20]的链表头
+
+然后呢，改这里有什么用？
+
+然后又把这个堆块删了
+
+![image-20261112194124275](/pwn-notes/images/notes/image-20261112194124275.png)
+
+啥情况啊？
+
+![image-20261112194335050](/pwn-notes/images/notes/image-20261112194335050.png)
+
+这个251是一开始就有的，之后的话如果是想的是想要释放相应大小的堆块的话，之后填充7的话，还是理解的，可是之后的，修改emtrys的数组改为40是干啥？
+
+依旧unsoretdbin的切割
+
+<!-- sync-hash: dbd091fdb4b44a94a0c5fca46c0940e4b00fbe9a4c32824a9f58b4e66de0ebe3 -->

