@@ -29,6 +29,21 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 CONFIG = os.path.join(ROOT, 'notes-sources.json')
 PUBLISH = os.path.join(HERE, 'publish.py')
+LOG = os.path.join(HERE, 'autosync.log')   # *.log 已在 .gitignore，不会进仓库
+
+
+def log(msg):
+    """pythonw 无控制台，把发布结果落盘，方便排查「为什么网站没更新」。"""
+    line = '[%s] %s' % (time.strftime('%Y-%m-%d %H:%M:%S'), msg)
+    try:
+        print(line, flush=True)
+    except Exception:
+        pass
+    try:
+        with open(LOG, 'a', encoding='utf-8') as f:
+            f.write(line + '\n')
+    except OSError:
+        pass
 
 
 def single_instance():
@@ -86,7 +101,14 @@ def do_publish(push):
     cmd = [sys.executable, PUBLISH, '--prune']
     if push:
         cmd.append('--push')
-    r = subprocess.run(cmd, cwd=ROOT)
+    try:
+        r = subprocess.run(cmd, cwd=ROOT, capture_output=True,
+                           text=True, errors='replace')
+    except OSError as e:
+        log('无法启动发布脚本：%s' % e)
+        return False
+    out = ((r.stdout or '') + (r.stderr or '')).strip()
+    log('发布脚本退出码 %d\n%s' % (r.returncode, out[-2500:]))
     return r.returncode == 0
 
 
