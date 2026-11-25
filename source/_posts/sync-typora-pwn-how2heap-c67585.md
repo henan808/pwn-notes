@@ -1,6 +1,6 @@
 ---
 title: "HOW2HEAP"
-date: 2026-11-25 10:02:11
+date: 2026-11-26 00:24:33
 categories:
   - "题目复现"
   - "how2heap"
@@ -908,7 +908,8 @@ int main()
 
     /*
       Firstly, lets allocate a chunk on the heap.
-    */
+    */这是申请堆块
+        
 
     p1 = malloc(0x400-16);
 
@@ -1135,10 +1136,130 @@ int winner(char *ptr)
 }
 ```
 
-修改top_chunk的size之后的话，如果top_chunk的大小不满足申请的大小，那么就会有两种方式扩展
+相关机制：
 
-在 Top chunk 的剩余大小**小于**你请求的内存大小时，系统有两种选择：1) 扩展 Top chunk（向系统要更多的内存） 2) 用 `mmap` 映射一块新的内存。
+在 `malloc` 过程中，当从 Unsorted Bin 中获取一个块时，会调用 `unlink`
 
-而这个手法就是靠的触发第一个
+### ptmalloc机制
 
-<!-- sync-hash: 82e2fd3a39a80625649324c672aaa6afb623f68e57e71473697c48724ebf8d8a -->
+![image-20261125190132468](/pwn-notes/images/notes/image-20261125190132468.png)
+
+
+
+单链表（lifo）：后进先出
+
+![image-20261125105056244](/pwn-notes/images/notes/image-20261125105056244.png)
+
+调试：“
+
+```bash
+sudo sysctl -w kernel.yama.ptrace_scope=0
+```
+
+调试的时候加上-g参数，然后调试的时候就会看到代码
+
+首先申请一个堆块
+
+![image-20261125150114614](/pwn-notes/images/notes/image-20261125150114614.png)
+
+![image-20261125150302006](/pwn-notes/images/notes/image-20261125150302006.png)
+
+下面就是此时的top_chunk的大小
+
+![image-20261125151005869](/pwn-notes/images/notes/image-20261125151005869.png)
+
+那个top就是指向这个的地方
+
+![image-20261125151328166](/pwn-notes/images/notes/image-20261125151328166.png)
+
+![image-20261125151133061](/pwn-notes/images/notes/image-20261125151133061.png)
+
+这个就是top1
+
+之后的话就是直接修改其大小
+
+（不能直接从top里面切，而是需要调用sysmalloc ）
+
+```c
+assert ((old_top == initial_top(av) && old_size == 0) ||
+        (old_size >= MINSIZE && prev_inuse(old_top) &&
+         ((unsigned long)old_end & (pagesize - 1)) == 0));
+```
+
+![image-20261125190857619](/pwn-notes/images/notes/image-20261125190857619.png)
+
+这个时候以经将那个top_chunk的size字段改成了c01
+
+![image-20261125191041827](/pwn-notes/images/notes/image-20261125191041827.png)
+
+申请x01000
+
+效果：
+
+![image-20261125191120391](/pwn-notes/images/notes/image-20261125191120391.png)
+
+这是在泄露libc地址吗，这里其实是申请了0x1000
+
+![image-20261125195731200](/pwn-notes/images/notes/image-20261125195731200.png)
+
+之后的top[3]就是bk指针
+
+![image-20261125195959512](/pwn-notes/images/notes/image-20261125195959512.png)
+
+![image-20261125200121599](/pwn-notes/images/notes/image-20261125200121599.png)
+
+之后的话，将相关字符串写入top的开头
+
+![image-20261125201742610](/pwn-notes/images/notes/image-20261125201742610.png)
+
+之后又修改了topchunk的size大小
+
+![image-20261125201814947](/pwn-notes/images/notes/image-20261125201814947.png)
+
+![image-20261125201847173](/pwn-notes/images/notes/image-20261125201847173.png)
+
+之后
+
+![image-20261125203126677](/pwn-notes/images/notes/image-20261125203126677.png)
+
+![image-20261125203115043](/pwn-notes/images/notes/image-20261125203115043.png)
+
+![image-20261125203733845](/pwn-notes/images/notes/image-20261125203733845.png)
+
+![image-20261126000422824](/pwn-notes/images/notes/image-20261126000422824.png)
+
+![image-20261126000444189](/pwn-notes/images/notes/image-20261126000444189.png)
+
+也就是说这三个参数的设置就只是为了通过这个if检查，之后的话好进入_IO_OVERFLOW
+
+
+
+
+
+看懵了
+
+### FILE结构体
+
+| 字段             | 偏移 |
+| :--------------- | :--- |
+| `_flags`         | 0x00 |
+| `_IO_read_ptr`   | 0x08 |
+| `_IO_write_base` | 0x20 |
+| `_IO_write_ptr`  | 0x28 |
+| `_chain`         | 0x68 |
+| `_mode`          | 0xc0 |
+| `vtable`         | 0xd8 |
+
+![image-20261126000826368](/pwn-notes/images/notes/image-20261126000826368.png)
+
+青色三行——决定成立后干什么。 _IO_OVERFLOW(fp, EOF) 实际是调用 fp->vtable->__overflow(fp, EOF)。2.23 不检查 vtable 指针，所以我们在堆上造一张假表，把 __overflow 那个槽填成 system。而第一个参数传的就是 fp 本身——所以把 "/bin/sh" 放在伪造 FILE 的开头，system(fp) 就变成了 system("/bin/sh")。_chain 则是让 _IO_list_all 那条链表能走到我们这块。
+
+### malloc_printerr
+
+![image-20261126001351918](/pwn-notes/images/notes/image-20261126001351918.png)
+
+2.26 那个提交把这条链路拆掉了，`malloc_printerr` 不再触发 `_IO_flush_all_lockp`
+
+![image-20261126001548885](/pwn-notes/images/notes/image-20261126001548885.png)
+
+<!-- sync-hash: 7e14e383a71d8d1529e982ec1874a476d1a417a3888b4973b2e3b697cc892d95 -->
