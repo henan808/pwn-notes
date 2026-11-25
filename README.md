@@ -140,6 +140,9 @@ npm run watch               # 或者挂着监听，笔记一保存就自动发�
 - 想暂时停掉：在任务管理器里结束对应的 `pythonw.exe` 进程。
 - 想取消开机自启：删除 `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\PwnNotes-AutoSync.vbs`。
 - 想改监听范围：编辑 `notes-sources.json` 的 `enabled`，保存后监听会自动重载配置。
+- 发布失败（网络波动、凭据临时失效）会 **60 秒起自动重试**（最长 5 分钟一次），不需要再改一次笔记；
+  开机启动也会先自检同步一次，兜住监听没运行期间的改动。每次结果写在 `tools/autosync.log`
+  （已被 `.gitignore` 忽略，不会进仓库）；想看实时输出就前台跑 `npm run watch`。
 - 手动兜底（需要时）：`npm run sync:dry` / `npm run sync -- --prune` / `npm run publish -- --prune --push` / `npm run watch`。
 
 > 注意：自动发布会把保存的笔记**直接公开**到博客。写草稿时可以先在 `notes-sources.json`

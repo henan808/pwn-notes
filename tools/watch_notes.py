@@ -5,9 +5,12 @@
 监听对象：notes/ 下所有 .md、notes-sources.json、以及配置里 enabled 的外部笔记
 （也就是 D:\\笔记\\ 里的 Typora 原稿）。不监听生成的 sync-*.md，避免自己触发自己。
 
-日常用法：什么都不用做 —— 开机后由「启动」文件夹自动拉起，
+日常用法：什么都不用做 —— 开机后由「启动」文件夹自动拉起（带 --initial 自检一次），
 在 Typora 里 Ctrl+S 保存，静默 30 秒后自动同步、提交、push，
 GitHub Actions 约 1 分钟后把新内容发到博客。
+
+发布失败（网络抖动、凭据临时失效）会每 60→120→…→300 秒自动重试，
+不必等下一次记笔记；每次结果写入 tools/autosync.log 便于排查。
 
 手动用法：
   npm run watch                    # 前台运行（Ctrl+C 停止）
@@ -122,7 +125,7 @@ def main():
     args = ap.parse_args()
 
     if not single_instance():
-        print('已有自动同步实例在运行，本次退出。')
+        log('已有自动同步实例在运行，本次退出。')
         return 0
 
     cfg = load_sources()
@@ -130,20 +133,31 @@ def main():
     prev = snapshot(cfg)
     dirty = args.initial
     last_change = time.time()
+    retry_at = 0.0
+    retry_delay = 60.0
 
-    print('监听中：notes/ 与已启用的外部笔记（含 D:\\笔记\\*.md） | 间隔 %.1fs | 静默 %.1fs | 推送 %s'
-          % (args.interval, args.debounce, '开' if push_enabled else '关'))
-    print('在 Typora 里保存笔记就会自动上线；按 Ctrl+C 停止。')
-    if push_enabled:
-        print('凭据已由 gh auth setup-git 配好，不需要密码或 PAT。')
+    log('监听启动：间隔 %.1fs | 静默 %.1fs | 推送 %s | 开机自检 %s'
+        % (args.interval, args.debounce, '开' if push_enabled else '关',
+           '开' if args.initial else '关'))
+    log('在 Typora 里保存 pwn题目.md / 汇编语言：.md 就会自动上线。日志：%s' % LOG)
 
     while True:
-        if dirty and (time.time() - last_change) >= args.debounce:
+        now = time.time()
+        # 发布失败时按 retry_at 定时重试，不再依赖「下一次笔记改动」
+        due = (dirty and now - last_change >= args.debounce) or (retry_at and now >= retry_at)
+        if due:
+            is_retry = bool(retry_at)
             dirty = False
-            print('\n--- 检测到改动，开始发布 %s ---' % time.strftime('%H:%M:%S'))
-            if not do_publish(push_enabled):
-                print('\n[提示] 本次发布未完成（多为网络波动），下次改动会重试。')
-            print('--- 发布流程结束 ---\n')
+            retry_at = 0.0
+            log('--- 开始发布 %s%s ---'
+                % (time.strftime('%H:%M:%S'), '（失败重试）' if is_retry else ''))
+            if do_publish(push_enabled):
+                retry_delay = 60.0
+                log('--- 发布完成，等待下一次保存 ---')
+            else:
+                retry_at = now + retry_delay
+                retry_delay = min(retry_delay * 2, 300.0)
+                log('--- 发布未完成（多为网络波动），%.0f 秒后自动重试 ---' % (retry_at - now))
             if args.once:
                 return 0
         time.sleep(max(0.2, args.interval))
@@ -152,8 +166,8 @@ def main():
             added = len(set(cur) - set(prev))
             removed = len(set(prev) - set(cur))
             changed = sum(1 for k in set(cur) & set(prev) if cur[k] != prev[k])
-            print('检测到改动：新增 %d / 删除 %d / 修改 %d，等待静默…'
-                  % (added, removed, changed))
+            log('检测到改动：新增 %d / 删除 %d / 修改 %d，等待静默…'
+                % (added, removed, changed))
             prev = cur
             dirty = True
             last_change = time.time()
